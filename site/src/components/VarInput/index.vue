@@ -31,7 +31,7 @@ import BasicTypes from './BasicTypes.vue'
 import ComplexTypes from './ComplexTypes.vue'
 
 const BASIC_TYPES = ['string', 'string[]', 'selection', 'date', 'unknown']
-const COMPLEX_TYPES = ['dict', 'fixlist', 'dynamiclist']
+const COMPLEX_TYPES = ['dict', 'fixlist', 'dynamiclist', 'nametree']
 
 export default {
   name: 'VarInput',
@@ -112,6 +112,10 @@ export default {
       }
       
       if (['fixlist', 'dynamiclist'].includes(this.type)) {
+        return Array.isArray(this.value) ? [...this.value] : []
+      }
+
+      if (this.type === 'nametree') {
         return Array.isArray(this.value) ? [...this.value] : []
       }
 

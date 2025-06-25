@@ -97,6 +97,14 @@
           }"
         />
       </div>
+
+      <div class="test-item">
+        <h3>NameTree</h3>
+        <var-input
+          type="nametree"
+          v-model="testData.nameTree"
+        />
+      </div>
     </div>
 
     <div class="data-preview">
@@ -131,7 +139,15 @@ export default {
           hobbies: ['', '']
         },
         fixList: ['', '', ''],
-        dynamicList: []
+        dynamicList: [],
+        nameTree: ['dict', 'dict', 'person', {
+          name: ['leaf', 'string', 'username', ''],
+          age: ['leaf', 'number', 'userage', 0],
+          hobbies: ['list', 'list', 'hobby_list', [
+            ['leaf', 'string', 'hobby1', ''],
+            ['leaf', 'string', 'hobby2', '']
+          ]]
+        }]
       }
     }
   }

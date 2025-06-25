@@ -1,7 +1,49 @@
 <template>
   <div class="var-input-complex" :style="style">
+    <!-- NameTree 类型 -->
+    <div v-if="type === 'nametree'" class="nametree-wrapper">
+      <div class="nametree-item">
+        <div class="nametree-type">{{ localValue[1] }}</div>
+        <div class="nametree-name">{{ localValue[2] }}</div>
+        <div v-if="localValue[0] === 'leaf'" class="nametree-value">
+          <component
+            :is="getComponentType(localValue[1])"
+            :type="localValue[1]"
+            v-model="localValue[3]"
+            :readonly="readonly"
+            :configs="configs"
+            @input="handleNameTreeInput"
+          />
+        </div>
+        <div v-else-if="localValue[0] === 'dict'" class="nametree-children">
+          <div v-for="(child, key) in localValue[3]" :key="key" class="nametree-child">
+            <component
+              :is="'ComplexTypes'"
+              type="nametree"
+              v-model="localValue[3][key]"
+              :readonly="readonly"
+              :configs="configs"
+              @input="handleNameTreeDictInput(key)"
+            />
+          </div>
+        </div>
+        <div v-else-if="localValue[0] === 'list'" class="nametree-children">
+          <div v-for="(child, index) in localValue[3]" :key="index" class="nametree-child">
+            <component
+              :is="'ComplexTypes'"
+              type="nametree"
+              v-model="localValue[3][index]"
+              :readonly="readonly"
+              :configs="configs"
+              @input="handleNameTreeListInput(index)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Dict 类型 -->
-    <div v-if="type === 'dict'" class="dict-wrapper">
+    <div v-else-if="type === 'dict'" class="dict-wrapper">
       <div v-for="(childType, key) in configs.children" :key="key" class="dict-item">
         <div class="dict-label">{{ key }}:</div>
         <component
@@ -162,6 +204,21 @@ export default {
       this.$emit('input', { ...this.localValue })
     },
 
+    handleNameTreeInput() {
+      console.log(`[ComplexTypes] NameTree leaf input updated`, this.localValue)
+      this.$emit('input', [...this.localValue])
+    },
+
+    handleNameTreeDictInput(key) {
+      console.log(`[ComplexTypes] NameTree dict child updated`, key, this.localValue)
+      this.$emit('input', [...this.localValue])
+    },
+
+    handleNameTreeListInput(index) {
+      console.log(`[ComplexTypes] NameTree list child updated`, index, this.localValue)
+      this.$emit('input', [...this.localValue])
+    },
+
     handleListInput() {
       console.log(`[ComplexTypes] List input updated`, this.localValue)
       this.$emit('input', [...this.localValue])
@@ -198,6 +255,42 @@ export default {
 <style scoped>
 .var-input-complex {
   margin: 4px 0;
+}
+
+.nametree-wrapper {
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+.nametree-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nametree-type {
+  color: #409eff;
+  font-size: 12px;
+}
+
+.nametree-name {
+  font-weight: bold;
+}
+
+.nametree-value {
+  margin-left: 16px;
+}
+
+.nametree-children {
+  margin-left: 16px;
+  border-left: 2px solid #e6e6e6;
+  padding-left: 8px;
+}
+
+.nametree-child {
+  margin: 8px 0;
 }
 
 .dict-wrapper {
