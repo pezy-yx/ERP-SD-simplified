@@ -4,7 +4,8 @@
     <div v-if="type === 'dict'" class="dict-wrapper">
       <div v-for="(childType, key) in configs.children" :key="key" class="dict-item">
         <div class="dict-label">{{ key }}:</div>
-        <var-input
+        <component
+          :is="getComponentType(childType)"
           :type="childType"
           v-model="localValue[key]"
           :readonly="readonly"
@@ -21,7 +22,8 @@
         <tbody>
           <tr v-for="(item, index) in localValue" :key="index">
             <td>
-              <var-input
+              <component
+                :is="getComponentType(configs.itemType)"
                 :type="configs.itemType"
                 v-model="localValue[index]"
                 :readonly="readonly"
@@ -40,7 +42,8 @@
         <tbody>
           <tr v-for="(item, index) in localValue" :key="index" class="list-item">
             <td>
-              <var-input
+              <component
+                :is="getComponentType(configs.itemType)"
                 :type="configs.itemType"
                 v-model="localValue[index]"
                 :readonly="readonly"
@@ -63,8 +66,17 @@
 </template>
 
 <script>
+import BasicTypes from './BasicTypes.vue'
+
+const BASIC_TYPES = ['string', 'string[]', 'selection', 'date', 'unknown']
+
 export default {
   name: 'ComplexTypes',
+
+  components: {
+    BasicTypes,
+    ComplexTypes: () => import('./ComplexTypes.vue')
+  },
 
   props: {
     type: {
@@ -102,11 +114,23 @@ export default {
     }
   },
 
+  created() {
+    console.log(`[ComplexTypes] Created with type: ${this.type}`, {
+      value: this.value,
+      configs: this.configs
+    })
+  },
+
   methods: {
+    getComponentType(type) {
+      return BASIC_TYPES.includes(type) ? 'BasicTypes' : 'ComplexTypes'
+    },
+
     initLocalValue() {
+      console.log(`[ComplexTypes] Initializing ${this.type} value`, this.value)
+      
       if (this.type === 'dict') {
         const value = { ...this.value }
-        // 初始化空对象的默认值
         Object.keys(this.configs.children).forEach(key => {
           if (!(key in value)) {
             value[key] = null
@@ -134,21 +158,25 @@ export default {
     },
 
     handleDictInput() {
+      console.log(`[ComplexTypes] Dict input updated`, this.localValue)
       this.$emit('input', { ...this.localValue })
     },
 
     handleListInput() {
+      console.log(`[ComplexTypes] List input updated`, this.localValue)
       this.$emit('input', [...this.localValue])
     },
 
     addItem() {
       if (this.canAddMore) {
+        console.log(`[ComplexTypes] Adding new item to list`)
         this.localValue.push(null)
         this.handleListInput()
       }
     },
 
     removeItem(index) {
+      console.log(`[ComplexTypes] Removing item at index ${index}`)
       this.localValue.splice(index, 1)
       this.handleListInput()
     }
@@ -156,10 +184,12 @@ export default {
 
   watch: {
     value: {
-      handler() {
+      handler(newValue) {
+        console.log(`[ComplexTypes] Value changed externally`, newValue)
         this.localValue = this.initLocalValue()
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   }
 }

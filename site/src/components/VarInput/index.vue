@@ -81,7 +81,7 @@ export default {
 
   data() {
     return {
-      modelValue: this.value,
+      modelValue: this.initModelValue()
     }
   },
 
@@ -91,19 +91,54 @@ export default {
     }
   },
 
+  created() {
+    console.log(`[VarInput] Created with type: ${this.type}`, {
+      value: this.value,
+      configs: this.configs,
+      isBasicType: this.isBasicType
+    })
+  },
+
   methods: {
+    initModelValue() {
+      console.log(`[VarInput] Initializing model value`, this.value)
+      
+      if (this.type === 'string[]') {
+        return Array.isArray(this.value) ? [...this.value] : []
+      }
+      
+      if (this.type === 'dict') {
+        return { ...this.value }
+      }
+      
+      if (['fixlist', 'dynamiclist'].includes(this.type)) {
+        return Array.isArray(this.value) ? [...this.value] : []
+      }
+
+      return this.value
+    },
+
     handleInput(value) {
-      this.modelValue = value
-      this.$emit('input', value)
+      console.log(`[VarInput] Input value changed`, {
+        type: this.type,
+        value: value
+      })
+
+      this.modelValue = this.type === 'dict' ? { ...value } :
+                       Array.isArray(value) ? [...value] : value
+                       
+      this.$emit('input', this.modelValue)
     }
   },
 
   watch: {
     value: {
-      handler(newVal) {
-        this.modelValue = newVal
+      handler(newValue) {
+        console.log(`[VarInput] Value changed externally`, newValue)
+        this.modelValue = this.initModelValue()
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   }
 }

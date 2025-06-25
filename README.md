@@ -4,7 +4,7 @@
 确保你已安装 Node.js 和 npm
 ```bash
 cd site
-npm install      # 安装依赖
+npm install --force      # 安装依赖，必须使用force参数
 npm run serve    # 启动开发服务器
 ```
 

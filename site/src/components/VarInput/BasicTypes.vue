@@ -5,6 +5,8 @@
       <input
         v-model="localValue"
         :readonly="readonly"
+        @input="handleInput"
+        @change="handleInput"
         @keyup.enter="handleInput"
         :placeholder="placeholder"
       />
@@ -16,7 +18,9 @@
         <input
           v-model="localValue[index]"
           :readonly="readonly"
-          @keyup.enter="handleInput"
+          @input="handleArrayInput(index, $event)"
+          @change="handleArrayInput(index, $event)"
+          @keyup.enter="handleArrayInput(index, $event)"
           :placeholder="`${placeholder} ${index + 1}`"
         />
       </div>
@@ -24,7 +28,11 @@
 
     <!-- Selection 类型 -->
     <div v-if="type === 'selection'" class="select-wrapper">
-      <select v-model="localValue" :disabled="readonly" @change="handleInput">
+      <select 
+        v-model="localValue" 
+        :disabled="readonly"
+        @change="handleInput"
+      >
         <option v-for="option in configs.options" :key="option" :value="option">
           {{ option }}
         </option>
@@ -36,6 +44,8 @@
       <input
         v-model="localValue"
         :readonly="readonly"
+        @input="handleInput"
+        @change="handleInput"
         @keyup.enter="handleInput"
         :placeholder="placeholder"
       />
@@ -100,16 +110,29 @@ export default {
     }
   },
 
+  created() {
+    console.log(`[BasicTypes] Created with type: ${this.type}`, {
+      value: this.value,
+      configs: this.configs
+    })
+  },
+
   methods: {
     initLocalValue() {
+      console.log(`[BasicTypes] Initializing ${this.type} value`, this.value)
       if (this.type === 'string[]') {
         return Array.isArray(this.value) ? [...this.value] : new Array(this.configs.length || 1).fill('')
       }
       return this.value
     },
 
-    async handleInput() {
+    async handleInput(event) {
       if (this.readonly) return
+      
+      console.log(`[BasicTypes] Input value changed`, {
+        type: this.type,
+        value: this.localValue
+      })
 
       // 验证输入
       if (this.validator) {
@@ -117,6 +140,7 @@ export default {
           await this.validator(this.localValue)
           this.error = ''
         } catch (err) {
+          console.warn(`[BasicTypes] Validation error`, err)
           this.error = err.message
           return
         }
@@ -125,7 +149,29 @@ export default {
       this.$emit('input', this.localValue)
     },
 
+    async handleArrayInput(index, event) {
+      if (this.readonly) return
+
+      console.log(`[BasicTypes] Array input changed at index ${index}`, {
+        value: this.localValue[index]
+      })
+
+      if (this.validator) {
+        try {
+          await this.validator(this.localValue[index])
+          this.error = ''
+        } catch (err) {
+          console.warn(`[BasicTypes] Array validation error`, err)
+          this.error = err.message
+          return
+        }
+      }
+
+      this.$emit('input', [...this.localValue])
+    },
+
     handleDateSelect() {
+      console.log(`[BasicTypes] Date selected`, this.localValue)
       this.showDatePicker = false
       this.handleInput()
     }
@@ -133,8 +179,9 @@ export default {
 
   watch: {
     value: {
-      handler(newVal) {
-        this.localValue = this.type === 'string[]' ? [...newVal] : newVal
+      handler(newValue) {
+        console.log(`[BasicTypes] Value changed externally`, newValue)
+        this.localValue = this.initLocalValue()
       },
       deep: true
     }
