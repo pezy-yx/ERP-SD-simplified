@@ -6,22 +6,21 @@
         :class="{ active: currentPage === 'new' }"
         class="switch-btn"
       >
-        新版VarTree测试
+        VarTree测试
       </button>
     </div>
     
-    <test-page v-if="currentPage === 'old'" />
-    <new-test-page v-if="currentPage === 'new'" />
+    <test-page v-if="currentPage === 'new'" />
   </div>
 </template>
 
 <script>
-import NewTestPage from './views/NewTestPage.vue'
+import TestPage from './views/TestPage.vue'
 
 export default {
   name: 'App',
   components: {
-    NewTestPage
+    TestPage
   },
   data() {
     return {
