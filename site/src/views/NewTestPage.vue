@@ -38,7 +38,7 @@
           :varTree="simpleDateTree"
           :nodePath="[]"
           :contentValidator="validators.date"
-          :configs="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
+          :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
           @update="handleUpdate('simpleDate', $event)"
         />
         <div class="result-preview">
@@ -51,7 +51,7 @@
         <var-input
           :varTree="simpleSelectionTree"
           :nodePath="[]"
-          :configs="{ options: ['选项1', '选项2', '选项3', '选项4'] }"
+          :config="{ options: ['选项1', '选项2', '选项3', '选项4'] }"
           @update="handleUpdate('simpleSelection', $event)"
         />
         <div class="result-preview">
@@ -82,7 +82,7 @@
         <var-input
           :varTree="threeLevelListTree"
           :nodePath="[]"
-          :configs="{
+          :config="{
             itemType: 'fixlist',
             itemConfig: {
               itemType: 'fixlist',
@@ -133,7 +133,7 @@
         <var-input
           :varTree="dynamicListTree"
           :nodePath="[]"
-          :configs="{
+          :config="{
             itemType: 'dict',
             maxLength: 5,
             itemConfig: {
@@ -231,13 +231,16 @@ export default {
               gender: {
                 type: 'selection',
                 defaultValue: '男',
-                // 注意：selection的选项通过configs传递
+                config: {
+                  options: ['男', '女', '其他']
+                }
               },
               birthDate: { type: 'date', defaultValue: '1995-01-01' }
             }
           },
           workInfo: {
             type: 'dict',
+            readonly: false,
             children: {
               department: { type: 'string', defaultValue: '技术部' },
               position: { type: 'string', defaultValue: '软件工程师' },
@@ -255,7 +258,31 @@ export default {
           },
           projects: {
             type: 'dynamiclist',
-            children: []
+            children: [
+              { type: 'dict', name:"lan", children: {
+                projectName: { type: 'string', defaultValue: '项目A' },
+                role: { type: 'string', defaultValue: '开发' },
+                startDate: { type: 'date', defaultValue: '2023-01-01' },
+                endDate: { type: 'date', defaultValue: '2023-12-31' }
+              }},
+              { type: 'dict', name:"lan", children: {
+                projectName: { type: 'string', defaultValue: '项目B' },
+                role: { type: 'string', defaultValue: '测试' },
+                startDate: { type: 'date', defaultValue: '2024-01-01' },
+                endDate: { type: 'date', defaultValue: '2024-12-31' }
+              }}
+            ],
+            config: {
+              childTemplate: {
+                type: 'dict',
+                children: {
+                  projectName: { type: 'string', name:"项目名称", defaultValue: '' },
+                  role: { type: 'string', name:"", defaultValue: '' },
+                  startDate: { type: 'date', name:"", defaultValue: '' },
+                  endDate: { type: 'date', name:"", defaultValue: '' }
+                }
+              }
+            }
           },
           projects2: {
             type: 'fixlist',

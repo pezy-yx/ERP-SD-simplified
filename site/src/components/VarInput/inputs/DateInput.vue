@@ -26,8 +26,8 @@
       v-if="showPicker"
       type="date"
       v-model="dateValue"
-      :min="configs.minDate"
-      :max="configs.maxDate"
+      :min="config.minDate"
+      :max="config.maxDate"
       @change="handleDateChange"
       @blur="hideDatePicker"
       class="date-picker"
@@ -57,7 +57,7 @@ export default {
       type: Function,
       default: null
     },
-    configs: {
+    config: {
       type: Object,
       default: () => ({})
     }

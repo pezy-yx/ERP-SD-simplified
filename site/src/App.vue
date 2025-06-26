@@ -2,13 +2,6 @@
   <div id="app">
     <div class="page-switcher">
       <button
-        @click="currentPage = 'old'"
-        :class="{ active: currentPage === 'old' }"
-        class="switch-btn"
-      >
-        旧版测试
-      </button>
-      <button
         @click="currentPage = 'new'"
         :class="{ active: currentPage === 'new' }"
         class="switch-btn"
@@ -23,13 +16,11 @@
 </template>
 
 <script>
-import TestPage from './views/TestPage.vue'
 import NewTestPage from './views/NewTestPage.vue'
 
 export default {
   name: 'App',
   components: {
-    TestPage,
     NewTestPage
   },
   data() {

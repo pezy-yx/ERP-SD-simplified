@@ -10,7 +10,7 @@
         v-model="nodeValue"
         :readonly="effectiveReadonly"
         :placeholder="getPlaceholder()"
-        :configs="configs"
+        :config="config"
         :validator="contentValidator"
         @input="handleValueChange"
         @blur="handleValidation"
@@ -35,7 +35,7 @@
           :nodePath="[...nodePath, child.name]"
           :readonly="effectiveReadonly"
           :contentValidator="getChildValidator(child)"
-          :configs="getChildConfigs(child)"
+          :config="getChildConfig(child)"
           :indentLevel="indentLevel + 20"
           :showLabel="true"
           @update="handleChildUpdate"
@@ -86,7 +86,7 @@
                     :nodePath="[...nodePath, index.toString(), dictChild.name]"
                     :readonly="effectiveReadonly"
                     :contentValidator="getChildValidator(dictChild)"
-                    :configs="getChildConfigs(dictChild)"
+                    :config="getChildConfig(dictChild)"
                     :showLabel="false"
                     @update="handleChildUpdate"
                   />
@@ -100,7 +100,7 @@
                   :nodePath="[...nodePath, index.toString()]"
                   :readonly="effectiveReadonly"
                   :contentValidator="getChildValidator(child)"
-                  :configs="getChildConfigs(child)"
+                  :config="getChildConfig(child)"
                   :showLabel="false"
                   @update="handleChildUpdate"
                 />
@@ -133,7 +133,7 @@
               :nodePath="[...nodePath, index.toString()]"
               :readonly="effectiveReadonly"
               :contentValidator="getChildValidator(child)"
-              :configs="getChildConfigs(child)"
+              :config="getChildConfig(child)"
               :indentLevel="indentLevel + 20"
               :showLabel="true"
               @update="handleChildUpdate"
@@ -146,7 +146,7 @@
 </template>
 
 <script>
-import { VarTree, VarNode, validators } from '@/utils/VarTree'
+import { VarTree, VarNode, validators, createVarTreeFromConfig } from '@/utils/VarTree'
 
 // 基础输入组件
 import StringInput from './inputs/StringInput.vue'
@@ -192,7 +192,7 @@ export default {
     },
     
     // 配置项
-    configs: {
+    config: {
       type: Object,
       default: () => ({})
     },
@@ -210,7 +210,7 @@ export default {
     },
     
     // 自定义样式
-    style: {
+    wrapperStyle: {
       type: Object,
       default: () => ({})
     }
@@ -265,14 +265,14 @@ export default {
     // 是否达到最大长度
     reachedMaxLength() {
       if (!this.isDynamicList) return false
-      const maxLength = this.configs.maxLength
+      const maxLength = this.config.maxLength
       return maxLength && this.currentNode.children.length >= maxLength
     },
 
     // 容器样式
     containerStyle() {
       return {
-        ...this.style,
+        ...this.wrapperStyle,
         marginBottom: '8px'
       }
     },
@@ -282,7 +282,7 @@ export default {
       return {
         width: '100%'
       }
-    }
+    },
   },
 
   watch: {
@@ -341,14 +341,22 @@ export default {
 
     // 获取表格头部
     getTableHeaders() {
-      if (!this.isListNode || !this.currentNode.children.length) return ['值']
+      const defaultValue = "值"
+      if (this.config?.childTemplate?.type == 'dict') {
+        return Object.values(this.config.childTemplate.children).map(child => child?.name || defaultValue);
+      }
+      if (this.config?.childTemplate?.type !== undefined) {
+        return this.config.childTemplate.name ? [this.config.childTemplate.name] : [defaultValue];
+      }
+
+      if (!this.isListNode || !this.currentNode.children.length) return [defaultValue]
       
       const firstChild = this.currentNode.children[0]
       if (firstChild.nodeType === 'dict') {
         return firstChild.children.map(child => child.name)
       }
       
-      return ['值']
+      return firstChild.name ? [firstChild.name] : [defaultValue]
     },
 
     // 获取子节点验证器
@@ -365,9 +373,8 @@ export default {
     },
 
     // 获取子节点配置
-    getChildConfigs(child) {
-      const childConfigs = this.configs.childConfigs || {}
-      return childConfigs[child.name] || {}
+    getChildConfig(child) {
+      return child.config || {}
     },
 
     // 处理值变化
@@ -437,8 +444,13 @@ export default {
 
     // 创建新的列表项
     createNewListItem() {
-      const itemConfig = this.configs.itemConfig || {}
-      const itemType = this.configs.itemType || 'string'
+      if(this.config?.childTemplate) {
+        const newItem = createVarTreeFromConfig(this.config.childTemplate).getRoot();
+        return newItem
+      }
+
+      const itemConfig = this.config.itemConfig || {}
+      const itemType = this.config.itemType || 'string'
       
       if (itemType === 'dict') {
         const children = []

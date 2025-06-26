@@ -5,9 +5,9 @@
     :readonly="readonly"
     :placeholder="placeholder"
     :class="inputClass"
-    :min="configs.min"
-    :max="configs.max"
-    :step="configs.step || 1"
+    :min="config.min"
+    :max="config.max"
+    :step="config.step || 1"
     @input="handleInput"
     @blur="handleBlur"
     @keyup.enter="handleEnter"
@@ -35,7 +35,7 @@ export default {
       type: Function,
       default: null
     },
-    configs: {
+    config: {
       type: Object,
       default: () => ({})
     }

@@ -61,7 +61,7 @@ export default {
       type: Function,
       default: null
     },
-    configs: {
+    config: {
       type: Object,
       default: () => ({})
     }
@@ -83,22 +83,22 @@ export default {
 
     // 是否为动态数组（可以添加删除项）
     isDynamic() {
-      return this.configs.dynamic !== false
+      return this.config.dynamic !== false
     },
 
     // 最小长度
     minLength() {
-      return this.configs.minLength || 0
+      return this.config.minLength || 0
     },
 
     // 最大长度
     maxLength() {
-      return this.configs.maxLength || 20
+      return this.config.maxLength || 20
     },
 
     // 固定长度
     fixedLength() {
-      return this.configs.length || 0
+      return this.config.length || 0
     }
   },
 

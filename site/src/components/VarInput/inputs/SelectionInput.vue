@@ -38,7 +38,7 @@ export default {
       type: Function,
       default: null
     },
-    configs: {
+    config: {
       type: Object,
       default: () => ({})
     }
@@ -59,7 +59,7 @@ export default {
     },
 
     options() {
-      return this.configs.options || []
+      return this.config.options || []
     }
   },
 

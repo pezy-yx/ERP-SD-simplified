@@ -32,7 +32,7 @@ export default {
       type: Function,
       default: null
     },
-    configs: {
+    config: {
       type: Object,
       default: () => ({})
     }

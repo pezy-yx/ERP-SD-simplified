@@ -12,7 +12,7 @@ export class VarNode {
    * @param {boolean} readonly - 是否只读
    * @param {VarNode[]} children - 子节点数组
    */
-  constructor(nodeType = 'leaf', varType = 'string', name = '', defaultValue = null, readonly = false, children = []) {
+  constructor(nodeType = 'leaf', varType = 'string', name = '', defaultValue = null, readonly = false, children = [], config = {}) {
     this.nodeType = nodeType // "dict"|"list"|"leaf"
     this.varType = varType   // 对应组件的变量类型
     this.name = name         // 变量名称
@@ -20,6 +20,7 @@ export class VarNode {
     this.readonly = readonly
     this.children = children || []
     this.index = -1          // 中序遍历位置，由VarTree初始化时设置
+    this.config = config || {} // 自定义配置参数
   }
 
   /**
@@ -60,7 +61,8 @@ export class VarNode {
       this.name,
       this.defaultValue,
       this.readonly,
-      clonedChildren
+      clonedChildren,
+      { ...this.config } // 深拷贝config对象
     )
   }
 }
@@ -91,6 +93,13 @@ export class VarTree {
   setRoot(rootNode) {
     this.root = rootNode
     this._initializeTree()
+  }
+
+  /**
+   * 获取根节点
+   */
+  getRoot() {
+    return this.root
   }
 
   /**
@@ -219,7 +228,8 @@ export class VarTree {
       name: node.name,
       defaultValue: node.defaultValue,
       readonly: node.readonly,
-      index: node.index
+      index: node.index,
+      config: node.config || {}
     }
 
     if (node.children && node.children.length > 0) {
@@ -260,7 +270,9 @@ export class VarTree {
       json.varType || 'string',
       json.name || '',
       json.defaultValue,
-      json.readonly || false
+      json.readonly || false,
+      [], // children将在后面添加
+      json.config || {}
     )
 
     node.index = json.index || -1
@@ -327,43 +339,43 @@ export const VarNodeFactory = {
   /**
    * 创建字符串叶子节点
    */
-  createStringNode(name = '', defaultValue = '', readonly = false) {
-    return new VarNode('leaf', 'string', name, defaultValue, readonly)
+  createStringNode(name = '', defaultValue = '', readonly = false, config = {}) {
+    return new VarNode('leaf', 'string', name, defaultValue, readonly, [], config)
   },
 
   /**
    * 创建数字叶子节点
    */
-  createNumberNode(name = '', defaultValue = 0, readonly = false) {
-    return new VarNode('leaf', 'number', name, defaultValue, readonly)
+  createNumberNode(name = '', defaultValue = 0, readonly = false, config = {}) {
+    return new VarNode('leaf', 'number', name, defaultValue, readonly, [], config)
   },
 
   /**
    * 创建日期叶子节点
    */
-  createDateNode(name = '', defaultValue = '', readonly = false) {
-    return new VarNode('leaf', 'date', name, defaultValue, readonly)
+  createDateNode(name = '', defaultValue = '', readonly = false, config = {}) {
+    return new VarNode('leaf', 'date', name, defaultValue, readonly, [], config)
   },
 
   /**
    * 创建选择叶子节点
    */
-  createSelectionNode(name = '', defaultValue = '', readonly = false) {
-    return new VarNode('leaf', 'selection', name, defaultValue, readonly)
+  createSelectionNode(name = '', defaultValue = '', readonly = false, config = {}) {
+    return new VarNode('leaf', 'selection', name, defaultValue, readonly, [], config)
   },
 
   /**
    * 创建字典节点
    */
-  createDictNode(name = '', children = [], readonly = false) {
-    return new VarNode('dict', 'dict', name, null, readonly, children)
+  createDictNode(name = '', children = [], readonly = false, config = {}) {
+    return new VarNode('dict', 'dict', name, null, readonly, children, config)
   },
 
   /**
    * 创建列表节点
    */
-  createListNode(name = '', children = [], readonly = false, listType = 'fixlist') {
-    return new VarNode('list', listType, name, null, readonly, children)
+  createListNode(name = '', children = [], readonly = false, listType = 'fixlist', config = {}) {
+    return new VarNode('list', listType, name, null, readonly, children, config)
   }
 }
 
@@ -418,7 +430,8 @@ function createNodeFromConfig(config) {
     name = '',
     defaultValue = null,
     readonly = false,
-    children = null
+    children = null,
+    config: nodeConfig = {}
   } = config
 
   // 根据type和children判断nodeType
@@ -453,5 +466,5 @@ function createNodeFromConfig(config) {
     }
   }
 
-  return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes)
+  return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, nodeConfig)
 }
