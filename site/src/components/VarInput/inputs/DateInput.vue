@@ -36,138 +36,131 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'DateInput',
-  
-  props: {
-    value: {
-      type: String,
-      default: ''
-    },
-    readonly: {
-      type: Boolean,
-      default: false
-    },
-    placeholder: {
-      type: String,
-      default: '请选择日期'
-    },
-    validator: {
-      type: Function,
-      default: null
-    },
-    config: {
-      type: Object,
-      default: () => ({})
-    }
+<script lang="ts" setup>
+import { ref, computed, watch, nextTick } from 'vue'
+
+import { VarNode } from '@/utils/VarTree'
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
   },
-
-  data() {
-    return {
-      displayValue: this.value || '',
-      dateValue: this.formatToDateInput(this.value),
-      showPicker: false
-    }
+  readonly: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    inputClass() {
-      return {
-        'date-input': true,
-        'readonly': this.readonly
-      }
-    }
+  placeholder: {
+    type: String,
+    default: '请选择日期'
   },
-
-  watch: {
-    value(newValue) {
-      this.displayValue = newValue || ''
-      this.dateValue = this.formatToDateInput(newValue)
-    }
+  config: {
+    type: Object,
+    default: () => ({})
   },
-
-  methods: {
-    // 格式化为date input需要的格式 (YYYY-MM-DD)
-    formatToDateInput(dateStr) {
-      if (!dateStr) return ''
-      
-      try {
-        const date = new Date(dateStr)
-        if (isNaN(date.getTime())) return ''
-        
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const day = String(date.getDate()).padStart(2, '0')
-        
-        return `${year}-${month}-${day}`
-      } catch {
-        return ''
-      }
-    },
-
-    // 格式化为显示格式
-    formatDisplayDate(dateStr) {
-      if (!dateStr) return ''
-      
-      try {
-        const date = new Date(dateStr)
-        if (isNaN(date.getTime())) return dateStr
-        
-        return date.toLocaleDateString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',  
-          day: '2-digit'
-        })
-      } catch {
-        return dateStr
-      }
-    },
-
-    handleTextInput() {
-      this.$emit('input', this.displayValue)
-    },
-
-    handleDateChange() {
-      if (this.dateValue) {
-        this.displayValue = this.formatDisplayDate(this.dateValue)
-        this.$emit('input', this.displayValue)
-      }
-      this.hideDatePicker()
-    },
-
-    handleBlur() {
-      this.$emit('blur', this.displayValue)
-    },
-
-    handleEnter() {
-      if (this.validator) {
-        const isValid = this.validator(this.displayValue)
-        if (!isValid) {
-          this.$emit('validation-error', '日期格式不正确')
-          return
-        }
-      }
-      this.$emit('enter', this.displayValue)
-    },
-
-    showDatePicker() {
-      if (this.readonly) return
-      
-      this.showPicker = true
-      this.$nextTick(() => {
-        if (this.$refs.datePicker) {
-          this.$refs.datePicker.focus()
-        }
-      })
-    },
-
-    hideDatePicker() {
-      setTimeout(() => {
-        this.showPicker = false
-      }, 200)
-    }
+  node: {
+    type: VarNode,
+    default: null
   }
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'blur', value: string): void;
+  (e: 'enter', value: string): void;
+  (e: 'validation-error', message: string): void;
+}>();
+
+const displayValue = ref<string>(props.modelValue || '')
+const dateValue = ref<string>(formatToDateInput(props.modelValue))
+const showPicker = ref(false)
+
+const inputClass = computed(() => ({
+  'date-input': true,
+  'readonly': props.readonly
+}))
+
+watch(() => props.modelValue, (newValue) => {
+  displayValue.value = newValue || ''
+  dateValue.value = formatToDateInput(newValue)
+})
+
+function formatToDateInput(dateStr: string) {
+  if (!dateStr) return ''
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  } catch {
+    return ''
+  }
+}
+
+function formatDisplayDate(dateStr: string) {
+  if (!dateStr) return ''
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return dateStr
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  } catch {
+    return dateStr
+  }
+}
+
+function handleTextInput() {
+  emit('update:modelValue', displayValue.value)
+}
+
+function handleDateChange() {
+  if (dateValue.value) {
+    displayValue.value = formatDisplayDate(dateValue.value)
+    emit('update:modelValue', displayValue.value)
+  }
+  hideDatePicker()
+}
+
+function handleBlur() {
+  emit('blur', displayValue.value)
+}
+
+function handleEnter() {
+  if (props.node?.config?.validators !== undefined) {
+    for (const validator of props.node.config.validators) {
+      const isValid = validator.creteria(displayValue.value);
+      if (!isValid) {
+        const message = validator.message || '输入值不符合要求'
+        emit('validation-error', message);
+        return;
+      }
+    }
+  } else {
+    emit('validation-error', '');
+  }
+
+  emit('enter', displayValue.value);
+  emit('validation-error', '');
+}
+
+function showDatePicker() {
+  if (props.readonly) return
+  showPicker.value = true
+  nextTick(() => {
+    const picker = document.querySelector<HTMLInputElement>('.date-picker')
+    if (picker) picker.focus()
+  })
+}
+
+function hideDatePicker() {
+  setTimeout(() => {
+    showPicker.value = false
+  }, 200)
 }
 </script>
 

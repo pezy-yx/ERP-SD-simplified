@@ -7,7 +7,10 @@ import { DefineComponent } from "vue";
 export type VarTypeString = 'string' | 'date' | 'selection' | 'dict' | 'dynamiclist' | 'fixlist' | 'number'
 export type NodeTypeString = 'dict' | 'list' | 'leaf'
 export type VarNodeValue = Object | null
-export type VarNodeValueValidator = (value: VarNodeValue) => boolean
+export type VarNodeValueValidator = {
+  creteria: (value: VarNodeValue) => boolean,
+  message?: string
+}
 export type VarNodeValueValidators = VarNodeValueValidator[]
 
 export type VarNodeConfig = {

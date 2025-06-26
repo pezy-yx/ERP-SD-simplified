@@ -3,7 +3,7 @@
     v-model="inputValue"
     :disabled="readonly"
     :class="inputClass"
-    @change="handleChange"
+    @change="handleChange, handleEnter"
     @blur="handleBlur"
   >
     <option value="" disabled>{{ placeholder }}</option>
@@ -17,91 +17,91 @@
   </select>
 </template>
 
-<script>
-export default {
-  name: 'SelectionInput',
-  
-  props: {
-    value: {
-      type: [String, Number],
-      default: ''
-    },
-    readonly: {
-      type: Boolean,
-      default: false
-    },
-    placeholder: {
-      type: String,
-      default: '请选择'
-    },
-    validator: {
-      type: Function,
-      default: null
-    },
-    config: {
-      type: Object,
-      default: () => ({})
-    }
+<script lang="ts" setup>
+import { ref, computed, watch } from 'vue'
+import { VarNode } from '@/utils/VarTree'
+
+const props = defineProps({
+  modelValue: {
+    type: [String, Number],
+    default: ''
   },
-
-  data() {
-    return {
-      inputValue: this.value || ''
-    }
+  readonly: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    inputClass() {
-      return {
-        'selection-input': true,
-        'readonly': this.readonly
-      }
-    },
-
-    options() {
-      return this.config.options || []
-    }
+  placeholder: {
+    type: String,
+    default: '请选择'
   },
-
-  watch: {
-    value(newValue) {
-      this.inputValue = newValue || ''
-    }
+  config: {
+    type: Object,
+    default: () => ({})
   },
-
-  methods: {
-    getOptionValue(option) {
-      // 支持简单字符串数组或对象数组
-      if (typeof option === 'string' || typeof option === 'number') {
-        return option
-      }
-      return option.value || option.key || option
-    },
-
-    getOptionLabel(option) {
-      // 支持简单字符串数组或对象数组
-      if (typeof option === 'string' || typeof option === 'number') {
-        return option
-      }
-      return option.label || option.text || option.name || option.value || option
-    },
-
-    handleChange() {
-      this.$emit('input', this.inputValue)
-      
-      if (this.validator) {
-        const isValid = this.validator(this.inputValue)
-        if (!isValid) {
-          this.$emit('validation-error', '选择的值不符合要求')
-          return
-        }
-      }
-    },
-
-    handleBlur() {
-      this.$emit('blur', this.inputValue)
-    }
+  node: {
+    type: VarNode,
+    default: null
   }
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string | number): void;
+  (e: 'blur', value: string | number): void;
+  (e: 'enter', value: string | number): void;
+  (e: 'validation-error', message: string): void;
+}>()
+
+const inputValue = ref<string | number>(props.modelValue || '')
+
+const inputClass = computed(() => ({
+  'selection-input': true,
+  'readonly': props.readonly
+}))
+
+const options = computed(() => props.config.options || [])
+
+watch(() => props.modelValue, (newValue) => {
+  inputValue.value = newValue || ''
+})
+
+function getOptionValue(option: any) {
+  if (typeof option === 'string' || typeof option === 'number') {
+    return option
+  }
+  return option.value || option.key || option
+}
+
+function getOptionLabel(option: any) {
+  if (typeof option === 'string' || typeof option === 'number') {
+    return option
+  }
+  return option.label || option.text || option.name || option.value || option
+}
+
+function handleChange() {
+  emit('update:modelValue', inputValue.value)
+}
+
+function handleEnter() {
+  if (props.node?.config?.validators !== undefined) {
+    for (const validator of props.node.config.validators) {
+      const isValid = validator.creteria(inputValue.value);
+      if (!isValid) {
+        const message = validator.message || '输入值不符合要求'
+        emit('validation-error', message);
+        return;
+      }
+    }
+  } else {
+    emit('validation-error', '');
+  }
+
+  emit('enter', inputValue.value);
+  emit('validation-error', '');
+}
+
+function handleBlur() {
+  emit('blur', inputValue.value)
 }
 </script>
 

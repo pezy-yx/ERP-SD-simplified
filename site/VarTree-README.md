@@ -42,7 +42,6 @@
 2. **NumberInput.vue** - 数字输入框  
 3. **DateInput.vue** - 日期输入框（文本+日期选择器）
 4. **SelectionInput.vue** - 选择下拉框
-5. **StringArrayInput.vue** - 字符串数组输入
 
 ## 支持的变量类型
 
@@ -194,7 +193,6 @@ site/src/
 │       ├── NumberInput.vue
 │       ├── DateInput.vue
 │       ├── SelectionInput.vue
-│       └── StringArrayInput.vue
 └── views/
     └── NewTestPage.vue     # 测试页面
 ```

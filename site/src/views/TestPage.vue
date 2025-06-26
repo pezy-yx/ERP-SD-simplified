@@ -290,10 +290,15 @@ export default {
     // 简单字符串树
     simpleStringTree(): VarTree {
       const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '', config: {
-        validators: [(val: any) => {
-          const flag = val === '123'
-          return flag
-        }],
+        validators: [
+          {
+            creteria:(val: any) => {
+              const flag = val === '123'
+              return flag
+            },
+            message: "值不是123"
+          }
+        ],
       }}
       return createTreeFromConfig(config)
     },

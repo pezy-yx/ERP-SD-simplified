@@ -154,7 +154,6 @@ import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
 import SelectionInput from './inputs/SelectionInput.vue'
-import StringArrayInput from './inputs/StringArrayInput.vue'
 
 const props = defineProps<{
   varTree: VarTree
@@ -218,7 +217,6 @@ function getLeafComponent() {
     'number': StringInput,
     'date': DateInput,
     'selection': SelectionInput,
-    'string[]': StringArrayInput
   }
   return typeMap[currentNode.value.varType] || StringInput
 }
@@ -229,7 +227,6 @@ function getPlaceholder() {
     'number': '请输入数字',
     'date': '请选择日期',
     'selection': '请选择',
-    'string[]': '请输入'
   }
   return typeMap[(currentNode.value?.varType ?? 'string')] || '请输入'
 }

@@ -14,82 +14,83 @@
   />
 </template>
 
-<script>
-export default {
-  name: 'NumberInput',
-  
-  props: {
-    value: {
-      type: [Number, String],
-      default: 0
-    },
-    readonly: {
-      type: Boolean,
-      default: false
-    },
-    placeholder: {
-      type: String,
-      default: '请输入数字'
-    },
-    validator: {
-      type: Function,
-      default: null
-    },
-    config: {
-      type: Object,
-      default: () => ({})
-    }
+<script lang="ts" setup>
+import { ref, computed, watch } from 'vue'
+import { VarNode } from '@/utils/VarTree'
+
+const props = defineProps({
+  modelValue: {
+    type: [Number, String],
+    default: 0
   },
-
-  data() {
-    return {
-      inputValue: this.parseValue(this.value)
-    }
+  readonly: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    inputClass() {
-      return {
-        'number-input': true,
-        'readonly': this.readonly
-      }
-    }
+  placeholder: {
+    type: String,
+    default: '请输入数字'
   },
-
-  watch: {
-    value(newValue) {
-      this.inputValue = this.parseValue(newValue)
-    }
+  config: {
+    type: Object,
+    default: () => ({})
   },
-
-  methods: {
-    parseValue(value) {
-      if (value === null || value === undefined || value === '') {
-        return ''
-      }
-      const num = Number(value)
-      return isNaN(num) ? '' : num
-    },
-
-    handleInput() {
-      this.$emit('input', this.inputValue)
-    },
-
-    handleBlur() {
-      this.$emit('blur', this.inputValue)
-    },
-
-    handleEnter() {
-      if (this.validator) {
-        const isValid = this.validator(this.inputValue)
-        if (!isValid) {
-          this.$emit('validation-error', '输入的数字不符合要求')
-          return
-        }
-      }
-      this.$emit('enter', this.inputValue)
-    }
+  node: {
+    type: VarNode,
+    default: null
   }
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number | string): void;
+  (e: 'blur', value: number | string): void;
+  (e: 'enter', value: number | string): void;
+  (e: 'validation-error', message: string): void;
+}>()
+
+function parseValue(value: number | string | null | undefined) {
+  if (value === null || value === undefined || value === '') {
+    return ''
+  }
+  const num = Number(value)
+  return isNaN(num) ? '' : num
+}
+
+const inputValue = ref<number | string>(parseValue(props.modelValue))
+
+const inputClass = computed(() => ({
+  'number-input': true,
+  'readonly': props.readonly
+}))
+
+watch(() => props.modelValue, (newValue) => {
+  inputValue.value = parseValue(newValue)
+})
+
+function handleInput() {
+  emit('update:modelValue', inputValue.value)
+}
+
+function handleBlur() {
+  emit('blur', inputValue.value)
+}
+
+function handleEnter() {
+  if (props.node?.config?.validators !== undefined) {
+    for (const validator of props.node.config.validators) {
+      const isValid = validator.creteria(inputValue.value);
+      if (!isValid) {
+        const message = validator.message || '输入值不符合要求'
+        emit('validation-error', message);
+        return;
+      }
+    }
+  } else {
+    emit('validation-error', '');
+  }
+
+  emit('enter', inputValue.value);
+  emit('validation-error', '');
 }
 </script>
 

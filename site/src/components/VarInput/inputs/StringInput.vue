@@ -11,102 +11,85 @@
   />
 </template>
 
-<script>
-import { VarNode, VarNodeValueValidator } from '@/utils/VarTree'
-export default {
-  name: 'StringInput',
-  
-  props: {
-    modelValue: {
-      type: [String, Number],
-      default: ''
-    },
-    readonly: {
-      type: Boolean,
-      default: false
-    },
-    placeholder: {
-      type: String,
-      default: '请输入文本'
-    },
-    config: {
-      type: Object,
-      default: () => ({})
-    },
-    node: {
-      type: VarNode,
-      default: null
-    }
+<script lang="ts" setup>
+import { ref, computed, watch } from 'vue'
+import { VarNode } from '@/utils/VarTree'
+
+const props = defineProps({
+  modelValue: {
+    type: [String, Number],
+    default: ''
   },
-
-  data() {
-    return {
-      inputValue: (typeof this.modelValue === 'number' || typeof this.modelValue === 'string')
-        ? String(this.modelValue)
-        : ''
-    }
+  readonly: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    inputClass() {
-      return {
-        'string-input': true,
-        'readonly': this.readonly
-      }
-    }
+  placeholder: {
+    type: String,
+    default: '请输入文本'
   },
-
-  watch: {
-    modelValue(newValue) {
-      if (typeof newValue === 'number' || typeof newValue === 'string') {
-        this.inputValue = String(newValue)
-      } else {
-        this.inputValue = ''
-      }
-    }
+  config: {
+    type: Object,
+    default: () => ({})
   },
-
-  methods: {
-    handleInput() {
-      this.$emit('update:modelValue', this.inputValue)
-    },
-
-    handleBlur() {
-      this.$emit('blur', this.inputValue)
-    },
-
-    handleEnter() {
-      // if (this.validator) {
-      //   const isValid = this.validator(this.inputValue)
-      //   if (!isValid) {
-      //     this.$emit('validation-error', '输入值不符合要求')
-      //     return
-      //   } else {
-      //     // 校验通过时清空错误喵！
-      //     this.$emit('validation-error', '')
-      //   }
-      // } else {
-      //   // 没有校验器也清空错误喵！
-      //   this.$emit('validation-error', '')
-      // }
-      // this.$emit('enter', this.inputValue)
-      if (this.node?.config?.validators!==undefined) {
-        for (const validator of this.node.config.validators) {
-          const isValid = validator(this.inputValue)
-          if (!isValid) {
-            this.$emit('validation-error', '输入值不符合要求')
-            return
-          }
-        }
-      } else {
-        // 没有校验器也清空错误
-        this.$emit('validation-error', '')
-      }
-      this.$emit('enter', this.inputValue)
-      this.$emit('validation-error', '')
-    }
+  node: {
+    type: VarNode,
+    default: null
   }
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'blur', value: string): void;
+  (e: 'enter', value: string): void;
+  (e: 'validation-error', message: string): void;
+}>();
+
+const inputValue = ref<string>(
+  (typeof props.modelValue === 'number' || typeof props.modelValue === 'string')
+    ? String(props.modelValue)
+    : ''
+)
+
+const inputClass = computed(()=>({
+        'string-input': true,
+        'readonly': props.readonly
+      }))
+
+watch(() => props.modelValue, (newValue)=>{
+  if (typeof newValue === 'number' || typeof newValue === 'string') {
+    inputValue.value = String(newValue);
+  } else {
+    inputValue.value = '';
+  }
+}, { immediate: true })
+
+function handleInput() {
+  emit('update:modelValue', inputValue.value);
 }
+
+function handleBlur() {
+  emit('blur', inputValue.value);
+}
+
+function handleEnter() {
+  if (props.node?.config?.validators !== undefined) {
+    for (const validator of props.node.config.validators) {
+      const isValid = validator.creteria(inputValue.value);
+      if (!isValid) {
+        const message = validator.message || '输入值不符合要求'
+        emit('validation-error', message);
+        return;
+      }
+    }
+  } else {
+    emit('validation-error', '');
+  }
+
+  emit('enter', inputValue.value);
+  emit('validation-error', '');
+}
+
 </script>
 
 <style scoped>
