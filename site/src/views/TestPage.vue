@@ -292,7 +292,6 @@ export default {
       const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '', config: {
         validators: [(val: any) => {
           const flag = val === '123'
-          console.log('TEST:', flag)
           return flag
         }],
       }}
