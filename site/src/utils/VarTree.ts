@@ -1,5 +1,5 @@
 import { DefineComponent } from "vue";
-
+import type { Component } from 'vue'
 /**
  * VarNode类：变量节点
  * 每个节点包含类型、名称、默认值、只读状态和子节点
@@ -17,7 +17,7 @@ export type VarNodeConfig = {
   childTemplate?: NodeStructure; // 子节点模板，用于动态列表
   maxLength?: number; // 最大长度，用于动态列表
   validators?: VarNodeValueValidators; // 内容检查函数集合
-  customComponent?: DefineComponent; // 自定义组件钩子
+  customComponent?: Component; // 自定义组件钩子
   minDate?: string; // 最小日期（ISO格式）
   maxDate?: string; // 最大日期（ISO格式）
   options?: string[]; // 选择项列表（用于selection类型）
@@ -70,7 +70,7 @@ export class VarNode {
     readonly: boolean = false,
     children: VarNode[] = [],
     config: VarNodeValue = {},
-    nameDisplay: string = '',
+    nameDisplay?: string,
   ) {
     this.nodeType = nodeType // "dict"|"list"|"leaf"
     this.varType = varType   // 对应组件的变量类型
@@ -160,6 +160,14 @@ export class VarNode {
    */
   isLeaf(): boolean {
     return this.nodeType === 'leaf'
+  }
+
+  /**
+   * 获取显示名称
+   * @returns {string}
+   */
+  getNameDisplay(): string {
+    return this.nameDisplay || this.name || '';
   }
 
   /**
@@ -515,7 +523,8 @@ export function createNodeStructure(
   defaultValue: VarNodeValue = null,
   readonly: boolean = false,
   config: VarNodeConfig = {},
-  children: NodeStructure[] = []
+  children: NodeStructure[] = [],
+  nameDisplay:string = ''
 ): NodeStructure {
   return {
     varType,
@@ -524,7 +533,8 @@ export function createNodeStructure(
     defaultValue,
     readonly,
     config,
-    children
+    children,
+    nameDisplay
   }
 }
 export const cns = createNodeStructure

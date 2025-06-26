@@ -149,7 +149,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig } from '@/utils/VarTree'
+import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig, NodeStructure } from '@/utils/VarTree'
 import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
@@ -241,15 +241,15 @@ function getInputClass() {
 function getTableHeaders(): string[] {
   const defaultValue = "值"
   if (props.config?.childTemplate?.children !== undefined && props.config.childTemplate.children.length > 0) {
-    return props.config.childTemplate.children.map((child: any) => child.name || defaultValue)
+    return props.config.childTemplate.children.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
   }
 
   const firstChild = currentNode.value?.children[0]
   if (!firstChild) return [defaultValue]
   if (firstChild.nodeType === 'dict') {
-    return firstChild.children.map((child: any) => child.name)
+    return firstChild.children.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
   }
-  return firstChild.name ? [firstChild.name] : [defaultValue]
+  return firstChild.nameDisplay ? [firstChild.nameDisplay] : [defaultValue]
 }
 
 function getChildConfig(child: VarNode) {
@@ -311,7 +311,7 @@ function createNewListItem(): VarNode | null {
   if (props.config?.childTemplate) {
     return createNodeFromConfig(props.config.childTemplate)
   }
-  const lastChild = currentNode.value?.children[currentNode.value.children.length - 1].template()
+  const lastChild = currentNode.value?.children[currentNode.value.children.length - 1]
   if (lastChild) {
     return lastChild.template()
   }

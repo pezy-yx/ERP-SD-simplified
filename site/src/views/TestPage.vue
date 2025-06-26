@@ -1,193 +1,290 @@
 <template>
-  <div class="test-page">
-    <h1>VarTree组件测试 🐱</h1>
+  <div>
+    <div class="test-page">
+      <h1>VarTree组件测试</h1>
 
-    <!-- 简单类型测试 -->
-    <div class="test-section">
-      <h2>1. 简单类型测试</h2>
-      
-      <div class="test-item">
-        <h3>单个VarNode（字符串叶子节点）</h3>
-        <var-input
-          :varTree="simpleStringTree"
-          :nodePath="[]"
-          @update="handleUpdate('simpleString', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleString) }}
+      <!-- 简单类型测试 -->
+      <div class="test-section">
+        <h2>1. 简单类型测试</h2>
+        
+        <div class="test-item">
+          <h3>单个VarNode（字符串叶子节点）</h3>
+          <var-input
+            :varTree="simpleStringTree"
+            :nodePath="[]"
+            @update="handleUpdate('simpleString', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleString) }}
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>数字类型节点</h3>
+          <var-input
+            :varTree="simpleNumberTree"
+            :nodePath="[]"
+            @update="handleUpdate('simpleNumber', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleNumber) }}
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>日期类型节点</h3>
+          <var-input
+            :varTree="simpleDateTree"
+            :nodePath="[]"
+            :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
+            @update="handleUpdate('simpleDate', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleDate) }}
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>选择类型节点</h3>
+          <var-input
+            :varTree="simpleSelectionTree"
+            :nodePath="[]"
+            :config="{ options: ['选项1', '选项2', '选项3', '选项4'] }"
+            @update="handleUpdate('simpleSelection', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleSelection) }}
+          </div>
         </div>
       </div>
 
-      <div class="test-item">
-        <h3>数字类型节点</h3>
-        <var-input
-          :varTree="simpleNumberTree"
-          :nodePath="[]"
-          @update="handleUpdate('simpleNumber', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleNumber) }}
+      <!-- 复杂类型测试 -->
+      <div class="test-section">
+        <h2>2. 复杂类型测试</h2>
+        
+        <div class="test-item">
+          <h3>三层字典嵌套</h3>
+          <var-input
+            :varTree="threeLevelDictTree"
+            :nodePath="[]"
+            @update="handleUpdate('threeLevelDict', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testResults.threeLevelDict, null, 2) }}</pre>
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>三层列表嵌套</h3>
+          <var-input
+            :varTree="threeLevelListTree"
+            :nodePath="[]"
+            :config="{
+            }"
+            @update="handleUpdate('threeLevelList', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testResults.threeLevelList, null, 2) }}</pre>
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>混合字典和列表</h3>
+          <var-input
+            :varTree="mixedTree"
+            :nodePath="[]"
+            @update="handleUpdate('mixed', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testResults.mixed, null, 2) }}</pre>
+          </div>
         </div>
       </div>
 
-      <div class="test-item">
-        <h3>日期类型节点</h3>
-        <var-input
-          :varTree="simpleDateTree"
-          :nodePath="[]"
-          :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
-          @update="handleUpdate('simpleDate', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleDate) }}
+      <!-- 功能特性测试 -->
+      <div class="test-section">
+        <h2>3. 功能特性测试</h2>
+        
+        <div class="test-item">
+          <h3>只读模式</h3>
+          <var-input
+            :varTree="readonlyTree"
+            :nodePath="[]"
+            :readonly="true"
+            @update="handleUpdate('readonly', $event)"
+          />
+        </div>
+
+        <div class="test-item">
+          <h3>动态列表（可添加删除）</h3>
+          <var-input
+            :varTree="dynamicListTree"
+            :nodePath="[]"
+            :config="{
+              maxLength: 5,
+            }"
+            @update="handleUpdate('dynamicList', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testResults.dynamicList, null, 2) }}</pre>
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>表格显示测试（Dict作为列表项）</h3>
+          <var-input
+            :varTree="tableTestTree"
+            :nodePath="[]"
+            @update="handleUpdate('tableTest', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testResults.tableTest, null, 2) }}</pre>
+          </div>
+        </div>
+
+        <div class="test-item">
+          <h3>便捷构造方法测试</h3>
+          <var-input
+            :varTree="configBasedTree"
+            :nodePath="[]"
+            @update="handleUpdate('configBased', $event)"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testResults.configBased, null, 2) }}</pre>
+          </div>
+          <div class="config-preview">
+            <strong>配置对象：</strong>
+            <pre>{{ JSON.stringify(configObject, null, 2) }}</pre>
+          </div>
         </div>
       </div>
 
-      <div class="test-item">
-        <h3>选择类型节点</h3>
-        <var-input
-          :varTree="simpleSelectionTree"
-          :nodePath="[]"
-          :config="{ options: ['选项1', '选项2', '选项3', '选项4'] }"
-          @update="handleUpdate('simpleSelection', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleSelection) }}
-        </div>
+      <!-- 全局数据预览 -->
+      <div class="global-preview">
+        <h2>全局数据预览</h2>
+        <pre>{{ JSON.stringify(testResults, null, 2) }}</pre>
       </div>
     </div>
 
-    <!-- 复杂类型测试 -->
-    <div class="test-section">
-      <h2>2. 复杂类型测试</h2>
-      
-      <div class="test-item">
-        <h3>三层字典嵌套</h3>
-        <var-input
-          :varTree="threeLevelDictTree"
-          :nodePath="[]"
-          @update="handleUpdate('threeLevelDict', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>
-          <pre>{{ JSON.stringify(testResults.threeLevelDict, null, 2) }}</pre>
+    <!-- VarBoxCases全量测试区 -->
+    <div class="testcase-demo-root">
+      <nav class="testcase-nav">
+        <div class="testcase-nav-title">VarBox TestCase目录</div>
+        <ul>
+          <li v-for="name in testcaseNames" :key="name">
+            <a :href="'#testcase-'+name">{{ name }}</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="testcase-list">
+        <div
+          v-for="name in testcaseNames"
+          :key="name"
+          class="testcase-item"
+          :id="'testcase-'+name"
+        >
+          <h3>{{ name }}</h3>
+          <var-box
+            :tree="testCases[name].tree"
+            :nodePath="[]"
+          />
+          <div class="result-preview">
+            <strong>当前值：</strong>
+            <pre>{{ JSON.stringify(testCases[name].tree.root?.currentValue, null, 2) }}</pre>
+          </div>
         </div>
       </div>
-
-      <div class="test-item">
-        <h3>三层列表嵌套</h3>
-        <var-input
-          :varTree="threeLevelListTree"
-          :nodePath="[]"
-          :config="{
-          }"
-          @update="handleUpdate('threeLevelList', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>
-          <pre>{{ JSON.stringify(testResults.threeLevelList, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <div class="test-item">
-        <h3>混合字典和列表</h3>
-        <var-input
-          :varTree="mixedTree"
-          :nodePath="[]"
-          @update="handleUpdate('mixed', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>
-          <pre>{{ JSON.stringify(testResults.mixed, null, 2) }}</pre>
-        </div>
-      </div>
-    </div>
-
-    <!-- 功能特性测试 -->
-    <div class="test-section">
-      <h2>3. 功能特性测试</h2>
-      
-      <div class="test-item">
-        <h3>只读模式</h3>
-        <var-input
-          :varTree="readonlyTree"
-          :nodePath="[]"
-          :readonly="true"
-          @update="handleUpdate('readonly', $event)"
-        />
-      </div>
-
-      <div class="test-item">
-        <h3>动态列表（可添加删除）</h3>
-        <var-input
-          :varTree="dynamicListTree"
-          :nodePath="[]"
-          :config="{
-            maxLength: 5,
-          }"
-          @update="handleUpdate('dynamicList', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>
-          <pre>{{ JSON.stringify(testResults.dynamicList, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <div class="test-item">
-        <h3>表格显示测试（Dict作为列表项）</h3>
-        <var-input
-          :varTree="tableTestTree"
-          :nodePath="[]"
-          @update="handleUpdate('tableTest', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>
-          <pre>{{ JSON.stringify(testResults.tableTest, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <div class="test-item">
-        <h3>便捷构造方法测试</h3>
-        <var-input
-          :varTree="configBasedTree"
-          :nodePath="[]"
-          @update="handleUpdate('configBased', $event)"
-        />
-        <div class="result-preview">
-          <strong>当前值：</strong>
-          <pre>{{ JSON.stringify(testResults.configBased, null, 2) }}</pre>
-        </div>
-        <div class="config-preview">
-          <strong>配置对象：</strong>
-          <pre>{{ JSON.stringify(configObject, null, 2) }}</pre>
-        </div>
-      </div>
-    </div>
-
-    <!-- 全局数据预览 -->
-    <div class="global-preview">
-      <h2>全局数据预览</h2>
-      <pre>{{ JSON.stringify(testResults, null, 2) }}</pre>
     </div>
   </div>
 </template>
 
+<style scoped>
+.testcase-demo-root {
+  display: flex;
+  margin-top: 48px;
+  min-height: 400px;
+}
+.testcase-nav {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  width: 180px;
+  background: #f8f8fc;
+  border-right: 2px solid #eee;
+  padding: 16px 8px 16px 16px;
+  z-index: 10;
+  font-size: 15px;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 2px 0 8px #eee;
+}
+.testcase-nav-title {
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #7c5fd4;
+}
+.testcase-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.testcase-nav li {
+  margin-bottom: 8px;
+}
+.testcase-nav a {
+  color: #5a4fcf;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.testcase-nav a:hover {
+  color: #e67e22;
+  text-decoration: underline;
+}
+.testcase-list {
+  margin-left: 200px;
+  flex: 1;
+  padding: 8px 24px;
+}
+.testcase-item {
+  margin-bottom: 36px;
+  padding: 18px 16px 16px 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #f0f0f0;
+  border: 1px solid #f3f3f3;
+}
+.testcase-item h3 {
+  margin-top: 0;
+  color: #6b4fcf;
+}
+</style>
+ 
 <script lang = "ts">
 import VarInput from '@/components/VarInput/VarInput.vue'
+import VarBox from '@/components/VarInput/VarBox.vue'
 import { VarTree, VarNode, validators, createTreeFromConfig, NodeStructure, VarTypeString } from '@/utils/VarTree'
 import MyCustomInput from '@/test/MyCustomInput.vue'
+import { testCases } from '@/test/VarInputCases'
 
 export default {
   name: 'NewTestPage',
 
   components: {
     VarInput,
+    VarBox,
     MyCustomInput
   },
 
   data() {
     return {
       validators,
+      testcaseNames: Object.keys(testCases),
+      testCases,
       testResults: {
         simpleString: '',
         simpleNumber: 0,

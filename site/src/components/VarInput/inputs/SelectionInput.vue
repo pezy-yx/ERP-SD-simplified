@@ -3,7 +3,7 @@
     v-model="inputValue"
     :disabled="readonly"
     :class="inputClass"
-    @change="handleChange, handleEnter"
+    @change="handleChange"
     @blur="handleBlur"
   >
     <option value="" disabled>{{ placeholder }}</option>
@@ -80,6 +80,7 @@ function getOptionLabel(option: any) {
 
 function handleChange() {
   emit('update:modelValue', inputValue.value)
+  handleEnter()
 }
 
 function handleEnter() {
