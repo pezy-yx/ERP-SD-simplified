@@ -1,10 +1,10 @@
 import { Component } from "vue";
-import type { NodeStructure, VarNode, VarTree } from "../utils/VarTree";
-import { createTreeFromConfig, createNodeFromConfig, cns } from "../utils/VarTree";
+import type { NodeStructure, VarNode, VarTree } from "../../utils/VarTree";
+import { createTreeFromConfig, createNodeFromConfig, cns } from "../../utils/VarTree";
 
 // TestCase结构：键为描述，值为NodeTree对象
 export type TestCase = Record<string, { tree: VarTree}>;
-import MyCustomInput from '@/test/MyCustomInput.vue'
+import MyCustomInput from '@/test/VarBox/MyCustomInput.vue'
 
 function dummyComponent(): Component {
   // 伪造一个外部组件钩子

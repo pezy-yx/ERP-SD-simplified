@@ -265,11 +265,11 @@
 </style>
  
 <script lang = "ts">
-import VarInput from '@/components/VarInput/VarInput.vue'
-import VarBox from '@/components/VarInput/VarBox.vue'
+import VarInput from '@/components/VarBox/VarInput.vue'
+import VarBox from '@/components/VarBox/VarBox.vue'
 import { VarTree, VarNode, validators, createTreeFromConfig, NodeStructure, VarTypeString } from '@/utils/VarTree'
-import MyCustomInput from '@/test/MyCustomInput.vue'
-import { testCases } from '@/test/VarInputCases'
+import MyCustomInput from '@/test/VarBox/MyCustomInput.vue'
+import { testCases } from '@/test/VarBox/VarInputCases'
 
 export default {
   name: 'NewTestPage',
