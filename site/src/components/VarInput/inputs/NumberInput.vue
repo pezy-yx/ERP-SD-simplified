@@ -1,6 +1,6 @@
 <template>
   <input
-    type="number"
+    type="text"
     v-model.number="inputValue"
     :readonly="readonly"
     :placeholder="placeholder"

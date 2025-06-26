@@ -16,8 +16,8 @@ export default {
   name: 'StringInput',
   
   props: {
-    value: {
-      type: String,
+    modelValue: {
+      type: [String, Number],
       default: ''
     },
     readonly: {
@@ -40,7 +40,9 @@ export default {
 
   data() {
     return {
-      inputValue: this.value || ''
+      inputValue: (typeof this.modelValue === 'number' || typeof this.modelValue === 'string')
+        ? String(this.modelValue)
+        : ''
     }
   },
 
@@ -54,14 +56,18 @@ export default {
   },
 
   watch: {
-    value(newValue) {
-      this.inputValue = newValue || ''
+    modelValue(newValue) {
+      if (typeof newValue === 'number' || typeof newValue === 'string') {
+        this.inputValue = String(newValue)
+      } else {
+        this.inputValue = ''
+      }
     }
   },
 
   methods: {
     handleInput() {
-      this.$emit('input', this.inputValue)
+      this.$emit('update:modelValue', this.inputValue)
     },
 
     handleBlur() {

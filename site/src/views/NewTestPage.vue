@@ -83,14 +83,6 @@
           :varTree="threeLevelListTree"
           :nodePath="[]"
           :config="{
-            itemType: 'fixlist',
-            itemConfig: {
-              itemType: 'fixlist',
-              length: 2,
-              itemConfig: {
-                itemType: 'string'
-              }
-            }
           }"
           @update="handleUpdate('threeLevelList', $event)"
         />
@@ -134,14 +126,7 @@
           :varTree="dynamicListTree"
           :nodePath="[]"
           :config="{
-            itemType: 'dict',
             maxLength: 5,
-            itemConfig: {
-              children: {
-                name: 'string',
-                score: 'number'
-              }
-            }
           }"
           @update="handleUpdate('dynamicList', $event)"
         />
@@ -190,15 +175,17 @@
   </div>
 </template>
 
-<script>
+<script lang = "ts">
 import VarInput from '@/components/VarInput/VarInput.vue'
-import { VarTree, VarNode, VarNodeFactory, validators, createVarTreeFromConfig } from '@/utils/VarTree'
+import { VarTree, VarNode, validators, createTreeFromConfig, NodeStructure, VarTypeString } from '@/utils/VarTree'
+import MyCustomInput from '@/test/MyCustomInput.vue'
 
 export default {
   name: 'NewTestPage',
 
   components: {
-    VarInput
+    VarInput,
+    MyCustomInput
   },
 
   data() {
@@ -216,235 +203,296 @@ export default {
         dynamicList: [],
         tableTest: [],
         configBased: {}
+      } as { 
+        [key: string]: any; 
+        simpleString: string;
+        simpleNumber: number;
+        simpleDate: string;
+        simpleSelection: string;
+        threeLevelDict: object;
+        threeLevelList: any[];
+        mixed: object;
+        readonly: object;
+        dynamicList: any[];
+        tableTest: any[];
+        configBased: object;
       },
       // 配置对象示例
       configObject: {
-        type: 'dict',
+        varType: 'dict',
         name: 'employee',
-        children: {
-          basicInfo: {
-            type: 'dict',
-            name: 'basic_info',
-            children: {
-              name: { type: 'string', defaultValue: '张三' },
-              age: { type: 'number', defaultValue: 28 },
-              gender: {
-                type: 'selection',
-                defaultValue: '男',
-                config: {
+        children: [
+          {
+            varType: 'dict',
+            name: 'basicInfo',
+            children: [
+              { varType: 'string', name: 'name', defaultValue: '张三'},
+              { varType: 'number', name: 'age', defaultValue: 28 },
+              {
+                varType: 'selection', name: 'gender', defaultValue: '男', config: {
                   options: ['男', '女', '其他']
                 }
               },
-              birthDate: { type: 'date', defaultValue: '1995-01-01' }
-            }
+              { varType: 'date', name: 'birthDate', defaultValue: '1995-01-01' }
+            ]
           },
-          workInfo: {
-            type: 'dict',
-            readonly: false,
-            children: {
-              department: { type: 'string', defaultValue: '技术部' },
-              position: { type: 'string', defaultValue: '软件工程师' },
-              salary: { type: 'number', defaultValue: 8000 },
-              skills: {
-                type: 'fixlist',
+          {
+            varType: 'dict',
+            name: 'workInfo',
+            children: [
+              { varType: 'string', name: 'department', defaultValue: '技术部' },
+              { varType: 'string', name: 'position', defaultValue: '软件工程师' },
+              { varType: 'number', name: 'salary', defaultValue: 8000 },
+              {
+                varType: 'fixlist',
+                name: 'skills',
                 children: [
-                  { type: 'string', defaultValue: 'JavaScript' },
-                  { type: 'string', defaultValue: 'Vue.js' , readonly: true},
-                  { type: 'string', defaultValue: 'Python' },
-                  { type: 'number', defaultValue: '123' }
+                  { varType: 'string', defaultValue: 'JavaScript' },
+                  { varType: 'string', defaultValue: 'Vue.js' , readonly: true},
+                  { varType: 'string', defaultValue: 'Python' },
+                  { varType: 'number', defaultValue: 123 }
                 ]
               }
-            }
+            ]
           },
-          projects: {
-            type: 'dynamiclist',
+          {
+            varType: 'dynamiclist',
+            name: 'projects',
             children: [
-              { type: 'dict', name:"lan", children: {
-                projectName: { type: 'string', defaultValue: '项目A' },
-                role: { type: 'string', defaultValue: '开发' },
-                startDate: { type: 'date', defaultValue: '2023-01-01' },
-                endDate: { type: 'date', defaultValue: '2023-12-31' }
-              }},
-              { type: 'dict', name:"lan", children: {
-                projectName: { type: 'string', defaultValue: '项目B' },
-                role: { type: 'string', defaultValue: '测试' },
-                startDate: { type: 'date', defaultValue: '2024-01-01' },
-                endDate: { type: 'date', defaultValue: '2024-12-31' }
-              }}
+              { varType: 'dict', name:"lan", children: [
+                { varType: 'string', name: 'projectName', defaultValue: '项目A' },
+                { varType: 'string', name: 'role', defaultValue: '开发', config: {customComponent: MyCustomInput} },
+                { varType: 'date', name: 'startDate', defaultValue: '2023-01-01' },
+                { varType: 'date', name: 'endDate', defaultValue: '2023-12-31' }
+              ]},
+              { varType: 'dict', name:"lan", children: [
+                { varType: 'string', name: 'projectName', defaultValue: '项目B' },
+                { varType: 'string', name: 'role', defaultValue: '测试' },
+                { varType: 'date', name: 'startDate', defaultValue: '2024-01-01' },
+                { varType: 'date', name: 'endDate', defaultValue: '2024-12-31' }
+              ]}
             ],
             config: {
               childTemplate: {
-                type: 'dict',
-                children: {
-                  projectName: { type: 'string', name:"项目名称", defaultValue: '' },
-                  role: { type: 'string', name:"", defaultValue: '' },
-                  startDate: { type: 'date', name:"", defaultValue: '' },
-                  endDate: { type: 'date', name:"", defaultValue: '' }
-                }
+                varType: 'dict',
+                children: [
+                  { varType: 'string', name: 'projectName', defaultValue: '' },
+                  { varType: 'string', name: 'role', defaultValue: '' },
+                  { varType: 'date', name: 'startDate', defaultValue: '' },
+                  { varType: 'date', name: 'endDate', defaultValue: '' }
+                ]
               }
             }
-          },
-          projects2: {
-            type: 'fixlist',
-            children: [
-              {},{}
-            ]
           }
-        }
-      }
+        ]
+      } as NodeStructure
     }
   },
 
   computed: {
     // 简单字符串树
-    simpleStringTree() {
-      const root = VarNodeFactory.createStringNode('用户名', '', false)
-      return new VarTree(root)
+    simpleStringTree(): VarTree {
+      const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '' }
+      return createTreeFromConfig(config)
     },
 
     // 简单数字树
-    simpleNumberTree() {
-      const root = VarNodeFactory.createNumberNode('年龄', 0, false)
-      return new VarTree(root)
+    simpleNumberTree(): VarTree {
+      const config: NodeStructure = { varType: 'number', name: '年龄', defaultValue: 0 }
+      return createTreeFromConfig(config)
     },
 
     // 简单日期树
-    simpleDateTree() {
-      const root = VarNodeFactory.createDateNode('生日', '', false)
-      return new VarTree(root)
+    simpleDateTree(): VarTree {
+      const config: NodeStructure = { varType: 'date', name: '生日', defaultValue: '' }
+      return createTreeFromConfig(config)
     },
 
     // 简单选择树
-    simpleSelectionTree() {
-      const root = VarNodeFactory.createSelectionNode('级别', '选项1', false)
-      return new VarTree(root)
+    simpleSelectionTree(): VarTree {
+      const config: NodeStructure = { varType: 'selection', name: '级别', defaultValue: '选项1' }
+      return createTreeFromConfig(config)
     },
 
     // 三层字典嵌套
-    threeLevelDictTree() {
-      // 第三层
-      const address = VarNodeFactory.createDictNode('address', [
-        VarNodeFactory.createStringNode('province', '广东省'),
-        VarNodeFactory.createStringNode('city', '深圳市'),
-        VarNodeFactory.createStringNode('district', '南山区')
-      ])
-
-      // 第二层
-      const personal = VarNodeFactory.createDictNode('personal', [
-        VarNodeFactory.createStringNode('name', '张三'),
-        VarNodeFactory.createNumberNode('age', 25),
-        address
-      ])
-
-      // 第一层（根）
-      const root = VarNodeFactory.createDictNode('user', [
-        VarNodeFactory.createStringNode('id', 'user_001'),
-        personal,
-        VarNodeFactory.createStringNode('email', 'test@example.com')
-      ])
-
-      return new VarTree(root)
+    threeLevelDictTree(): VarTree {
+      const config: NodeStructure = {
+        varType: 'dict',
+        name: 'user',
+        children: [
+          {
+            varType: 'string',
+            name: 'id',
+            defaultValue: 'user_001'
+          },
+          {
+            varType: 'dict',
+            name: 'personal',
+            children: [
+              { varType: 'string', name: 'name', defaultValue: '张三' },
+              { varType: 'number', name: 'age', defaultValue: 25 },
+              {
+                varType: 'dict',
+                name: 'address',
+                children: [
+                  { varType: 'string', name: 'province', defaultValue: '广东省' },
+                  { varType: 'string', name: 'city', defaultValue: '深圳市' },
+                  { varType: 'string', name: 'district', defaultValue: '南山区' }
+                ]
+              }
+            ]
+          },
+          {
+            varType: 'string',
+            name: 'email',
+            defaultValue: 'test@example.com'
+          }
+        ]
+      }
+      return createTreeFromConfig(config)
     },
 
     // 三层列表嵌套
-    threeLevelListTree() {
-      // 第三层：字符串列表
-      const level3_1 = VarNodeFactory.createListNode('', [
-        VarNodeFactory.createStringNode('', 'item1'),
-        VarNodeFactory.createStringNode('', 'item2')
-      ], false, 'fixlist')
-
-      const level3_2 = VarNodeFactory.createListNode('', [
-        VarNodeFactory.createStringNode('', 'item3'),
-        VarNodeFactory.createStringNode('', 'item4')
-      ], false, 'fixlist')
-
-      // 第二层：列表的列表
-      const level2 = VarNodeFactory.createListNode('', [level3_1, level3_2], false, 'fixlist')
-
-      // 第一层（根）：包含第二层的列表
-      const root = VarNodeFactory.createListNode('matrix', [level2], false, 'fixlist')
-
-      return new VarTree(root)
+    threeLevelListTree(): VarTree {
+      const config: NodeStructure = {
+        varType: 'fixlist',
+        name: 'matrix',
+        children: [
+          {
+            varType: 'fixlist',
+            children: [
+              {
+                varType: 'fixlist',
+                children: [
+                  { varType: 'string', defaultValue: 'item1' },
+                  { varType: 'string', defaultValue: 'item2' }
+                ]
+              },
+              {
+                varType: 'fixlist',
+                children: [
+                  { varType: 'string', defaultValue: 'item3' },
+                  { varType: 'string', defaultValue: 'item4' }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+      return createTreeFromConfig(config)
     },
 
     // 混合字典和列表
-    mixedTree() {
-      // 列表中的字典项
-      const scoreDict1 = VarNodeFactory.createDictNode('', [
-        VarNodeFactory.createStringNode('subject', '数学'),
-        VarNodeFactory.createNumberNode('score', 95)
-      ])
-
-      const scoreDict2 = VarNodeFactory.createDictNode('', [
-        VarNodeFactory.createStringNode('subject', '英语'),
-        VarNodeFactory.createNumberNode('score', 88)
-      ])
-
-      // 成绩列表
-      const scoresList = VarNodeFactory.createListNode('scores', [scoreDict1, scoreDict2], false, 'fixlist')
-
-      // 根字典
-      const root = VarNodeFactory.createDictNode('student', [
-        VarNodeFactory.createStringNode('name', '李四'),
-        VarNodeFactory.createStringNode('class', '三年级一班'),
-        scoresList
-      ])
-
-      return new VarTree(root)
+    mixedTree(): VarTree {
+      const config: NodeStructure = {
+        varType: 'dict',
+        name: 'student',
+        children: [
+          { varType: 'string', name: 'name', defaultValue: '李四' },
+          { varType: 'string', name: 'class', defaultValue: '三年级一班' },
+          { varType: 'dynamiclist', name: 'scores', 
+            children: [
+              { varType: 'dict', name: 'math', children: [
+                { varType: 'string', name: 'subject', defaultValue: '数学' },
+                { varType: 'number', name: 'score', defaultValue: 95 }
+              ]},
+              { varType: 'dict', name: 'english', children: [
+                { varType: 'string', name: 'subject', defaultValue: '英语' },
+                { varType: 'number', name: 'score', defaultValue: 88 }
+              ]}
+            ]
+          }
+        ]
+      }
+      return createTreeFromConfig(config)
     },
 
     // 只读树
-    readonlyTree() {
-      const root = VarNodeFactory.createDictNode('readonly_data', [
-        VarNodeFactory.createStringNode('系统版本', 'v1.0.0', true),
-        VarNodeFactory.createStringNode('创建时间', '2024-01-01', true),
-        VarNodeFactory.createNumberNode('用户数量', 1000, true)
-      ], true)
-
-      return new VarTree(root)
+    readonlyTree(): VarTree {
+      const config: NodeStructure = {
+        varType: 'dict',
+        name: 'readonly_data',
+        readonly: true,
+        children: [
+          { varType: 'string', name: '系统版本', defaultValue: 'v1.0.0', readonly: true },
+          { varType: 'string', name: '创建时间', defaultValue: '2024-01-01', readonly: true },
+          { varType: 'number', name: '用户数量', defaultValue: 1000, readonly: true }
+        ]
+      }
+      return createTreeFromConfig(config)
     },
 
     // 动态列表树
-    dynamicListTree() {
-      const root = VarNodeFactory.createListNode('students', [], false, 'dynamiclist')
-      return new VarTree(root)
+    dynamicListTree(): VarTree {
+      const config: NodeStructure = {
+        varType: 'dynamiclist',
+        nodeType: 'list',
+        name: 'students',
+        children: [{
+            varType: 'dict',
+            children: [
+              { varType: 'string', name: 'name', defaultValue: '学生姓名' },
+              { varType: 'number', name: 'score', defaultValue: 100 }
+            ]
+          }],
+        config: {
+          childTemplate: {
+            varType: 'dict',
+            children: [
+              { varType: 'string', name: 'name'},
+              { varType: 'number', name: 'score'}
+            ]
+          },
+          maxLength: 10
+        }
+      }
+      return createTreeFromConfig(config)
     },
 
     // 表格显示测试树
-    tableTestTree() {
-      // 创建几个预设的字典项用于表格显示
-      const student1 = VarNodeFactory.createDictNode('', [
-        VarNodeFactory.createStringNode('name', '张三'),
-        VarNodeFactory.createNumberNode('age', 20),
-        VarNodeFactory.createStringNode('major', '计算机科学')
-      ])
-
-      const student2 = VarNodeFactory.createDictNode('', [
-        VarNodeFactory.createStringNode('name', '李四'),
-        VarNodeFactory.createNumberNode('age', 21),
-        VarNodeFactory.createStringNode('major', '软件工程')
-      ])
-
-      const student3 = VarNodeFactory.createDictNode('', [
-        VarNodeFactory.createStringNode('name', '王五'),
-        VarNodeFactory.createNumberNode('age', 19),
-        VarNodeFactory.createStringNode('major', '数据科学')
-      ])
-
-      const root = VarNodeFactory.createListNode('student_table', [student1, student2, student3], false, 'fixlist')
-      return new VarTree(root)
+    tableTestTree(): VarTree {
+      const config: NodeStructure = {
+        varType: 'fixlist',
+        name: 'student_table',
+        children: [
+          {
+            varType: 'dict',
+            children: [
+              { varType: 'string', name: 'name', defaultValue: '张三' },
+              { varType: 'number', name: 'age', defaultValue: 20 },
+              { varType: 'string', name: 'major', defaultValue: '计算机科学' }
+            ]
+          },
+          {
+            varType: 'dict',
+            children: [
+              { varType: 'string', name: 'name', defaultValue: '李四' },
+              { varType: 'number', name: 'age', defaultValue: 21 },
+              { varType: 'string', name: 'major', defaultValue: '软件工程' }
+            ]
+          },
+          {
+            varType: 'dict',
+            children: [
+              { varType: 'string', name: 'name', defaultValue: '王五' },
+              { varType: 'number', name: 'age', defaultValue: 19 },
+              { varType: 'string', name: 'major', defaultValue: '数据科学' }
+            ]
+          }
+        ]
+      }
+      return createTreeFromConfig(config)
     },
 
     // 便捷构造方法测试树
-    configBasedTree() {
-      return createVarTreeFromConfig(this.configObject)
+    configBasedTree(): VarTree {
+      return createTreeFromConfig((this as any).configObject as NodeStructure)
     }
   },
 
   mounted() {
     // 初始化所有复杂类型的数据预览
-    this.initializeComplexData()
+    (this as any).initializeComplexData()
   },
 
   methods: {
@@ -453,69 +501,39 @@ export default {
       const complexKeys = ['threeLevelDict', 'threeLevelList', 'mixed', 'readonly', 'dynamicList', 'tableTest', 'configBased']
       
       complexKeys.forEach(key => {
-        const tree = this.getTreeByKey(key)
+        const tree = (this as any).getTreeByKey(key)
         if (tree && tree.root) {
-          this.testResults[key] = this.extractNodeValue(tree.root)
+          (this as any).testResults[key] = tree.root.currentValue
         }
       })
     },
-    handleUpdate(key, updateInfo) {
-      console.log(`[${key}] Update:`, updateInfo)
-      
-      // 根据key获取对应的树
-      const tree = this.getTreeByKey(key)
+    handleUpdate(key: string, updateInfo: any) {
+      const tree = (this as any).getTreeByKey(key)
       if (!tree || !tree.root) return
-      
-      // 判断根节点类型来决定更新策略
       if (tree.root.isLeaf()) {
-        // 如果根节点就是叶子节点，直接更新值
-        this.testResults[key] = updateInfo.value
+        (this as any).testResults[key] = updateInfo.value
       } else {
-        // 如果根节点是复杂类型，无论更新的是哪个子节点，都要提取完整结构
-        this.testResults[key] = this.extractNodeValue(tree.root)
+        (this as any).testResults[key] = tree.root.currentValue
       }
     },
 
     // 根据key获取对应的树
-    getTreeByKey(key) {
+    getTreeByKey(key: any): VarTree | undefined {
       const treeMap = {
-        'simpleString': this.simpleStringTree,
-        'simpleNumber': this.simpleNumberTree,
-        'simpleDate': this.simpleDateTree,
-        'simpleSelection': this.simpleSelectionTree,
-        'threeLevelDict': this.threeLevelDictTree,
-        'threeLevelList': this.threeLevelListTree,
-        'mixed': this.mixedTree,
-        'readonly': this.readonlyTree,
-        'dynamicList': this.dynamicListTree,
-        'tableTest': this.tableTestTree,
-        'configBased': this.configBasedTree
+        simpleString: (this as any).simpleStringTree,
+        simpleNumber: (this as any).simpleNumberTree,
+        simpleDate: (this as any).simpleDateTree,
+        simpleSelection: (this as any).simpleSelectionTree,
+        threeLevelDict: (this as any).threeLevelDictTree,
+        threeLevelList: (this as any).threeLevelListTree,
+        mixed: (this as any).mixedTree,
+        readonly: (this as any).readonlyTree,
+        dynamicList: (this as any).dynamicListTree,
+        tableTest: (this as any).tableTestTree,
+        configBased: (this as any).configBasedTree
       }
-      return treeMap[key]
+      return treeMap[key as keyof typeof treeMap] as VarTree | undefined
     },
-
-    // 从节点提取值
-    extractNodeValue(node) {
-      if (!node) return null
-
-      if (node.isLeaf()) {
-        return node.defaultValue
-      }
-
-      if (node.nodeType === 'dict') {
-        const result = {}
-        for (let child of node.children) {
-          result[child.name] = this.extractNodeValue(child)
-        }
-        return result
-      }
-
-      if (node.nodeType === 'list') {
-        return node.children.map(child => this.extractNodeValue(child))
-      }
-
-      return null
-    }
   }
 }
 </script>
