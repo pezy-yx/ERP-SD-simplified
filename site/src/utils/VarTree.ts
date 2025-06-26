@@ -430,7 +430,6 @@ export function createTreeFromConfig(struct: NodeStructure): VarTree {
   return tree
 }
 
-
 // // 示例nodeStructure：
 // const simpleNodeStructure: NodeStructure = {
 //   varType: 'string',
@@ -504,3 +503,39 @@ export function createTreeFromConfig(struct: NodeStructure): VarTree {
 //     }
 //   ]
 // }
+
+// 快速创建，使用元组创建一个NodeStructure对象
+export function createNodeStructure(
+  varType: VarTypeString,
+  nodeType: NodeTypeString = 'leaf',
+  name: string = '',
+  defaultValue: VarNodeValue = null,
+  readonly: boolean = false,
+  config: VarNodeConfig = {},
+  children: NodeStructure[] = []
+): NodeStructure {
+  return {
+    varType,
+    nodeType,
+    name,
+    defaultValue,
+    readonly,
+    config,
+    children
+  }
+}
+export const cns = createNodeStructure
+
+// // example:
+// const exampleNode: NodeStructure = 
+// cns('string','leaf','exampleString','Hello, World!',false,{},[
+//     cns('number', 'leaf', 'exampleNumber', 42, false),
+//     cns('dict', 'dict', 'exampleDict', null, false, {}, [
+//       cns('string', 'leaf', 'nestedString', 'Nested Value', false),
+//       cns('date', 'leaf', 'nestedDate', '2023-10-01T00:00:00Z', false, {
+//         minDate: '2023-01-01T00:00:00Z',
+//         maxDate: '2024-01-01T00:00:00Z'
+//       })
+//     ])
+//   ]
+// )
