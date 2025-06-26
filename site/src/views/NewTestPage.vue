@@ -11,7 +11,6 @@
         <var-input
           :varTree="simpleStringTree"
           :nodePath="[]"
-          :contentValidator="validators.required"
           @update="handleUpdate('simpleString', $event)"
         />
         <div class="result-preview">
@@ -24,7 +23,6 @@
         <var-input
           :varTree="simpleNumberTree"
           :nodePath="[]"
-          :contentValidator="validators.number"
           @update="handleUpdate('simpleNumber', $event)"
         />
         <div class="result-preview">
@@ -37,7 +35,6 @@
         <var-input
           :varTree="simpleDateTree"
           :nodePath="[]"
-          :contentValidator="validators.date"
           :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
           @update="handleUpdate('simpleDate', $event)"
         />
@@ -292,7 +289,13 @@ export default {
   computed: {
     // 简单字符串树
     simpleStringTree(): VarTree {
-      const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '' }
+      const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '', config: {
+        validators: [(val: any) => {
+          const flag = val === '123'
+          console.log('TEST:', flag)
+          return flag
+        }],
+      }}
       return createTreeFromConfig(config)
     },
 

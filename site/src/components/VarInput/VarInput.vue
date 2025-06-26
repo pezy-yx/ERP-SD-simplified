@@ -7,7 +7,6 @@
         :varTree="varTree"
         :nodePath="nodePath"
         :readonly="effectiveReadonly"
-        :contentValidator="contentValidator"
         :config="config"
         @update="handleValueChange"
       />
@@ -24,11 +23,12 @@
           :readonly="effectiveReadonly"
           :placeholder="getPlaceholder()"
           :config="config"
-          :validator="contentValidator"
           @input="handleValueChange"
           @blur="handleValidation"
+          @validation-error="handleValidationError"
           :class="getInputClass()"
           :style="inputStyle"
+          :node="currentNode"
         />
         <div v-if="validationError" class="error-message">{{ validationError }}</div>
       </div>
@@ -45,7 +45,6 @@
             :varTree="varTree"
             :nodePath="[...nodePath, child.name]"
             :readonly="effectiveReadonly ?? false"
-            :contentValidator="getChildValidator(child)"
             :config="getChildConfig(child)"
             :indentLevel="(indentLevel ?? 0) + 20"
             :showLabel="true"
@@ -93,7 +92,6 @@
                       :varTree="varTree"
                       :nodePath="[...nodePath, index.toString(), dictChild.name]"
                       :readonly="effectiveReadonly ?? false"
-                      :contentValidator="getChildValidator(dictChild)"
                       :config="getChildConfig(dictChild)"
                       :showLabel="false"
                       @update="handleChildUpdate"
@@ -106,7 +104,6 @@
                     :varTree="varTree"
                     :nodePath="[...nodePath, index.toString()]"
                     :readonly="effectiveReadonly ?? false"
-                    :contentValidator="getChildValidator(child)"
                     :config="getChildConfig(child)"
                     :showLabel="false"
                     @update="handleChildUpdate"
@@ -137,7 +134,6 @@
                 :varTree="varTree"
                 :nodePath="[...nodePath, index.toString()]"
                 :readonly="effectiveReadonly ?? false"
-                :contentValidator="getChildValidator(child)"
                 :config="getChildConfig(child)"
                 :indentLevel="(indentLevel ?? 0) + 20"
                 :showLabel="true"
@@ -153,7 +149,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { VarTree, VarNode, validators, VarNodeConfig, createNodeFromConfig } from '@/utils/VarTree'
+import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig } from '@/utils/VarTree'
 import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
@@ -164,7 +160,6 @@ const props = defineProps<{
   varTree: VarTree
   nodePath: string[]
   readonly?: boolean
-  contentValidator?: ((val: any) => boolean) | null
   config?: VarNodeConfig
   indentLevel?: number
   showLabel?: boolean
@@ -260,16 +255,6 @@ function getTableHeaders(): string[] {
   return firstChild.name ? [firstChild.name] : [defaultValue]
 }
 
-function getChildValidator(child: VarNode) {
-  const validatorMap: Record<string, ((val: any) => boolean)> = {
-    'date': validators.date,
-    'number': validators.number,
-    'email': validators.email,
-    'url': validators.url
-  }
-  return validatorMap[child.varType] || props.contentValidator
-}
-
 function getChildConfig(child: VarNode) {
   return child.config || {}
 }
@@ -290,18 +275,13 @@ function handleChildUpdate(updateInfo: any) {
 }
 
 function handleValidation() {
-  if (!props.contentValidator) {
-    validationError.value = ''
-    return
-  }
-  try {
-    const isValid = props.contentValidator(nodeValue.value)
-    validationError.value = isValid ? '' : '输入值不符合要求'
-  } catch (error) {
-    validationError.value = '验证过程出错'
-    // eslint-disable-next-line no-console
-    console.error('Validation error:', error)
-  }
+  // validationError.value = ''
+  return
+}
+
+function handleValidationError(message: string | null = '') {
+  validationError.value = message || ''
+  return
 }
 
 function addListItem() {

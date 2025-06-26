@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import { VarNode, VarNodeValueValidator } from '@/utils/VarTree'
 export default {
   name: 'StringInput',
   
@@ -28,13 +29,13 @@ export default {
       type: String,
       default: '请输入文本'
     },
-    validator: {
-      type: Function,
-      default: null
-    },
     config: {
       type: Object,
       default: () => ({})
+    },
+    node: {
+      type: VarNode,
+      default: null
     }
   },
 
@@ -75,14 +76,34 @@ export default {
     },
 
     handleEnter() {
-      if (this.validator) {
-        const isValid = this.validator(this.inputValue)
-        if (!isValid) {
-          this.$emit('validation-error', '输入值不符合要求')
-          return
+      // if (this.validator) {
+      //   const isValid = this.validator(this.inputValue)
+      //   if (!isValid) {
+      //     this.$emit('validation-error', '输入值不符合要求')
+      //     return
+      //   } else {
+      //     // 校验通过时清空错误喵！
+      //     this.$emit('validation-error', '')
+      //   }
+      // } else {
+      //   // 没有校验器也清空错误喵！
+      //   this.$emit('validation-error', '')
+      // }
+      // this.$emit('enter', this.inputValue)
+      if (this.node?.config?.validators!==undefined) {
+        for (const validator of this.node.config.validators) {
+          const isValid = validator(this.inputValue)
+          if (!isValid) {
+            this.$emit('validation-error', '输入值不符合要求')
+            return
+          }
         }
+      } else {
+        // 没有校验器也清空错误
+        this.$emit('validation-error', '')
       }
       this.$emit('enter', this.inputValue)
+      this.$emit('validation-error', '')
     }
   }
 }
