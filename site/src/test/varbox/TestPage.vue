@@ -182,6 +182,63 @@
             <pre>{{ JSON.stringify(configObject, null, 2) }}</pre>
           </div>
         </div>
+
+        <!-- 新功能测试：额外组件插槽和自定义布局 -->
+        <div class="test-item">
+          <h3>额外组件插槽测试</h3>
+          
+          <h4>搜索输入框（水平布局）</h4>
+          <var-input
+            :varTree="simpleStringTree"
+            :nodePath="[]"
+            :config="{ classPrefix: 'search-input' }"
+            @update="handleUpdate('searchInput', $event)"
+          >
+            <template #--extra="{ currentNode }">
+              <button class="search-btn" @click="handleSearch(currentNode)">🔍 搜索</button>
+              <button class="clear-btn" @click="handleClear(currentNode)">✖️ 清除</button>
+            </template>
+          </var-input>
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.searchInput) }}
+          </div>
+
+          <h4>数值输入框（垂直布局）</h4>
+          <var-input
+            :varTree="simpleNumberTree"
+            :nodePath="[]"
+            :config="{ classPrefix: 'number-input' }"
+            @update="handleUpdate('numberInput', $event)"
+          >
+            <template #--extra="{ currentNode, handleValueChange }">
+              <div class="number-controls">
+                <button @click="()=>{increment(currentNode,handleValueChange)}">+ 增加</button>
+                <button @click="decrement(currentNode)">- 减少</button>
+                <span class="number-info">当前值: {{ currentNode?.currentValue || 0 }}</span>
+              </div>
+            </template>
+          </var-input>
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.numberInput) }}
+          </div>
+
+          <h4>文件选择器（Grid布局）</h4>
+          <var-input
+            :varTree="simpleStringTree"
+            :nodePath="[]"
+            :config="{ classPrefix: 'file-input' }"
+            @update="handleUpdate('fileInput', $event)"
+          >
+            <template #extra-components="{ currentNode }">
+              <button class="browse-btn" @click="handleBrowse(currentNode)">📁 浏览</button>
+              <button class="upload-btn" @click="handleUpload(currentNode)">⬆️ 上传</button>
+              <span class="file-info">{{ getFileInfo(currentNode) }}</span>
+            </template>
+          </var-input>
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.fileInput) }}
+          </div>
+        </div>
       </div>
 
       <!-- 全局数据预览 -->
@@ -316,7 +373,11 @@ export default {
         readonly: {},
         dynamicList: [],
         tableTest: [],
-        configBased: {}
+        configBased: {},
+        // 新增的测试数据
+        searchInput: '',
+        numberInput: 0,
+        fileInput: ''
       } as { 
         [key: string]: any; 
         simpleString: string;
@@ -330,6 +391,10 @@ export default {
         dynamicList: any[];
         tableTest: any[];
         configBased: object;
+        // 新增字段的类型定义
+        searchInput: string;
+        numberInput: number;
+        fileInput: string;
       },
       // 配置对象示例
       configObject: {
@@ -659,6 +724,59 @@ export default {
       }
       return treeMap[key as keyof typeof treeMap] as VarTree | undefined
     },
+
+    // 新增的额外组件功能方法
+    handleSearch(node: any) {
+      console.log('搜索功能', node?.currentValue)
+      alert(`搜索内容: ${node?.currentValue || '空'}`)
+    },
+
+    handleClear(node: any) {
+      console.log('清除功能', node)
+      if (node) {
+        node.currentValue = ''
+      }
+    },
+
+    increment(node: any, handleValueChange: any) {
+      console.log(node.currentValue)
+      if (node) {
+        const currentValue = Number(node.currentValue) || 0
+        node.currentValue = currentValue + 1
+        handleValueChange(node.currentValue)
+      }
+    },
+
+    decrement(node: any) {
+      if (node) {
+        const currentValue = Number(node.currentValue) || 0
+        node.currentValue = Math.max(0, currentValue - 1)
+      }
+    },
+
+    handleBrowse(node: any) {
+      console.log('浏览文件', node)
+      // 模拟文件选择
+      const fileName = prompt('请输入文件名:') || ''
+      if (node && fileName) {
+        node.currentValue = fileName
+      }
+    },
+
+    handleUpload(node: any) {
+      console.log('上传文件', node?.currentValue)
+      if (node?.currentValue) {
+        alert(`上传文件: ${node.currentValue}`)
+      } else {
+        alert('请先选择文件')
+      }
+    },
+
+    getFileInfo(node: any) {
+      const fileName = node?.currentValue || ''
+      if (!fileName) return '未选择文件'
+      return `文件: ${fileName} (${fileName.length} 字符)`
+    },
   }
 }
 </script>
@@ -737,6 +855,163 @@ h3 {
 .global-preview h2 {
   color: #409EFF;
   border-bottom-color: #409EFF;
+}
+
+/* 新增的额外组件布局样式 */
+
+/* 搜索输入框 - 水平布局 */
+.search-input--wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  background-color: #fff;
+}
+
+.search-input--main {
+  flex: 1;
+}
+
+.search-input--extra {
+  display: flex;
+  gap: 4px;
+}
+
+.search-btn, .clear-btn {
+  padding: 4px 8px;
+  border: 1px solid #409EFF;
+  border-radius: 4px;
+  background-color: #409EFF;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+}
+
+.search-btn:hover, .clear-btn:hover {
+  background-color: #337ECC;
+}
+
+.clear-btn {
+  background-color: #F56C6C;
+  border-color: #F56C6C;
+}
+
+.clear-btn:hover {
+  background-color: #DD6161;
+}
+
+/* 数值输入框 - 垂直布局 */
+.number-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #E4E7ED;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: #F9FAFC;
+}
+
+.number-input-main-content {
+  width: 100%;
+}
+
+.number-input-extra-components {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.number-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.number-controls button {
+  padding: 6px 12px;
+  border: 1px solid #67C23A;
+  border-radius: 4px;
+  background-color: #67C23A;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.number-controls button:hover {
+  background-color: #5DAE34;
+}
+
+.number-info {
+  font-size: 12px;
+  color: #909399;
+  font-weight: 500;
+}
+
+/* 文件输入框 - Grid布局 */
+.file-input-wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+  border: 2px dashed #C0C4CC;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #FAFBFC;
+  transition: all 0.3s;
+}
+
+.file-input-wrapper:hover {
+  border-color: #409EFF;
+  background-color: #F0F9FF;
+}
+
+.file-input-main-content {
+  min-height: 40px;
+}
+
+.file-input-extra-components {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.browse-btn, .upload-btn {
+  padding: 8px 16px;
+  border: 1px solid #E6A23C;
+  border-radius: 6px;
+  background-color: #E6A23C;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s;
+  min-width: 80px;
+}
+
+.browse-btn:hover, .upload-btn:hover {
+  background-color: #CF9236;
+}
+
+.upload-btn {
+  background-color: #909399;
+  border-color: #909399;
+}
+
+.upload-btn:hover {
+  background-color: #82848A;
+}
+
+.file-info {
+  font-size: 11px;
+  color: #606266;
+  text-align: center;
+  max-width: 120px;
+  word-wrap: break-word;
 }
 
 .global-preview pre {
