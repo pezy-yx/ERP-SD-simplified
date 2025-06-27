@@ -36,10 +36,11 @@
           <var-input
             :varTree="simpleDateTree"
             :nodePath="[]"
+            :showLabel="true"
             :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
             @update="handleUpdate('simpleDate', $event)"
           >
-            <template #--date>
+            <template #[`birthday--simple`]>
               HELLO
             </template>
           </var-input>
@@ -166,7 +167,7 @@
             :nodePath="[]"
             @update="handleUpdate('configBased', $event)"
           >
-            <template v-for="i in [0,2,6]" #[`projects-${i}-startDate--simple-input-group`]="slotProps">
+            <template v-for="i in [0,2,6]" #[`employee-projects-${i}-startDate--simple-input-group`]="slotProps">
               <p>im an empty slot {{ i }}, overcoming so many layers</p>
               <button @click="slotProps.showDatePicker()">Show Date Picker for Row {{ i }}</button>
               <p>only row 0,2,6 will be customized</p>
@@ -476,7 +477,7 @@ export default {
 
     // 简单日期树
     simpleDateTree(): VarTree {
-      const config: NodeStructure = { varType: 'date', name: '生日', defaultValue: '' }
+      const config: NodeStructure = { varType: 'date', name: 'birthday', defaultValue: '' }
       return createTreeFromConfig(config)
     },
 

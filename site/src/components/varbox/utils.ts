@@ -4,6 +4,9 @@ export function getPathString(tree: VarTree ,path: string[]): string {
   if(!tree.root){
     return "no root"
   }
+  if(path.length == 0){
+    return escape(tree.root.name)
+  }
   return escape(tree.root.name) + "-" + path
     .map(segment => escape(segment))
     .join('-');

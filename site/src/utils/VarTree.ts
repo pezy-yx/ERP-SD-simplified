@@ -1,4 +1,4 @@
-import { DefineComponent, ref, Ref } from "vue";
+import { DefineComponent } from "vue";
 import type { Component } from 'vue'
 /**
  * VarNode类：变量节点
@@ -48,9 +48,9 @@ export class VarNode {
   public config: VarNodeConfig;
 
   /**
-   * 当前值，使用Vue的ref包装以实现响应式
+   * 当前值，object，可读写
    */
-  private _currentValue: Ref<VarNodeValue> = ref(null);
+  private _currentValue: VarNodeValue = {};
 
   /**
    * 构造函数
@@ -103,7 +103,7 @@ export class VarNode {
       return this.children.map(child => child.currentValue) // 递归获取子节点的当前值
     }
     // leaf节点直接返回当前值
-    return this._currentValue?.value ?? null; // 递归结束，使用ref的value，防止null错误
+    return this._currentValue; // 递归结束
   }
 
   /**
@@ -134,7 +134,7 @@ export class VarNode {
       }
     } else {
       if (this._currentValue) {
-        this._currentValue.value = val; // 使用ref的value
+        this._currentValue = val;
       }
     }
   }
