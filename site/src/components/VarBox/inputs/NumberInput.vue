@@ -1,26 +1,40 @@
 <template>
-  <input
-    type="text"
-    v-model.number="inputValue"
-    :readonly="readonly"
-    :placeholder="placeholder"
-    :class="inputClass"
-    :min="config.min"
-    :max="config.max"
-    :step="config.step || 1"
-    @input="handleInput"
-    @blur="handleBlur"
-    @keyup.enter="handleEnter"
-  />
+  <div class="number-input-container">
+    <slot
+      :name="`${pathString}--simple`"
+      v-bind="slotScopeData"
+    >
+      <input
+        type="text"
+        v-model.number="inputValue"
+        :readonly="readonly"
+        :placeholder="placeholder"
+        :class="inputClass"
+        :min="config.min"
+        :max="config.max"
+        :step="config.step || 1"
+        @input="handleInput"
+        @blur="handleBlur"
+        @keyup.enter="handleEnter"
+      />
+    </slot>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import { SimpleInputBoxProps, SimpleInputBoxEmitsWithNum } from './InputProps';
+import {getPathString} from '../utils'
 
 const props = defineProps(SimpleInputBoxProps)
 const emit = defineEmits(SimpleInputBoxEmitsWithNum)
-
+const slotScopeData = computed(() => ({
+  handleInput: handleInput,
+  blur: handleBlur,
+  handleEnter: handleEnter,
+  allProps: props,
+}));
+const pathString = computed<string>(()=>getPathString(props.nodePath))
 
 function parseValue(value: number | string | null | undefined) {
   if (value === null || value === undefined || value === '') {

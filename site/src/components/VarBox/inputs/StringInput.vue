@@ -1,24 +1,43 @@
 <template>
-  <input
-    type="text"
-    v-model="inputValue"
-    :readonly="readonly"
-    :placeholder="placeholder"
-    :class="inputClass"
-    @input="handleInput"
-    @blur="handleBlur"
-    @keyup.enter="handleEnter"
-  />
+  <div class="string-input-container">
+    <slot
+      :name="`${pathString}--simple`"
+      v-bind="slotScopeData"
+    >
+      <input
+        type="text"
+        v-model="inputValue"
+        :readonly="readonly"
+        :placeholder="placeholder"
+        :class="inputClass"
+        @input="handleInput"
+        @blur="handleBlur"
+        @keyup.enter="handleEnter"
+      />
+    </slot>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import { VarNode } from '@/utils/VarTree'
 import { SimpleInputBoxProps, SimpleInputBoxEmits } from './InputProps';
-
-const props = defineProps(SimpleInputBoxProps)
+import {getPathString} from '../utils'
+const props = defineProps({...SimpleInputBoxProps,
+  modelValue:{
+    type: [String, Number],
+    default: ""
+  }
+})
 const emit = defineEmits(SimpleInputBoxEmits)
 
+const slotScopeData = computed(() => ({
+  handleInput: handleInput,
+  blur: handleBlur,
+  handleEnter: handleEnter,
+  allProps: props,
+}));
+const pathString = computed<string>(()=>getPathString(props.nodePath))
 const inputValue = ref<string>(
   (typeof props.modelValue === 'number' || typeof props.modelValue === 'string')
     ? String(props.modelValue)

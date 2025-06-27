@@ -354,6 +354,53 @@ export class VarTree {
     
     return currentNode
   }
+
+  /**
+   * 根据节点查找路径，深度优先查找，请尽量不要在响应式变量里调用
+   * @param {VarNode} targetNode - 目标节点
+   * @returns {string[]|null} - 返回从根节点到目标节点的路径，如果未找到则返回 null
+   */
+  findPathToNode(targetNode: VarNode): string[] | null {
+    if (!this.root) {
+      return null;
+    }
+
+    // DFS
+    const dfs = (currentNode: VarNode, currentPath: string[]): string[] | null => {
+      // 如果当前节点就是目标节点，则返回当前路径
+      if (currentNode === targetNode) {
+        return currentPath;
+      }
+
+      // 遍历子节点
+      if (currentNode.children && currentNode.children.length > 0) {
+        for (let i = 0; i < currentNode.children.length; i++) {
+          const child = currentNode.children[i];
+          let nextSegment: string;
+
+          // 根据父节点的类型决定路径片段
+          if (currentNode.nodeType === 'dict') {
+            nextSegment = child.name; // 字典用子节点的名字
+          } else if (currentNode.nodeType === 'list') {
+            nextSegment = String(i); // 列表用子节点的索引
+          } else {
+            // 如果父节点是叶子节点，则不应该有子节点，跳过
+            continue;
+          }
+
+          const result = dfs(child, [...currentPath, nextSegment]);
+          if (result) {
+            return result; // 找到路径，立即返回
+          }
+        }
+      }
+
+      return null; // 未在当前路径下找到
+    };
+
+    // 从根节点开始搜索
+    return dfs(this.root, []);
+  }
 }
 
 // 内容检查函数集合

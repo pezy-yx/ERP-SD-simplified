@@ -1,149 +1,195 @@
 <template>
   <div>
-    <!-- 外部组件钩子 config.customComponent -->
-    <div v-if="config?.customComponent !== undefined" class="custom-component">
-      <component
-        :is="config.customComponent"
-        :varTree="varTree"
-        :nodePath="nodePath"
-        :readonly="effectiveReadonly"
-        :config="config"
-        @update="handleValueChange"
-      />
-    </div>
-    <div v-else class="var-input-container" :style="containerStyle">
-      <!-- 叶子节点渲染 -->
-      <div v-if="isLeafNode" class="leaf-node">
-        <label v-if="showLabel" class="var-label">{{ nameDisplay }}</label>
-        <!-- 基础类型输入框 -->
+    <slot :name="pathString">
+      <!-- 外部组件钩子 config.customComponent -->
+      <div v-if="config?.customComponent !== undefined" class="custom-component">
         <component
-          :is="getLeafComponent()"
+          :is="config.customComponent"
           :modelValue="currentNode?.currentValue"
-          @update:modelValue="handleValueChange"
           :readonly="effectiveReadonly"
           :placeholder="getPlaceholder()"
           :config="config"
-          @input="handleValueChange"
+          :style="inputStyle"
+          :tree="varTree"
+          :node="currentNode"
+          :nodePath="nodePath"
+          :varTree="varTree"
+          :class="getInputClass()"
+          @update="handleChildUpdate"
+          @update:modelValue="handleValueChange"
           @blur="handleValidation"
           @validation-error="handleValidationError"
-          :class="getInputClass()"
-          :style="inputStyle"
-          :node="currentNode"
-        />
-        <div v-if="validationError" class="error-message">{{ validationError }}</div>
+        >
+          <!-- 透传插槽 -->
+          <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+            <slot :name="slotName" v-bind="slotProps"></slot>
+          </template>
+        </component>
       </div>
+      <div v-else class="var-input-container" :style="containerStyle">
+        <!-- 叶子节点渲染 -->
+        <div v-if="isLeafNode" class="leaf-node">
+          <label v-if="showLabel" class="var-label">{{ nameDisplay }}</label>
+          <!-- 基础类型输入框 -->
+          <component
+            :is="getLeafComponent()"
 
-      <!-- 字典节点渲染 -->
-      <div v-else-if="isDictNode" class="dict-node">
-        <div v-if="1 || showLabel" class="dict-header">
-          <label class="var-label">{{ nameDisplay }}</label>
+            :modelValue="currentNode?.currentValue"
+            :readonly="effectiveReadonly"
+            :placeholder="getPlaceholder()"
+            :config="config"
+            :class="getInputClass()"
+            :style="inputStyle"
+            :tree="varTree"
+            :node="currentNode"
+            :nodePath="nodePath"
+            
+            @update:modelValue="handleValueChange"
+            @blur="handleValidation"
+            @validation-error="handleValidationError"
+          >
+            <!-- 透传插槽 -->
+            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+              <slot :name="slotName" v-bind="slotProps"></slot>
+            </template>
+          </component>
+          <div v-if="validationError" class="error-message">{{ validationError }}</div>
         </div>
-        <div class="dict-content" :style="{ paddingLeft: indentLevel + 'px' }">
-          <VarInput
-            v-for="(child, index) in currentNode?.children"
-            :key="child.name + '_' + index"
-            :varTree="varTree"
-            :nodePath="[...nodePath, child.name]"
-            :readonly="effectiveReadonly ?? false"
-            :config="getChildConfig(child)"
-            :indentLevel="(indentLevel ?? 0) + 20"
-            :showLabel="true"
-            @update="handleChildUpdate"
-            class="dict-item"
-          />
-        </div>
-      </div>
 
-      <!-- 列表节点渲染 -->
-      <div v-else-if="isListNode" class="list-node">
-        <div v-if="1 || showLabel" class="list-header">
-          <label class="var-label">{{ nameDisplay }}</label>
-          <!-- 动态列表的添加/删除按钮 -->
-          <div v-if="isDynamicList && !effectiveReadonly" class="list-controls">
-            <button
-              @click="addListItem"
-              :disabled="!!reachedMaxLength"
-              class="btn-add"
+        <!-- 字典节点渲染 -->
+        <div v-else-if="isDictNode" class="dict-node">
+          <div v-if="1 || showLabel" class="dict-header">
+            <label class="var-label">{{ nameDisplay }}</label>
+          </div>
+          <div class="dict-content" :style="{ paddingLeft: indentLevel + 'px' }">
+            <VarInput
+              v-for="(child, index) in currentNode?.children"
+              :key="child.name + '_' + index"
+
+              :varTree="varTree"
+              :nodePath="[...nodePath, child.name]"
+              :readonly="effectiveReadonly ?? false"
+              :config="getChildConfig(child)"
+              :indentLevel="(indentLevel ?? 0) + 20"
+              :showLabel="true"
+
+              class="dict-item"
+              @update="handleChildUpdate"
             >
-              添加项 +
-            </button>
+              <!-- 透传插槽 -->
+              <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
+                <slot :name="slotName" v-bind="slotProps"></slot>
+              </template>
+            </VarInput>
           </div>
         </div>
-        <!-- 表格形式渲染列表 -->
-        <div class="list-content">
-          <table v-if="shouldRenderAsTable" class="list-table">
-            <thead>
-              <tr>
-                <th v-if="isDynamicList && !effectiveReadonly" class="action-column">操作</th>
-                <th v-for="(header, index) in getTableHeaders()" :key="index">
-                  {{ header }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(child, index) in currentNode?.children" :key="index" class="list-row">
-                <td v-if="isDynamicList && !effectiveReadonly" class="action-cell">
-                  <button @click="removeListItem(index)" class="btn-remove">删除</button>
-                </td>
-                <!-- 如果子项是dict，则每个字段占一列 -->
-                <template v-if="child.nodeType === 'dict'">
-                  <td v-for="(dictChild, dictIndex) in child.children" :key="dictIndex" class="list-cell">
+
+        <!-- 列表节点渲染 -->
+        <div v-else-if="isListNode" class="list-node">
+          <div v-if="1 || showLabel" class="list-header">
+            <label class="var-label">{{ nameDisplay }}</label>
+            <!-- 动态列表的添加/删除按钮 -->
+            <div v-if="isDynamicList && !effectiveReadonly" class="list-controls">
+              <button
+                @click="addListItem"
+                :disabled="!!reachedMaxLength"
+                class="btn-add"
+              >
+                添加项 +
+              </button>
+            </div>
+          </div>
+          <!-- 表格形式渲染列表 -->
+          <div class="list-content">
+            <table v-if="shouldRenderAsTable" class="list-table">
+              <thead>
+                <tr>
+                  <th v-if="isDynamicList && !effectiveReadonly" class="action-column">操作</th>
+                  <th v-for="(header, index) in getTableHeaders()" :key="index">
+                    {{ header }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(child, index) in currentNode?.children" :key="index" class="list-row">
+                  <td v-if="isDynamicList && !effectiveReadonly" class="action-cell">
+                    <button @click="removeListItem(index)" class="btn-remove">删除</button>
+                  </td>
+                  <!-- 如果子项是dict，则每个字段占一列 -->
+                  <template v-if="child.nodeType === 'dict'">
+                    <td v-for="(dictChild, dictIndex) in child.children" :key="dictIndex" class="list-cell">
+                      <VarInput
+                        :varTree="varTree"
+                        :nodePath="[...nodePath, index.toString(), dictChild.name]"
+                        :readonly="effectiveReadonly ?? false"
+                        :config="getChildConfig(dictChild)"
+                        :showLabel="false"
+                        @update="handleChildUpdate"
+                      >
+                        <!-- 透传插槽 -->
+                        <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
+                          <slot :name="slotName" v-bind="slotProps"></slot>
+                        </template>
+                      </VarInput>
+                    </td>
+                  </template>
+                  <!-- 如果子项不是dict，则整个子项占一列 -->
+                  <td v-else class="list-cell">
                     <VarInput
                       :varTree="varTree"
-                      :nodePath="[...nodePath, index.toString(), dictChild.name]"
+                      :nodePath="[...nodePath, index.toString()]"
                       :readonly="effectiveReadonly ?? false"
-                      :config="getChildConfig(dictChild)"
+                      :config="getChildConfig(child)"
                       :showLabel="false"
                       @update="handleChildUpdate"
-                    />
+                    >
+                        <!-- 透传插槽 -->
+                        <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
+                          <slot :name="slotName" v-bind="slotProps"></slot>
+                        </template>
+                    </VarInput>
                   </td>
-                </template>
-                <!-- 如果子项不是dict，则整个子项占一列 -->
-                <td v-else class="list-cell">
-                  <VarInput
-                    :varTree="varTree"
-                    :nodePath="[...nodePath, index.toString()]"
-                    :readonly="effectiveReadonly ?? false"
-                    :config="getChildConfig(child)"
-                    :showLabel="false"
-                    @update="handleChildUpdate"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <!-- 非表格形式渲染列表 -->
-          <div v-else class="list-items">
-            <div
-              v-for="(child, index) in currentNode?.children"
-              :key="index"
-              class="list-item"
-              :style="{ paddingLeft: indentLevel + 'px' }"
-            >
-              <div class="list-item-header">
-                <span class="item-index">[{{ index }}]</span>
-                <button
-                  v-if="isDynamicList && !effectiveReadonly"
-                  @click="removeListItem(index)"
-                  class="btn-remove-inline"
+                </tr>
+              </tbody>
+            </table>
+            <!-- 非表格形式渲染列表 -->
+            <div v-else class="list-items">
+              <div
+                v-for="(child, index) in currentNode?.children"
+                :key="index"
+                class="list-item"
+                :style="{ paddingLeft: indentLevel + 'px' }"
+              >
+                <div class="list-item-header">
+                  <span class="item-index">[{{ index }}]</span>
+                  <button
+                    v-if="isDynamicList && !effectiveReadonly"
+                    @click="removeListItem(index)"
+                    class="btn-remove-inline"
+                  >
+                    删除
+                  </button>
+                </div>
+                <VarInput
+                  :varTree="varTree"
+                  :nodePath="[...nodePath, index.toString()]"
+                  :readonly="effectiveReadonly ?? false"
+                  :config="getChildConfig(child)"
+                  :indentLevel="(indentLevel ?? 0) + 20"
+                  :showLabel="true"
+                  @update="handleChildUpdate"
                 >
-                  删除
-                </button>
+                  <!-- 透传插槽 -->
+                  <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
+                    <slot :name="slotName" v-bind="slotProps"></slot>
+                  </template>
+                </VarInput>
               </div>
-              <VarInput
-                :varTree="varTree"
-                :nodePath="[...nodePath, index.toString()]"
-                :readonly="effectiveReadonly ?? false"
-                :config="getChildConfig(child)"
-                :indentLevel="(indentLevel ?? 0) + 20"
-                :showLabel="true"
-                @update="handleChildUpdate"
-              />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </slot>
   </div>
 </template>
 
@@ -154,6 +200,8 @@ import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
 import SelectionInput from './inputs/SelectionInput.vue'
+
+import {getPathString} from './utils'
 
 const props = defineProps<{
   varTree: VarTree
@@ -173,6 +221,7 @@ const validationError = ref<string>('')
 const nodeValue = ref<any>(null)
 
 const currentNode = computed<VarNode | null>(() => props.varTree.findNodeByPath(props.nodePath))
+const pathString = computed<string>(()=>getPathString(props.nodePath))
 
 const isLeafNode = computed(() => currentNode.value && currentNode.value.isLeaf())
 const isDictNode = computed(() => currentNode.value && currentNode.value.nodeType === 'dict')

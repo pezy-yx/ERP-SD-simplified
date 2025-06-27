@@ -9,8 +9,10 @@
   },
   "dependencies": {
     "@types/vue": "^2.0.0",
+    "@vue/compiler-sfc": "^3.5.17",
     "core-js": "^3.6.5",
-    "vue": "^2.7.16"
+    "vue": "^3.5.17",
+    "vue-loader": "^17.4.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

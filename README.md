@@ -265,9 +265,9 @@ const tree = createTreeFromConfig(simpleNodeStructure)
 
 支持复杂嵌套结构，推荐配合 [`createNodeStructure()`](site/src/utils/VarTree.ts) 
 
-#### 使用外部钩子展示变量（叶子或子树）
+#### 使用外部钩子添加组件（叶子或子树）
 
-VarInput 支持通过 `config.customComponent` 外部钩子渲染变量节点（叶子或子树）。自定义组件需实现 `@update` 事件。
+VarInput 支持通过 `config.customComponent` 外部钩子渲染变量节点（叶子或子树）。自定义组件如通过config传入，需实现 `@update` 事件，且推荐使用markRaw包裹。
 
 示例：
 

@@ -1,16 +1,6 @@
 import { defineProps, PropType } from 'vue';
 import { VarNode, VarTree } from '@/utils/VarTree';
 
-// 类型安全
-export interface SimpleInputBoxPropsType {
-  modelValue: string | number;
-  readonly: boolean;
-  placeholder: string;
-  config: Record<string, any>;
-  node: VarNode | null;
-  tree: VarTree | null;
-}
-
 export const SimpleInputBoxProps = {
   modelValue: {
     type: String,
@@ -35,6 +25,10 @@ export const SimpleInputBoxProps = {
   tree: {
     type: Object as PropType<VarTree | null>,
     default: null
+  },
+  nodePath: {
+    type: Array as PropType<string[]>,
+    default: () => []
   }
 };
 

@@ -1,31 +1,48 @@
 <template>
-  <select
-    v-model="inputValue"
-    :disabled="readonly"
-    :class="inputClass"
-    @change="handleChange"
-    @blur="handleBlur"
-  >
-    <option value="" disabled>{{ placeholder }}</option>
-    <option
-      v-for="option in options"
-      :key="getOptionValue(option)"
-      :value="getOptionValue(option)"
+  <div class="selection-input-container">
+    <slot
+      :name="`${pathString}--simple`"
+      v-bind="slotScopeData"
     >
-      {{ getOptionLabel(option) }}
-    </option>
-  </select>
+      <select
+        v-model="inputValue"
+        :disabled="readonly"
+        :class="inputClass"
+        @change="handleChange"
+        @blur="handleBlur"
+      >
+        <option value="" disabled>{{ placeholder }}</option>
+        <option
+          v-for="option in options"
+          :key="getOptionValue(option)"
+          :value="getOptionValue(option)"
+        >
+          {{ getOptionLabel(option) }}
+        </option>
+      </select>
+    </slot>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import { VarNode } from '@/utils/VarTree'
+import {getPathString} from '../utils'
 
 import { SimpleInputBoxProps, SimpleInputBoxEmitsWithNum } from './InputProps';
 
 const props = defineProps(SimpleInputBoxProps)
 const emit = defineEmits(SimpleInputBoxEmitsWithNum)
-
+const slotScopeData = computed(() => ({
+  handleChange: handleChange,
+  handleInput: handleChange,
+  blur: handleBlur,
+  handleEnter: handleEnter,
+  getOptionValue: getOptionValue,
+  getOptionLabel: getOptionLabel,
+  allProps: props,
+}));
+const pathString = computed<string>(()=>getPathString(props.nodePath))
 const inputValue = ref<string | number>(props.modelValue || '')
 
 const inputClass = computed(() => ({

@@ -1,44 +1,54 @@
 <template>
   <div class="date-input-container">
-    <div class="date-input-group">
-      <input
-        type="text"
-        v-model="displayValue"
-        :readonly="readonly"
-        :placeholder="placeholder"
-        :class="inputClass"
-        @input="handleTextInput"
-        @blur="handleBlur"
-        @keyup.enter="handleEnter"
-      />
-      <button
-        v-if="!readonly"
-        type="button"
-        class="date-picker-btn"
-        @click="showDatePicker"
-        :disabled="readonly"
+    <slot
+      :name="`${pathString}--simple`"
+      v-bind="slotScopeData"
+    >    
+      <slot
+        :name="`${pathString}--simple-input-group`"
+        v-bind="slotScopeData"
       >
-        📅
-      </button>
-    </div>
-    
-    <input
-      v-if="showPicker"
-      type="date"
-      v-model="dateValue"
-      :min="config.minDate"
-      :max="config.maxDate"
-      @change="handleDateChange"
-      @blur="hideDatePicker"
-      class="date-picker"
-      ref="datePicker"
-    />
+        <div class="date-input-group">
+          <input
+            type="text"
+            v-model="displayValue"
+            :readonly="readonly"
+            :placeholder="placeholder"
+            :class="inputClass"
+            @input="handleTextInput"
+            @blur="handleBlur"
+            @keyup.enter="handleEnter"
+          />
+          <button
+            v-if="!readonly"
+            type="button"
+            class="date-picker-btn"
+            @click="showDatePicker"
+            :disabled="readonly"
+          >
+            📅
+          </button>
+        </div>
+      </slot>
+      <input
+        v-if="showPicker"
+        type="date"
+        v-model="dateValue"
+        :min="config.minDate"
+        :max="config.maxDate"
+        @change="handleDateChange"
+        @blur="hideDatePicker"
+        class="date-picker"
+        ref="datePicker"
+      />
+    </slot>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { SimpleInputBoxProps, SimpleInputBoxEmits } from './InputProps';
+import {getPathString} from '../utils'
 import { VarNode, VarTree } from '@/utils/VarTree'
 
 const props = defineProps(SimpleInputBoxProps)
@@ -47,6 +57,18 @@ const emit = defineEmits(SimpleInputBoxEmits)
 const displayValue = ref<string>(props.modelValue || '')
 const dateValue = ref<string>(formatToDateInput(props.modelValue))
 const showPicker = ref(false)
+
+const slotScopeData = computed(() => ({
+  handleInput: handleTextInput,
+  handleTextInput: handleTextInput,
+  blur: handleBlur,
+  handleEnter: handleEnter,
+  showDatePicker: showDatePicker,
+  handleDateChange: handleDateChange,
+  hideDatePicker: hideDatePicker,
+  allProps: props,
+}));
+const pathString = computed<string>(()=>getPathString(props.nodePath))
 
 const inputClass = computed(() => ({
   'date-input': true,

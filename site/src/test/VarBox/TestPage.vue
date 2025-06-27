@@ -38,7 +38,11 @@
             :nodePath="[]"
             :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
             @update="handleUpdate('simpleDate', $event)"
-          />
+          >
+            <template #--date>
+              HELLO
+            </template>
+          </var-input>
           <div class="result-preview">
             <strong>当前值：</strong>{{ JSON.stringify(testResults.simpleDate) }}
           </div>
@@ -96,7 +100,11 @@
             :varTree="mixedTree"
             :nodePath="[]"
             @update="handleUpdate('mixed', $event)"
-          />
+          >
+            <template #birthday--date>
+              im an empty slot, overcoming so many layers
+            </template>
+          </var-input>
           <div class="result-preview">
             <strong>当前值：</strong>
             <pre>{{ JSON.stringify(testResults.mixed, null, 2) }}</pre>
@@ -153,7 +161,14 @@
             :varTree="configBasedTree"
             :nodePath="[]"
             @update="handleUpdate('configBased', $event)"
-          />
+          >
+            <template v-for="i in [0,2,6]" #[`projects-${i}-startDate--date-input-group`]="slotProps">
+              <p>im an empty slot {{ i }}, overcoming so many layers</p>
+              <button @click="slotProps.showDatePicker()">Show Date Picker for Row {{ i }}</button>
+              <p>only row 0,2,6 will be customized</p>
+              <span style="color: blue;">当前索引: {{ i }}</span>
+            </template>
+          </var-input>
           <div class="result-preview">
             <strong>当前值：</strong>
             <pre>{{ JSON.stringify(testResults.configBased, null, 2) }}</pre>
@@ -270,6 +285,7 @@ import VarBox from '@/components/VarBox/VarBox.vue'
 import { VarTree, VarNode, validators, createTreeFromConfig, NodeStructure, VarTypeString } from '@/utils/VarTree'
 import MyCustomInput from '@/test/VarBox/MyCustomInput.vue'
 import { testCases } from '@/test/VarBox/VarInputCases'
+import { markRaw } from 'vue'
 
 export default {
   name: 'NewTestPage',
@@ -355,7 +371,7 @@ export default {
             children: [
               { varType: 'dict', name:"lan", children: [
                 { varType: 'string', name: 'projectName', defaultValue: '项目A' },
-                { varType: 'string', name: 'role', defaultValue: '开发', config: {customComponent: MyCustomInput} },
+                { varType: 'string', name: 'role', defaultValue: '开发', config: {customComponent: markRaw(MyCustomInput)} },
                 { varType: 'date', name: 'startDate', defaultValue: '2023-01-01' },
                 { varType: 'date', name: 'endDate', defaultValue: '2023-12-31' }
               ]},
@@ -494,6 +510,7 @@ export default {
         children: [
           { varType: 'string', name: 'name', defaultValue: '李四' },
           { varType: 'string', name: 'class', defaultValue: '三年级一班' },
+          { varType: 'date', name: 'birthday', defaultValue: '2004/03/14' },
           { varType: 'dynamiclist', name: 'scores', 
             children: [
               { varType: 'dict', name: 'math', children: [
