@@ -193,11 +193,12 @@
             :varTree="simpleStringTree"
             :nodePath="[]"
             :config="{ classPrefix: 'search-input' }"
+            :showLabel = "true"
             @update="handleUpdate('searchInput', $event)"
           >
-            <template #--extra="{ currentNode }">
-              <button class="search-btn" @click="handleSearch(currentNode)">🔍 搜索</button>
-              <button class="clear-btn" @click="handleClear(currentNode)">✖️ 清除</button>
+            <template #用户名--extra="allProps">
+              <button class="search-btn" @click="handleSearch(allProps)">🔍 搜索</button>
+              <button class="clear-btn" @click="handleClear(allProps)">✖️ 清除</button>
             </template>
           </var-input>
           <div class="result-preview">
@@ -209,13 +210,14 @@
             :varTree="simpleNumberTree"
             :nodePath="[]"
             :config="{ classPrefix: 'number-input' }"
+            :showLabel = "true"
             @update="handleUpdate('numberInput', $event)"
           >
-            <template #--extra="{ currentNode, handleValueChange }">
+            <template #年龄--extra="allProps">
               <div class="number-controls">
-                <button @click="()=>{increment(currentNode)}">+ 增加</button>
-                <button @click="decrement(currentNode)">- 减少</button>
-                <span class="number-info">当前值: {{ currentNode?.currentValue || 0 }}</span>
+                <button @click="increment(allProps)">+ 增加</button>
+                <button @click="decrement(allProps)">- 减少</button>
+                <span class="number-info">当前值: {{ allProps.currentNode?.currentValue || 0 }}</span>
               </div>
             </template>
           </var-input>
@@ -704,36 +706,37 @@ export default {
         readonly: (this as any).readonlyTree,
         dynamicList: (this as any).dynamicListTree,
         tableTest: (this as any).tableTestTree,
-        configBased: (this as any).configBasedTree
+        configBased: (this as any).configBasedTree,
+        searchInput: (this as any).simpleStringTree,
+        numberInput: (this as any).simpleNumberTree,
       }
       return treeMap[key as keyof typeof treeMap] as VarTree | undefined
     },
 
     // 新增的额外组件功能方法
-    handleSearch(node: any) {
-      console.log('搜索功能', node?.currentValue)
-      alert(`搜索内容: ${node?.currentValue || '空'}`)
+    handleSearch(varProps: any) {
+      alert(`搜索内容: ${varProps.currentNode?.currentValue || '空'}`)
     },
 
-    handleClear(node: any) {
-      console.log('清除功能', node)
-      if (node) {
-        node.currentValue = ''
+    handleClear(varProps: any) {
+      if (varProps.currentNode) {
+        varProps.setNodeValue('')
       }
     },
 
-    increment(node: any) {
-      if (node) {
-        const currentValue = Number(node.currentValue) || 0
-        const newValue = currentValue + 1
-        node.currentValue = newValue
+    increment(varProps: any) {
+      if (varProps.currentNode) {
+        const value = varProps.getNodeValue()
+        const newValue = Number(value) + 1
+        varProps.setNodeValue(newValue)
       }
     },
 
-    decrement(node: any) {
-      if (node) {
-        const currentValue = Number(node.currentValue) || 0
-        node.currentValue = Math.max(0, currentValue - 1)
+    decrement(varProps: any) {
+      if (varProps.currentNode) {
+        const value = varProps.getNodeValue()
+        const newValue = Number(value) - 1
+        varProps.setNodeValue(newValue)
       }
     },
   }

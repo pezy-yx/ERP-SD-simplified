@@ -1,5 +1,5 @@
 <template>
-  <div :class="wrapperClass">
+  <div :class="wrapperClass" :key="forceUpdateKey">
     <slot
       :name="`${pathString}--all`"
       v-bind="slotScopeData"
@@ -42,7 +42,6 @@
               <!-- 基础类型输入框 -->
               <component
                 :is="getLeafComponent()"
-
                 :modelValue="currentNode?.currentValue"
                 :readonly="effectiveReadonly"
                 :placeholder="getPlaceholder()"
@@ -269,10 +268,37 @@ const slotScopeData = computed(() => ({
   addListItem:addListItem,
   removeListItem:removeListItem,
   createNewListItem:createNewListItem,
+  forceUpdate:forceUpdate,
+  forceUpdateKey:forceUpdateKey.value,
+  setNodeValue:setNodeValue,
+  getNodeValue:getNodeValue,
 }));
 
-const currentNode = computed<VarNode | null>(() => props.varTree.findNodeByPath(props.nodePath))
+const forceUpdateKey = ref(0)
+const forceUpdate = () => {
+  forceUpdateKey.value++
+}
+
+const currentNode = computed<VarNode | null>(() => {return props.varTree.findNodeByPath(props.nodePath)})
 const pathString = computed<string>(()=>getPathString(props.varTree,props.nodePath))
+const setNodeValue = (val: any, refresh:boolean=true, update:boolean=true) => {
+  if (currentNode.value) {
+    currentNode.value.currentValue = val
+  }
+  if (refresh) {
+    forceUpdate()
+  }
+  if (update) {
+    emit('update', {
+      path: props.nodePath,
+      value: val,
+      node: currentNode.value || undefined
+    })
+  }
+}
+const getNodeValue = () => {
+  return currentNode.value?.currentValue
+}
 
 const isLeafNode = computed(() => currentNode.value && currentNode.value.isLeaf())
 const isDictNode = computed(() => currentNode.value && currentNode.value.nodeType === 'dict')
@@ -377,7 +403,6 @@ function getChildConfig(child: VarNode) {
 }
 
 function handleValueChange(newValue: any) {
-  console.log("change")
   if (currentNode.value) {
     currentNode.value.currentValue = newValue
   }

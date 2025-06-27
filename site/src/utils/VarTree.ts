@@ -133,9 +133,7 @@ export class VarNode {
         this.children.push(newChild)
       }
     } else {
-      if (this._currentValue) {
-        this._currentValue = val;
-      }
+      this._currentValue = val;
     }
   }
 
