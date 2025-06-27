@@ -202,7 +202,7 @@ import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig, NodeStructure } 
 import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
-import SelectionInput from './inputs/SelectionInput.vue'
+import SelectionInput from './inputs/StringInput.vue'
 
 import {getPathString} from './utils'
 

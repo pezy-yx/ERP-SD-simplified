@@ -284,11 +284,11 @@
 </style>
  
 <script lang = "ts">
-import VarInput from '@/components/VarBox/VarInput.vue'
-import VarBox from '@/components/VarBox/VarBox.vue'
+import VarInput from '@/components/varbox/VarInput.vue'
+import VarBox from '@/components/varbox/VarBox.vue'
 import { VarTree, VarNode, validators, createTreeFromConfig, NodeStructure, VarTypeString } from '@/utils/VarTree'
-import MyCustomInput from '@/test/VarBox/MyCustomInput.vue'
-import { testCases } from '@/test/VarBox/VarInputCases'
+import MyCustomInput from '@/test/varbox/MyCustomInput.vue'
+import { testCases } from '@/test/varbox/VarInputCases'
 import { markRaw } from 'vue'
 
 export default {

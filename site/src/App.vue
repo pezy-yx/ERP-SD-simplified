@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import TestPage from '@/test/VarBox/TestPage.vue'
+import TestPage from '@/test/varbox/TestPage.vue'
 
 export default {
   name: 'App',

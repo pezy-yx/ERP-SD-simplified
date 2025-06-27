@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import VarInput from '@/components/VarBox/VarInput.vue'
+import VarInput from '@/components/varbox/VarInput.vue'
 import { VarTree } from '@/utils/VarTree';
 const props = defineProps<{
   tree: VarTree,
