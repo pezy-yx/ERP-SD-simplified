@@ -8,7 +8,12 @@
     :indentLevel="props.indentLevel"
     :showLabel="props.showLabel"
     :wrapperStyle="props.wrapperStyle"
-  />
+  >
+    <!-- 透传插槽 -->
+    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+      <slot :name="slotName" v-bind="slotProps"></slot>
+    </template>
+  </VarInput>
 </template>
 
 <script lang="ts" setup>

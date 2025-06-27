@@ -148,7 +148,11 @@
             :varTree="tableTestTree"
             :nodePath="[]"
             @update="handleUpdate('tableTest', $event)"
-          />
+          >
+            <template #--slot>
+              Top Slot
+            </template>
+          </var-input>
           <div class="result-preview">
             <strong>当前值：</strong>
             <pre>{{ JSON.stringify(testResults.tableTest, null, 2) }}</pre>
@@ -162,7 +166,7 @@
             :nodePath="[]"
             @update="handleUpdate('configBased', $event)"
           >
-            <template v-for="i in [0,2,6]" #[`projects-${i}-startDate--date-input-group`]="slotProps">
+            <template v-for="i in [0,2,6]" #[`projects-${i}-startDate--simple-input-group`]="slotProps">
               <p>im an empty slot {{ i }}, overcoming so many layers</p>
               <button @click="slotProps.showDatePicker()">Show Date Picker for Row {{ i }}</button>
               <p>only row 0,2,6 will be customized</p>

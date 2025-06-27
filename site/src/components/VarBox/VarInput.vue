@@ -1,6 +1,9 @@
 <template>
   <div>
-    <slot :name="pathString">
+    <slot
+      :name="`${pathString}--slot`"
+      v-bind="slotScopeData"
+    >
       <!-- 外部组件钩子 config.customComponent -->
       <div v-if="config?.customComponent !== undefined" class="custom-component">
         <component
@@ -219,6 +222,37 @@ const emit = defineEmits<{
 
 const validationError = ref<string>('')
 const nodeValue = ref<any>(null)
+
+const slotScopeData = computed(() => ({
+  allProps: props,
+  validationError: validationError,
+  nodeValue: nodeValue,
+  currentNode: currentNode,
+  pathString: pathString,
+  isLeafNode:isLeafNode,
+  isDictNode:isDictNode,
+  isListNode:isListNode,
+  isDynamicList:isDynamicList,
+  effectiveReadonly:effectiveReadonly,
+  shouldRenderAsTable:shouldRenderAsTable,
+  reachedMaxLength:reachedMaxLength,
+  containerStyle:containerStyle,
+  inputStyle:inputStyle,
+  nameDisplay:nameDisplay,
+  initNodeValue:initNodeValue,
+  getLeafComponent:getLeafComponent,
+  getPlaceholder:getPlaceholder,
+  getInputClass:getInputClass,
+  getTableHeaders:getTableHeaders,
+  getChildConfig:getChildConfig,
+  handleValueChange:handleValueChange,
+  handleChildUpdate:handleChildUpdate,
+  handleValidation:handleValidation,
+  handleValidationError:handleValidationError,
+  addListItem:addListItem,
+  removeListItem:removeListItem,
+  createNewListItem:createNewListItem,
+}));
 
 const currentNode = computed<VarNode | null>(() => props.varTree.findNodeByPath(props.nodePath))
 const pathString = computed<string>(()=>getPathString(props.nodePath))
