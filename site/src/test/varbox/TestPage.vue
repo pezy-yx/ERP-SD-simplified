@@ -738,12 +738,11 @@ export default {
       }
     },
 
-    increment(node: any, handleValueChange: any) {
-      console.log(node.currentValue)
+    increment(node: any, handleValueChange?: any) {
       if (node) {
         const currentValue = Number(node.currentValue) || 0
-        node.currentValue = currentValue + 1
-        handleValueChange(node.currentValue)
+        const newValue = currentValue + 1
+        node.currentValue = newValue
       }
     },
 
