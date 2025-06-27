@@ -68,7 +68,7 @@ const slotScopeData = computed(() => ({
   hideDatePicker: hideDatePicker,
   allProps: props,
 }));
-const pathString = computed<string>(()=>getPathString(props.nodePath))
+const pathString = computed<string>(()=>getPathString(props.tree, props.nodePath))
 
 const inputClass = computed(() => ({
   'date-input': true,

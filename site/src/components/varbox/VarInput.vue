@@ -272,7 +272,7 @@ const slotScopeData = computed(() => ({
 }));
 
 const currentNode = computed<VarNode | null>(() => props.varTree.findNodeByPath(props.nodePath))
-const pathString = computed<string>(()=>getPathString(props.nodePath))
+const pathString = computed<string>(()=>getPathString(props.varTree,props.nodePath))
 
 const isLeafNode = computed(() => currentNode.value && currentNode.value.isLeaf())
 const isDictNode = computed(() => currentNode.value && currentNode.value.nodeType === 'dict')
@@ -299,10 +299,8 @@ const nameDisplay = computed(() => {
   return currentNode.value?.nameDisplay || currentNode.value?.name || '未命名'
 })
 
-// 动态类名生成 - 使用pathString作为基础前缀
 const baseClassPrefix = computed(() => {
-  // 如果config中有自定义前缀，使用自定义前缀
-  // 否则使用pathString，如果pathString为空则使用默认前缀
+  // 如果config中有自定义前缀，使用自定义前缀，否则使用pathString，如果pathString为空则使用默认前缀
   if (props.config?.classPrefix) {
     return props.config.classPrefix
   }

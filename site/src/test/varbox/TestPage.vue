@@ -212,7 +212,7 @@
           >
             <template #--extra="{ currentNode, handleValueChange }">
               <div class="number-controls">
-                <button @click="()=>{increment(currentNode,handleValueChange)}">+ 增加</button>
+                <button @click="()=>{increment(currentNode)}">+ 增加</button>
                 <button @click="decrement(currentNode)">- 减少</button>
                 <span class="number-info">当前值: {{ currentNode?.currentValue || 0 }}</span>
               </div>
@@ -220,23 +220,6 @@
           </var-input>
           <div class="result-preview">
             <strong>当前值：</strong>{{ JSON.stringify(testResults.numberInput) }}
-          </div>
-
-          <h4>文件选择器（Grid布局）</h4>
-          <var-input
-            :varTree="simpleStringTree"
-            :nodePath="[]"
-            :config="{ classPrefix: 'file-input' }"
-            @update="handleUpdate('fileInput', $event)"
-          >
-            <template #extra-components="{ currentNode }">
-              <button class="browse-btn" @click="handleBrowse(currentNode)">📁 浏览</button>
-              <button class="upload-btn" @click="handleUpload(currentNode)">⬆️ 上传</button>
-              <span class="file-info">{{ getFileInfo(currentNode) }}</span>
-            </template>
-          </var-input>
-          <div class="result-preview">
-            <strong>当前值：</strong>{{ JSON.stringify(testResults.fileInput) }}
           </div>
         </div>
       </div>
@@ -738,7 +721,7 @@ export default {
       }
     },
 
-    increment(node: any, handleValueChange?: any) {
+    increment(node: any) {
       if (node) {
         const currentValue = Number(node.currentValue) || 0
         const newValue = currentValue + 1
@@ -751,30 +734,6 @@ export default {
         const currentValue = Number(node.currentValue) || 0
         node.currentValue = Math.max(0, currentValue - 1)
       }
-    },
-
-    handleBrowse(node: any) {
-      console.log('浏览文件', node)
-      // 模拟文件选择
-      const fileName = prompt('请输入文件名:') || ''
-      if (node && fileName) {
-        node.currentValue = fileName
-      }
-    },
-
-    handleUpload(node: any) {
-      console.log('上传文件', node?.currentValue)
-      if (node?.currentValue) {
-        alert(`上传文件: ${node.currentValue}`)
-      } else {
-        alert('请先选择文件')
-      }
-    },
-
-    getFileInfo(node: any) {
-      const fileName = node?.currentValue || ''
-      if (!fileName) return '未选择文件'
-      return `文件: ${fileName} (${fileName.length} 字符)`
     },
   }
 }
