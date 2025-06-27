@@ -21,35 +21,10 @@
 import { ref, computed, watch } from 'vue'
 import { VarNode } from '@/utils/VarTree'
 
-const props = defineProps({
-  modelValue: {
-    type: [String, Number],
-    default: ''
-  },
-  readonly: {
-    type: Boolean,
-    default: false
-  },
-  placeholder: {
-    type: String,
-    default: '请选择'
-  },
-  config: {
-    type: Object,
-    default: () => ({})
-  },
-  node: {
-    type: VarNode,
-    default: null
-  }
-})
+import { SimpleInputBoxProps, SimpleInputBoxEmitsWithNum } from './InputProps';
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string | number): void;
-  (e: 'blur', value: string | number): void;
-  (e: 'enter', value: string | number): void;
-  (e: 'validation-error', message: string): void;
-}>()
+const props = defineProps(SimpleInputBoxProps)
+const emit = defineEmits(SimpleInputBoxEmitsWithNum)
 
 const inputValue = ref<string | number>(props.modelValue || '')
 

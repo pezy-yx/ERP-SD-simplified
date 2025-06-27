@@ -38,38 +38,11 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch, nextTick } from 'vue'
+import { SimpleInputBoxProps, SimpleInputBoxEmits } from './InputProps';
+import { VarNode, VarTree } from '@/utils/VarTree'
 
-import { VarNode } from '@/utils/VarTree'
-
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  readonly: {
-    type: Boolean,
-    default: false
-  },
-  placeholder: {
-    type: String,
-    default: '请选择日期'
-  },
-  config: {
-    type: Object,
-    default: () => ({})
-  },
-  node: {
-    type: VarNode,
-    default: null
-  }
-})
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void;
-  (e: 'blur', value: string): void;
-  (e: 'enter', value: string): void;
-  (e: 'validation-error', message: string): void;
-}>();
+const props = defineProps(SimpleInputBoxProps)
+const emit = defineEmits(SimpleInputBoxEmits)
 
 const displayValue = ref<string>(props.modelValue || '')
 const dateValue = ref<string>(formatToDateInput(props.modelValue))

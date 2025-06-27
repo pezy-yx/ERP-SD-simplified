@@ -16,37 +16,11 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { VarNode } from '@/utils/VarTree'
+import { SimpleInputBoxProps, SimpleInputBoxEmitsWithNum } from './InputProps';
 
-const props = defineProps({
-  modelValue: {
-    type: [Number, String],
-    default: 0
-  },
-  readonly: {
-    type: Boolean,
-    default: false
-  },
-  placeholder: {
-    type: String,
-    default: '请输入数字'
-  },
-  config: {
-    type: Object,
-    default: () => ({})
-  },
-  node: {
-    type: VarNode,
-    default: null
-  }
-})
+const props = defineProps(SimpleInputBoxProps)
+const emit = defineEmits(SimpleInputBoxEmitsWithNum)
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: number | string): void;
-  (e: 'blur', value: number | string): void;
-  (e: 'enter', value: number | string): void;
-  (e: 'validation-error', message: string): void;
-}>()
 
 function parseValue(value: number | string | null | undefined) {
   if (value === null || value === undefined || value === '') {
