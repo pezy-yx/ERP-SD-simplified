@@ -42,7 +42,7 @@ const slotScopeData = computed(() => ({
   getOptionLabel: getOptionLabel,
   allProps: props,
 }));
-const pathString = computed<string>(()=>getPathString(props.nodePath))
+const pathString = computed<string>(()=>getPathString(props.tree, props.nodePath))
 const inputValue = ref<string | number>(props.modelValue || '')
 
 const inputClass = computed(() => ({

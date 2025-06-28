@@ -36,10 +36,11 @@
           <var-input
             :varTree="simpleDateTree"
             :nodePath="[]"
+            :showLabel="true"
             :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
             @update="handleUpdate('simpleDate', $event)"
           >
-            <template #--date>
+            <template #[`birthday--simple`]>
               HELLO
             </template>
           </var-input>
@@ -166,7 +167,7 @@
             :nodePath="[]"
             @update="handleUpdate('configBased', $event)"
           >
-            <template v-for="i in [0,2,6]" #[`projects-${i}-startDate--simple-input-group`]="slotProps">
+            <template v-for="i in [0,2,6]" #[`employee-projects-${i}-startDate--simple-input-group`]="slotProps">
               <p>im an empty slot {{ i }}, overcoming so many layers</p>
               <button @click="slotProps.showDatePicker()">Show Date Picker for Row {{ i }}</button>
               <p>only row 0,2,6 will be customized</p>
@@ -180,6 +181,48 @@
           <div class="config-preview">
             <strong>配置对象：</strong>
             <pre>{{ JSON.stringify(configObject, null, 2) }}</pre>
+          </div>
+        </div>
+
+        <!-- 新功能测试：额外组件插槽和自定义布局 -->
+        <div class="test-item">
+          <h3>额外组件插槽测试</h3>
+          
+          <h4>搜索输入框（水平布局）</h4>
+          <var-input
+            :varTree="simpleStringTree"
+            :nodePath="[]"
+            :config="{ classPrefix: 'search-input' }"
+            :showLabel = "true"
+            @update="handleUpdate('searchInput', $event)"
+          >
+            <template #用户名--extra="allProps">
+              <button class="search-btn" @click="handleSearch(allProps)">🔍 搜索</button>
+              <button class="clear-btn" @click="handleClear(allProps)">✖️ 清除</button>
+            </template>
+          </var-input>
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.searchInput) }}
+          </div>
+
+          <h4>数值输入框（垂直布局）</h4>
+          <var-input
+            :varTree="simpleNumberTree"
+            :nodePath="[]"
+            :config="{ classPrefix: 'number-input' }"
+            :showLabel = "true"
+            @update="handleUpdate('numberInput', $event)"
+          >
+            <template #年龄--extra="allProps">
+              <div class="number-controls">
+                <button @click="increment(allProps)">+ 增加</button>
+                <button @click="decrement(allProps)">- 减少</button>
+                <span class="number-info">当前值: {{ allProps.currentNode?.currentValue || 0 }}</span>
+              </div>
+            </template>
+          </var-input>
+          <div class="result-preview">
+            <strong>当前值：</strong>{{ JSON.stringify(testResults.numberInput) }}
           </div>
         </div>
       </div>
@@ -316,7 +359,11 @@ export default {
         readonly: {},
         dynamicList: [],
         tableTest: [],
-        configBased: {}
+        configBased: {},
+        // 新增的测试数据
+        searchInput: '',
+        numberInput: 0,
+        fileInput: ''
       } as { 
         [key: string]: any; 
         simpleString: string;
@@ -330,6 +377,10 @@ export default {
         dynamicList: any[];
         tableTest: any[];
         configBased: object;
+        // 新增字段的类型定义
+        searchInput: string;
+        numberInput: number;
+        fileInput: string;
       },
       // 配置对象示例
       configObject: {
@@ -428,7 +479,7 @@ export default {
 
     // 简单日期树
     simpleDateTree(): VarTree {
-      const config: NodeStructure = { varType: 'date', name: '生日', defaultValue: '' }
+      const config: NodeStructure = { varType: 'date', name: 'birthday', defaultValue: '' }
       return createTreeFromConfig(config)
     },
 
@@ -655,9 +706,38 @@ export default {
         readonly: (this as any).readonlyTree,
         dynamicList: (this as any).dynamicListTree,
         tableTest: (this as any).tableTestTree,
-        configBased: (this as any).configBasedTree
+        configBased: (this as any).configBasedTree,
+        searchInput: (this as any).simpleStringTree,
+        numberInput: (this as any).simpleNumberTree,
       }
       return treeMap[key as keyof typeof treeMap] as VarTree | undefined
+    },
+
+    // 新增的额外组件功能方法
+    handleSearch(varProps: any) {
+      alert(`搜索内容: ${varProps.currentNode?.currentValue || '空'}`)
+    },
+
+    handleClear(varProps: any) {
+      if (varProps.currentNode) {
+        varProps.setNodeValue('')
+      }
+    },
+
+    increment(varProps: any) {
+      if (varProps.currentNode) {
+        const value = varProps.getNodeValue()
+        const newValue = Number(value) + 1
+        varProps.setNodeValue(newValue)
+      }
+    },
+
+    decrement(varProps: any) {
+      if (varProps.currentNode) {
+        const value = varProps.getNodeValue()
+        const newValue = Number(value) - 1
+        varProps.setNodeValue(newValue)
+      }
     },
   }
 }
@@ -739,36 +819,105 @@ h3 {
   border-bottom-color: #409EFF;
 }
 
-.global-preview pre {
-  margin: 15px 0 0 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 12px;
-  line-height: 1.4;
-  background-color: white;
-  padding: 15px;
-  border-radius: 4px;
-  border: 1px solid #DCDFE6;
+/* 新增的额外组件布局样式 */
+
+/* 搜索输入框 - 水平布局 */
+:deep(.search-input--wrapper) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  background-color: #fff;
+}
+:deep(.search-input--wrapper .search-btn) {
+  scale: 1.2;
+  transform: translateX(0, 50px);
+}
+:deep(.search-input--main) {
+  display: flex;
+  flex: 1;
 }
 
-.config-preview {
-  margin-top: 10px;
-  padding: 15px;
-  background-color: #FFF9E6;
-  border-radius: 4px;
-  border-left: 4px solid #E6A23C;
+:deep(.search-input--extra) {
+  display: flex;
+  gap: 4px;
 }
 
-.config-preview pre {
-  margin: 10px 0 0 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 12px;
-  line-height: 1.4;
-  background-color: white;
-  padding: 15px;
+:deep(.search-btn, .clear-btn) {
+  padding: 4px 8px;
+  border: 1px solid #409EFF;
   border-radius: 4px;
-  border: 1px solid #DCDFE6;
-  color: #E6A23C;
+  background-color: #409EFF;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
 }
+
+:deep(.search-btn:hover, .clear-btn:hover) {
+  background-color: #337ECC;
+}
+
+:deep(.clear-btn) {
+  background-color: #F56C6C;
+  border-color: #F56C6C;
+}
+
+:deep(.clear-btn:hover) {
+  background-color: #DD6161;
+}
+
+/* 数值输入框 - 垂直布局 */
+:deep(.number-input--wrapper) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #E4E7ED;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: #F9FAFC;
+  width: 40%;
+
+}
+
+:deep(.number-input--main) {
+  width: 100%;
+}
+
+:deep(.number-input--extra) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:deep(.number-controls) {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.number-controls button) {
+  padding: 6px 12px;
+  border: 1px solid #67C23A;
+  border-radius: 4px;
+  background-color: #67C23A;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+:deep(.number-controls button:hover) {
+  background-color: #5DAE34;
+}
+
+:deep(.number-info) {
+  font-size: 12px;
+  color: #909399;
+  font-weight: 500;
+}
+
 </style>

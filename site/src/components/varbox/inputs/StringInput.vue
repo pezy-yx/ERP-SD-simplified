@@ -37,7 +37,7 @@ const slotScopeData = computed(() => ({
   handleEnter: handleEnter,
   allProps: props,
 }));
-const pathString = computed<string>(()=>getPathString(props.nodePath))
+const pathString = computed<string>(()=>getPathString(props.tree, props.nodePath))
 const inputValue = ref<string>(
   (typeof props.modelValue === 'number' || typeof props.modelValue === 'string')
     ? String(props.modelValue)

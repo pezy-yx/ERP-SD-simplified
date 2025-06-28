@@ -149,147 +149,270 @@ git push -u origin feature/your-feature-name
 
 # CodeBase
 
-## VarTree 类说明
+## 1. 变量树
 
-VarTree 负责描述变量树结构。核心类型如下：
+### 1.1. VarTree和VarNode核心类
 
-- `VarNode`：变量节点，包含类型/节点类型、名称/显示名称、默认值、只读状态、子节点、其他参数等属性。
-- `NodeStructure`：节点结构定义，支持嵌套。
-- 支持类型：`string`、`date`、`selection`、`dict`、`dynamiclist`、`fixlist`、`number`。
+#### 1.1.1 核心概念
+- **VarTree类**：变量树管理器，管理整个递归变量结构
+- **VarNode类**：变量节点，表示树中的单个节点，支持三种节点类型（dict/list/leaf）
+- **NodeStructure接口**：节点结构定义，用于快速构建变量树
 
-示例结构：
+#### 1.1.2 VarTree类主要属性和方法
+**属性：**
+- `root: VarNode | null`：根节点
+- `nodeIndex: number`：节点索引计数器
+
+**核心方法：**
+- `findNodeByPath(path: string[]): VarNode | null`：根据路径查找节点
+- `findPathToNode(node: VarNode): string[] | null`：根据节点查找路径
+- `getAllNodes(): VarNode[]`：获取所有节点
+- `setRoot(rootNode: VarNode): void`：设置根节点
+
+#### 1.1.3 VarNode类主要属性和方法
+**核心属性：**
+- `nodeType: NodeTypeString`：节点类型（"dict"|"list"|"leaf"）
+- `varType: VarTypeString`：变量类型（"string"|"number"|"date"|"selection"|"dict"|"dynamiclist"|"fixlist"）
+- `name: string`：变量名称
+- `nameDisplay: string`：显示名称
+- `defaultValue: VarNodeValue`：默认值
+- `readonly: boolean`：只读状态
+- `children: VarNode[]`：子节点数组
+- `config: VarNodeConfig`：配置对象
+
+**核心方法：**
+- `currentValue` getter/setter：自动聚合/分发子节点值
+- `addChild(child: VarNode): void`：添加子节点
+- `removeChild(index: number): void`：移除子节点
+- `clone(): VarNode`：克隆节点
+- `template(): VarNode`：生成模板节点（清空值，保留结构）
+
+#### 1.1.4 工具函数
+- `createNodeStructure()/cns()`：快速构建NodeStructure
+- `createTreeFromConfig(struct: NodeStructure): VarTree`：从配置创建VarTree
 
 ```typescript
-const exampleTree: NodeStructure = {
-  varType: 'dict', // 类型
-  nodeType: 'dict', // 节点类型，缺省根据类型自动判断
-  name: 'root', // 变量名称，缺省根据规则生成
-  nameDisplay: '根节点变量', // 显示的名称，缺省使用name值
-  children: [ // 子节点
-    {
-      varType: 'string',
-      name: 'username',
-      defaultValue: '', // 默认值，可以缺省
-    },
-    {
-      varType: 'number',
-      name: 'age',
-      defaultValue: 18,
-    },
-    {
-      varType: 'date',
-      name: 'birthday',
-      defaultValue: null,
-      config: { minDate: '2020-01-01', maxDate: '2030-12-31' } // 其他属性
-    }
-  ]
-}
+import { cns, createTreeFromConfig } from '@/utils/VarTree'
+
+// 使用cns快速构建结构
+const nodeStructure = cns('dict', 'dict', 'userInfo', null, false, {}, [
+  cns('string', 'leaf', 'username', 'John', false),
+  cns('number', 'leaf', 'age', 25, false)
+])
+
+// 创建变量树
+const tree = createTreeFromConfig(nodeStructure)
 ```
 
-## VarInput 组件说明
+### 1.2. VarInput和VarBox组件标准接口
 
-VarInput 用于渲染和编辑 VarTree 结构的变量节点，支持递归渲染字典、列表、叶子节点。支持自定义组件钩子（`config.customComponent`）。
+#### 1.2.1 VarInput组件Props详解
+- **`varTree: VarTree`**：要渲染的变量树实例（与VarTree类对应）
+- **`nodePath: string[]`**：当前节点在树中的路径（用于VarTree.findNodeByPath()）
+- **`readonly?: boolean`**：是否只读模式（对应VarNode.readonly）
+- **`config?: VarNodeConfig`**：节点配置（扩展VarNode.config，支持组件级覆盖）
+- **`indentLevel?: number`**：缩进级别（用于递归渲染的视觉层次）
+- **`showLabel?: boolean`**：是否显示标签（对应VarNode.nameDisplay）
+- **`wrapperStyle?: Record<string, any>`**：容器样式
 
-主要 props：
+#### 1.2.2 VarBox组件Props详解
+- **`tree: VarTree`**：变量树实例（直接传递给VarInput）
+- **其他props**：透传给VarInput的配置项（indentLevel、showLabel、wrapperStyle）
 
-- `varTree`：VarTree 实例或 NodeStructure。
-- `nodePath`：当前节点路径（数组）。
-- `readonly`：是否只读。
-- `config`：节点配置（选项、日期范围等，以及校验函数、组件钩子）。
+#### 1.2.3 基础输入组件接口（varbox/inputs）
+**组件类型：**
+- **StringInput**：字符串输入组件
+- **NumberInput**：数字输入组件
+- **DateInput**：日期输入组件
+- **SelectionInput**：选择输入组件
 
-典型用例：
+**标准Props：**
+- `modelValue`：当前值
+- `readonly`：是否只读
+- `placeholder`：占位符文本
+- `config`：配置对象
+- `node`：当前VarNode实例
+- `tree`：VarTree实例
+- `nodePath`：节点路径
+
+**标准Emits：**
+- `update:modelValue`：值更新事件
+- `blur`：失焦事件
+- `enter`：回车事件
+- `validation-error`：校验错误事件
+
+### 1.3. 功能分类介绍
+
+#### 1.3.1 基础读写功能
+VarInput通过`varTree`和`nodePath`定位到具体的VarNode，实现双向数据绑定：
 
 ```vue
 <var-input
-  :varTree="simpleStringTree"
+  :varTree="userTree"
   :nodePath="[]"
-  @update="handleUpdate('simpleString', $event)"
-/>
-<var-input
-  :varTree="simpleNumberTree"
-  :nodePath="[]"
-  @update="handleUpdate('simpleNumber', $event)"
-/>
-<var-input
-  :varTree="simpleDateTree"
-  :nodePath="[]"
-  :config="{ minDate: '2024-01-01', maxDate: '2025-12-31' }"
-  @update="handleUpdate('simpleDate', $event)"
+  @update="handleUpdate"
 />
 ```
 
-### 详细用法
-#### 使用 createNodeStructure 快速构建NodeStructure
+**支持的变量类型：**
+- `string`：字符串类型
+- `number`：数字类型
+- `date`：日期类型
+- `selection`：选择类型
+- `dict`：字典类型（对象）
+- `dynamiclist`：动态列表
+- `fixlist`：固定列表
 
-推荐使用 [`createNodeStructure()`简称`cns()`](site/src/utils/VarTree.ts) 快速生成变量树结构。
+**递归渲染机制：**
+- `leaf`节点：渲染对应的基础输入组件
+- `dict`节点：递归渲染所有子节点
+- `list`节点：渲染列表容器和子项
 
-```typescript
-import { cns } from '@/utils/VarTree'
+#### 1.3.2 插槽与自定义外观功能
 
-const exampleNode: NodeStructure =
-cns('string','leaf','exampleString','Hello, World!',false,{},[
-    cns('number', 'leaf', 'exampleNumber', 42, false),
-    cns('dict', 'dict', 'exampleDict', null, false, {}, [
-      cns('string', 'leaf', 'nestedString', 'Nested Value', false),
-      cns('date', 'leaf', 'nestedDate', '2023-10-01T00:00:00Z', false, {
-        minDate: '2023-01-01T00:00:00Z',
-        maxDate: '2024-01-01T00:00:00Z'
-      })
-    ])
-  ]
-)
+**插槽命名规则：**
+基于`getPathString()`生成的路径字符串：
+- `${pathString}--wrapper`：完全自定义整个节点容器
+- `${pathString}--main`：自定义主要内容区域
+- `${pathString}--extra`：额外组件插槽
+- `${pathString}--simple`：自定义基础输入组件
+
+```vue
+<var-input :varTree="tree" :nodePath="[]">
+  <!-- 为用户名字段添加额外按钮 -->
+  <template #用户名--extra="slotProps">
+    <button @click="clearField(slotProps)">清除</button>
+  </template>
+
+  <!-- 自定义输入组件 -->
+  <template #用户名--simple="slotProps">
+    <input v-model="slotProps.allProps.modelValue" class="custom-input" />
+  </template>
+</var-input>
 ```
 
-#### 使用createTreeFromConfig快速从NodeStructure构建变量树
-
-`createTreeFromConfig(struct: NodeStructure): VarTree` 可将变量结构描述直接转为可用的 VarTree 实例。
-
-**用法示例：**
-
-```typescript
-import { createTreeFromConfig } from '@/utils/VarTree'
-
-const simpleNodeStructure = {
-  varType: 'string',
-  nodeType: 'leaf',
-  name: 'exampleString',
-  defaultValue: 'Hello, World!',
-  readonly: false,
-  config: {},
-  children: []
-}
-
-const tree = createTreeFromConfig(simpleNodeStructure)
-// tree 即为可用的 VarTree 实例
-```
-
-支持复杂嵌套结构，推荐配合 [`createNodeStructure()`](site/src/utils/VarTree.ts) 
-
-#### 使用外部钩子添加组件（叶子或子树）
-
-VarInput 支持通过 `config.customComponent` 外部钩子渲染变量节点（叶子或子树）。自定义组件如通过config传入，需实现 `@update` 事件，且推荐使用markRaw包裹。
-
-示例：
-
+**CSS类名系统：**
 ```vue
 <var-input
   :varTree="tree"
-  :nodePath="[]"
-  :config="{ customComponent: MyCustomInput }"
+  :config="{ classPrefix: 'search-input' }"
 />
 ```
 
-#### 传入一个变量校验器
+classPrefix缺省则使用路径字符串作为前缀
 
-可通过 `config.validators` 传入校验函数数组，对变量输入进行严格校验。每个校验器需返回布尔值。
+生成类名：
+- `search-input--wrapper`：容器类名
+- `search-input--main`：主要内容类名
+- `search-input--extra`：额外组件类名
 
-示例：
+在父组件中使用`:deep()`定制样式：
+```vue
+<style scoped>
+:deep(.search-input--wrapper) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
+:deep(.search-input--extra) {
+  display: flex;
+  gap: 4px;
+}
+</style>
+```
+
+**自定义组件钩子：**
+```vue
+<var-input
+  :varTree="tree"
+  :config="{ customComponent: markRaw(MyCustomInput) }"
+/>
+```
+
+#### 1.3.3 校验器功能
+
+**校验器接口：**
 ```typescript
-const notEmpty = (v) => typeof v === 'string' && v.length > 0
-const node: NodeStructure = {
-  varType: 'string',
-  name: 'username',
-  config: { validators: [notEmpty] }
+type VarNodeValueValidator = {
+  creteria: (value: VarNodeValue) => boolean,
+  message?: string
 }
 ```
+
+**配置方式：**
+```typescript
+const validators = [
+  {
+    creteria: (v) => typeof v === 'string' && v.length > 0,
+    message: '不能为空'
+  },
+  {
+    creteria: (v) => typeof v === 'string' && v.length <= 50,
+    message: '长度不能超过50个字符'
+  }
+]
+
+const nodeStructure = cns('string', 'leaf', 'username', '', false, {
+  validators: validators
+})
+```
+
+**触发时机：**
+- 在简单输入组件的`@enter`事件中自动触发校验
+- 校验失败时通过`validation-error`事件传递错误信息
+
+#### 1.3.4 动态列表
+
+**动态列表配置：**
+```typescript
+const dynamicListNode = cns('dynamiclist', 'list', 'hobbies', [], false, {
+  maxLength: 5,  // 最大长度限制
+  childTemplate: cns('string', 'leaf', '', '', false)  // 子项模板
+})
+```
+
+**功能特性：**
+- 运行时添加/删除子项
+- 通过`config.maxLength`控制列表最大长度
+- 通过`config.childTemplate`定义新增子项的结构，这个参数强烈建议传入
+- 自动生成添加/删除按钮
+
+```vue
+<var-input
+  :varTree="dynamicListTree"
+  :nodePath="[]"
+  :config="{ maxLength: 5 }"
+  @update="handleListUpdate"
+/>
+```
+
+#### 1.3.5 特性说明
+
+**路径字符串生成：**
+`getPathString()`函数处理特殊字符转义，确保插槽名称在同一棵树内部的唯一性：
+```typescript
+// 路径 ['user', 'profile', 'name']
+// 生成插槽名称：'user-profile-name--extra'
+```
+
+**透传机制：**
+所有插槽在递归组件中自动透传，确保深层嵌套的节点也能接收到自定义插槽。
+
+**响应式支持：**
+与Vue 3响应式系统完全兼容，支持ref包装的VarTree对象：
+```typescript
+import { ref } from 'vue'
+
+const treeRef = ref(createTreeFromConfig(nodeStructure))
+// 自动响应数据变化
+```
+
+### 1.4. 在复杂ERP系统前端中可能可以解决的问题
+
+- **任意深度嵌套数据的统一渲染**：一套组件解决所有层级的数据展示需求
+- **高度可定制的用户界面**：通过插槽系统实现业务特定的UI需求
+- **配置驱动的表单生成**：通过NodeStructure配置快速构建复杂表单
+- **数据录入表单**：根据业务规则动态生成的录入界面
+- **递归组件设计**：避免了硬编码的层级限制
+- **标准化接口**：确保了组件间的一致性和可维护性

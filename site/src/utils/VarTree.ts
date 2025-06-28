@@ -21,6 +21,7 @@ export type VarNodeConfig = {
   minDate?: string; // 最小日期（ISO格式）
   maxDate?: string; // 最大日期（ISO格式）
   options?: string[]; // 选择项列表（用于selection类型）
+  classPrefix?: string; // CSS类名前缀，用于自定义布局样式
   
 }
 

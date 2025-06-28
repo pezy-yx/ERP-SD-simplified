@@ -34,7 +34,7 @@ const slotScopeData = computed(() => ({
   handleEnter: handleEnter,
   allProps: props,
 }));
-const pathString = computed<string>(()=>getPathString(props.nodePath))
+const pathString = computed<string>(()=>getPathString(props.tree, props.nodePath))
 
 function parseValue(value: number | string | null | undefined) {
   if (value === null || value === undefined || value === '') {
