@@ -12,6 +12,7 @@
           <var-input
             :varTree="simpleStringTree"
             :nodePath="[]"
+            :showLabel="true"
             @update="handleUpdate('simpleString', $event)"
           />
           <div class="result-preview">
@@ -24,6 +25,7 @@
           <var-input
             :varTree="simpleNumberTree"
             :nodePath="[]"
+            :showLabel="true"
             @update="handleUpdate('simpleNumber', $event)"
           />
           <div class="result-preview">
@@ -102,8 +104,9 @@
             :nodePath="[]"
             @update="handleUpdate('mixed', $event)"
           >
-            <template #birthday--date>
-              im an empty slot, overcoming so many layers
+            <template #student-class--extra>
+              <!-- im an empty slot, overcoming so many layers -->
+              <button>HELLO</button>
             </template>
           </var-input>
           <div class="result-preview">
@@ -178,10 +181,10 @@
             <strong>当前值：</strong>
             <pre>{{ JSON.stringify(testResults.configBased, null, 2) }}</pre>
           </div>
-          <div class="config-preview">
+          <!-- <div class="config-preview">
             <strong>配置对象：</strong>
             <pre>{{ JSON.stringify(configObject, null, 2) }}</pre>
-          </div>
+          </div> -->
         </div>
 
         <!-- 新功能测试：额外组件插槽和自定义布局 -->
@@ -228,10 +231,10 @@
       </div>
 
       <!-- 全局数据预览 -->
-      <div class="global-preview">
+      <!-- <div class="global-preview">
         <h2>全局数据预览</h2>
         <pre>{{ JSON.stringify(testResults, null, 2) }}</pre>
-      </div>
+      </div> -->
     </div>
 
     <!-- VarBoxCases全量测试区 -->
@@ -364,8 +367,8 @@ export default {
         searchInput: '',
         numberInput: 0,
         fileInput: ''
-      } as { 
-        [key: string]: any; 
+      } as {
+        [key: string]: any;
         simpleString: string;
         simpleNumber: number;
         simpleDate: string;
@@ -788,6 +791,11 @@ h3 {
   font-size: 16px;
   border-left: 4px solid #409EFF;
   padding-left: 10px;
+}
+
+pre {
+  max-height: 300px;
+  overflow-y: scroll;
 }
 
 .result-preview {

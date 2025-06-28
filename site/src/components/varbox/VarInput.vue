@@ -39,28 +39,40 @@
             <!-- 叶子节点渲染 -->
             <div v-if="isLeafNode" class="leaf-node">
               <label v-if="showLabel" class="var-label">{{ nameDisplay }}</label>
-              <!-- 基础类型输入框 -->
-              <component
-                :is="getLeafComponent()"
-                :modelValue="currentNode?.currentValue"
-                :readonly="effectiveReadonly"
-                :placeholder="getPlaceholder()"
-                :config="config"
-                :class="getInputClass()"
-                :style="inputStyle"
-                :tree="varTree"
-                :node="currentNode"
-                :nodePath="nodePath"
-                
-                @update:modelValue="handleValueChange"
-                @blur="handleValidation"
-                @validation-error="handleValidationError"
-              >
-                <!-- 透传插槽 -->
-                <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
-                  <slot :name="slotName" v-bind="slotProps"></slot>
-                </template>
-              </component>
+              <!-- 输入框和额外组件的容器 -->
+              <div class="leaf-input-container">
+                <!-- 基础类型输入框 -->
+                <component
+                  :is="getLeafComponent()"
+                  :modelValue="currentNode?.currentValue"
+                  :readonly="effectiveReadonly"
+                  :placeholder="getPlaceholder()"
+                  :config="config"
+                  :class="getInputClass()"
+                  :style="inputStyle"
+                  :tree="varTree"
+                  :node="currentNode"
+                  :nodePath="nodePath"
+
+                  @update:modelValue="handleValueChange"
+                  @blur="handleValidation"
+                  @validation-error="handleValidationError"
+                >
+                  <!-- 透传插槽 -->
+                  <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+                    <slot :name="slotName" v-bind="slotProps"></slot>
+                  </template>
+                </component>
+
+                <!-- 额外组件插槽 - 在叶子节点内部 -->
+                <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
+                  <slot
+                    :name="`${pathString}--extra`"
+                    v-bind="slotScopeData"
+                  >
+                  </slot>
+                </div>
+              </div>
               <div v-if="validationError" class="error-message">{{ validationError }}</div>
             </div>
 
@@ -68,27 +80,57 @@
             <div v-else-if="isDictNode" class="dict-node">
               <div v-if="1 || showLabel" class="dict-header">
                 <label class="var-label">{{ nameDisplay }}</label>
+                <!-- 字典节点的额外组件插槽 -->
+                <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
+                  <slot
+                    :name="`${pathString}--extra`"
+                    v-bind="slotScopeData"
+                  >
+                  </slot>
+                </div>
               </div>
               <div class="dict-content" :style="{ paddingLeft: indentLevel + 'px' }">
-                <VarInput
-                  v-for="(child, index) in currentNode?.children"
-                  :key="child.name + '_' + index"
+                <!-- 先渲染所有叶子节点 -->
+                <div v-if="leafChildren.length > 0" class="dict-leaf-section">
+                  <VarInput
+                    v-for="(child, index) in leafChildren"
+                    :key="child.name + '_leaf_' + index"
+                    :varTree="varTree"
+                    :nodePath="[...nodePath, child.name]"
+                    :readonly="effectiveReadonly ?? false"
+                    :config="getChildConfig(child)"
+                    :indentLevel="0"
+                    :showLabel="true"
+                    :class="`dict-item dict-item--${child.nodeType}`"
+                    @update="handleChildUpdate"
+                  >
+                    <!-- 透传插槽 -->
+                    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
+                      <slot :name="slotName" v-bind="slotProps"></slot>
+                    </template>
+                  </VarInput>
+                </div>
 
-                  :varTree="varTree"
-                  :nodePath="[...nodePath, child.name]"
-                  :readonly="effectiveReadonly ?? false"
-                  :config="getChildConfig(child)"
-                  :indentLevel="(indentLevel ?? 0) + 20"
-                  :showLabel="true"
-
-                  class="dict-item"
-                  @update="handleChildUpdate"
-                >
-                  <!-- 透传插槽 -->
-                  <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
-                    <slot :name="slotName" v-bind="slotProps"></slot>
-                  </template>
-                </VarInput>
+                <!-- 再渲染所有复杂节点（dict和list） -->
+                <div v-if="complexChildren.length > 0" class="dict-complex-section">
+                  <VarInput
+                    v-for="(child, index) in complexChildren"
+                    :key="child.name + '_complex_' + index"
+                    :varTree="varTree"
+                    :nodePath="[...nodePath, child.name]"
+                    :readonly="effectiveReadonly ?? false"
+                    :config="getChildConfig(child)"
+                    :indentLevel="(indentLevel ?? 0) + 20"
+                    :showLabel="true"
+                    :class="`dict-item dict-item--${child.nodeType}`"
+                    @update="handleChildUpdate"
+                  >
+                    <!-- 透传插槽 -->
+                    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
+                      <slot :name="slotName" v-bind="slotProps"></slot>
+                    </template>
+                  </VarInput>
+                </div>
               </div>
             </div>
 
@@ -96,15 +138,25 @@
             <div v-else-if="isListNode" class="list-node">
               <div v-if="1 || showLabel" class="list-header">
                 <label class="var-label">{{ nameDisplay }}</label>
-                <!-- 动态列表的添加/删除按钮 -->
-                <div v-if="isDynamicList && !effectiveReadonly" class="list-controls">
-                  <button
-                    @click="addListItem"
-                    :disabled="!!reachedMaxLength"
-                    class="btn-add"
-                  >
-                    添加项 +
-                  </button>
+                <div class="list-header-actions">
+                  <!-- 动态列表的添加/删除按钮 -->
+                  <div v-if="isDynamicList && !effectiveReadonly" class="list-controls">
+                    <button
+                      @click="addListItem"
+                      :disabled="!!reachedMaxLength"
+                      class="btn-add"
+                    >
+                      添加项 +
+                    </button>
+                  </div>
+                  <!-- 列表节点的额外组件插槽 -->
+                  <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
+                    <slot
+                      :name="`${pathString}--extra`"
+                      v-bind="slotScopeData"
+                    >
+                    </slot>
+                  </div>
                 </div>
               </div>
               <!-- 表格形式渲染列表 -->
@@ -197,15 +249,6 @@
               </div>
             </div>
           </div>
-        </slot>
-      </div>
-      
-      <!-- 额外组件插槽 -->
-      <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
-        <slot 
-          :name="`${pathString}--extra`"
-          v-bind="slotScopeData"
-        >
         </slot>
       </div>
     </slot>
@@ -345,6 +388,17 @@ const extraComponentsClass = computed(() => {
   return `${baseClassPrefix.value}--extra`
 })
 
+// 分离叶子节点和复杂节点
+const leafChildren = computed(() => {
+  if (!currentNode.value?.children) return []
+  return currentNode.value.children.filter(child => child.nodeType === 'leaf')
+})
+
+const complexChildren = computed(() => {
+  if (!currentNode.value?.children) return []
+  return currentNode.value.children.filter(child => child.nodeType === 'dict' || child.nodeType === 'list')
+})
+
 watch(currentNode, () => {
   initNodeValue()
 }, { immediate: true, deep: true })
@@ -478,10 +532,316 @@ function createNewListItem(): VarNode | null {
   line-height: 1.5;
 }
 
+/* SAP风格叶子节点布局 */
+.leaf-node {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
 .var-label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 0; /* 移除垂直间距 */
   font-weight: 500;
   color: #606266;
+  text-align: right; /* 右对齐，SAP风格 */
+  padding-right: 8px;
+}
+
+/* 叶子节点输入容器 */
+.leaf-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.leaf-input-container > :first-child {
+  flex: 1; /* 输入框占主要空间 */
+}
+
+/* 叶子节点内的额外组件 */
+.leaf-input-container .var-input--extra {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0; /* 不压缩额外组件 */
+}
+
+/* 输入框容器样式 */
+.leaf-node :deep(.string-input-container),
+.leaf-node :deep(.number-input-container),
+.leaf-node :deep(.date-input-container),
+.leaf-node :deep(.selection-input-container) {
+  width: 100%;
+}
+
+/* 统一输入框样式 - 方形设计 */
+.leaf-node :deep(input),
+.leaf-node :deep(select) {
+  width: 100%;
+  min-width: 120px; /* 最小宽度 */
+  max-width: 300px; /* 最大宽度 */
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 0px; /* 方形直角 */
+  font-size: 14px;
+  line-height: 1.5;
+  background: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.leaf-node :deep(input:focus),
+.leaf-node :deep(select:focus) {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.leaf-node :deep(input:readonly),
+.leaf-node :deep(select:disabled) {
+  background-color: #f9fafb;
+  cursor: default;
+}
+
+/* SAP风格字典节点布局 */
+.dict-node {
+  margin-bottom: 16px;
+}
+
+.dict-header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.dict-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dict-header .var-label {
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0;
+  padding-right: 0;
+  flex: 1;
+}
+
+.dict-header .var-input--extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.list-header .var-label{
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0;
+  padding-right: 0;
+}
+
+.dict-content {
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  width: 100%;
+}
+
+/* 叶子节点区域 - 网格布局 */
+.dict-leaf-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(35%, 1fr));
+  gap: 16px 24px;
+  align-items: center;
+  justify-items: start;
+  margin-bottom: 16px;
+}
+
+:deep(.dict-leaf-section input) {
+  width: 50px;
+}
+
+.dict-leaf-section > .dict-item--leaf {
+  display: contents; /* 让叶子节点直接参与网格布局 */
+}
+
+/* 复杂节点区域 - 垂直布局 */
+.dict-complex-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dict-complex-section > .dict-item--dict,
+.dict-complex-section > .dict-item--list {
+  width: 100%; /* 复杂节点独占一行 */
+}
+
+/* SAP风格列表表格 */
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  table-layout: fixed; /* 固定表格布局，实现等宽列 */
+}
+
+.list-table th {
+  background: #f9fafb;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  height: 40px; /* 固定表头高度 */
+  white-space: nowrap; /* 防止文字换行 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 超出部分显示省略号 */
+}
+
+.list-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  height: 36px; /* 固定单元格高度 */
+  white-space: nowrap; /* 防止内容换行 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 超出部分显示省略号 */
+  vertical-align: middle; /* 垂直居中对齐 */
+}
+
+.list-table tr:hover {
+  background: #f9fafb;
+}
+
+/* 表格内的输入框样式调整 */
+.list-table td :deep(input),
+.list-table td :deep(select) {
+  width: 100%;
+  height: 24px; /* 固定输入框高度 */
+  padding: 2px 6px; /* 减少内边距 */
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  font-size: 13px; /* 稍小的字体 */
+  line-height: 1.2;
+  background: white;
+}
+
+.list-table td :deep(input:focus),
+.list-table td :deep(select:focus) {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* 操作列宽度控制 */
+.list-table .action-column {
+  width: 80px; /* 固定操作列宽度 */
+}
+
+.list-table .action-cell {
+  width: 80px;
+  text-align: center;
+}
+
+/* 列表头部布局 */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.list-header .var-label {
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0;
+  padding-right: 0;
+  flex: 1;
+}
+
+.list-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.list-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list-header .var-input--extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 列表操作按钮 */
+.btn-add, .btn-remove, .btn-remove-inline {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  color: #374151;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add:hover {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.btn-remove:hover, .btn-remove-inline:hover {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+/* 错误信息样式 */
+.error-message {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .leaf-node {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .var-label {
+    text-align: left;
+    padding-right: 0;
+    margin-bottom: 4px;
+  }
+
+  .dict-children {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
