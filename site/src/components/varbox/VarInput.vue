@@ -1,7 +1,7 @@
 <template>
   <div :class="wrapperClass" :key="forceUpdateKey">
     <slot
-      :name="`${pathString}--all`"
+      :name="`${pathString}--wrapper`"
       v-bind="slotScopeData"
     >
       <!-- 主要内容区域 -->
