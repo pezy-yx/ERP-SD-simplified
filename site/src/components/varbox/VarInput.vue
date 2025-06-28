@@ -316,10 +316,10 @@ const reachedMaxLength = computed(() => {
 })
 const containerStyle = computed(() => ({
   ...(props.wrapperStyle || {}),
-  marginBottom: '8px'
+  // marginBottom: '8px'
 }))
 const inputStyle = computed(() => ({
-  width: '100%'
+  // width: '100%'
 }))
 const nameDisplay = computed(() => {
   return currentNode.value?.nameDisplay || currentNode.value?.name || '未命名'
@@ -483,39 +483,5 @@ function createNewListItem(): VarNode | null {
   margin-bottom: 5px;
   font-weight: 500;
   color: #606266;
-}
-
-/* 新的布局类默认样式 */
-.var-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.var-input-main-content {
-  flex: 1;
-}
-
-.var-input-extra-components {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-/* 当没有自定义前缀时的默认样式 */
-:global(.var-input-wrapper) {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-:global(.var-input-main-content) {
-  flex: 1;
-}
-
-:global(.var-input-extra-components) {
-  display: flex;
-  gap: 4px;
-  align-items: center;
 }
 </style>

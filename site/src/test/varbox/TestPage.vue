@@ -822,7 +822,7 @@ h3 {
 /* 新增的额外组件布局样式 */
 
 /* 搜索输入框 - 水平布局 */
-.search-input--wrapper {
+:deep(.search-input--wrapper) {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -831,17 +831,21 @@ h3 {
   padding: 8px;
   background-color: #fff;
 }
-
-.search-input--main {
+:deep(.search-input--wrapper .search-btn) {
+  scale: 1.2;
+  transform: translateX(0, 50px);
+}
+:deep(.search-input--main) {
+  display: flex;
   flex: 1;
 }
 
-.search-input--extra {
+:deep(.search-input--extra) {
   display: flex;
   gap: 4px;
 }
 
-.search-btn, .clear-btn {
+:deep(.search-btn, .clear-btn) {
   padding: 4px 8px;
   border: 1px solid #409EFF;
   border-radius: 4px;
@@ -852,21 +856,21 @@ h3 {
   transition: all 0.3s;
 }
 
-.search-btn:hover, .clear-btn:hover {
+:deep(.search-btn:hover, .clear-btn:hover) {
   background-color: #337ECC;
 }
 
-.clear-btn {
+:deep(.clear-btn) {
   background-color: #F56C6C;
   border-color: #F56C6C;
 }
 
-.clear-btn:hover {
+:deep(.clear-btn:hover) {
   background-color: #DD6161;
 }
 
 /* 数值输入框 - 垂直布局 */
-.number-input-wrapper {
+:deep(.number-input--wrapper) {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -874,26 +878,28 @@ h3 {
   border-radius: 6px;
   padding: 12px;
   background-color: #F9FAFC;
+  width: 40%;
+
 }
 
-.number-input-main-content {
+:deep(.number-input--main) {
   width: 100%;
 }
 
-.number-input-extra-components {
+:deep(.number-input--extra) {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.number-controls {
+:deep(.number-controls) {
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: center;
 }
 
-.number-controls button {
+:deep(.number-controls button) {
   padding: 6px 12px;
   border: 1px solid #67C23A;
   border-radius: 4px;
@@ -904,108 +910,14 @@ h3 {
   transition: all 0.3s;
 }
 
-.number-controls button:hover {
+:deep(.number-controls button:hover) {
   background-color: #5DAE34;
 }
 
-.number-info {
+:deep(.number-info) {
   font-size: 12px;
   color: #909399;
   font-weight: 500;
 }
 
-/* 文件输入框 - Grid布局 */
-.file-input-wrapper {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: start;
-  border: 2px dashed #C0C4CC;
-  border-radius: 8px;
-  padding: 16px;
-  background-color: #FAFBFC;
-  transition: all 0.3s;
-}
-
-.file-input-wrapper:hover {
-  border-color: #409EFF;
-  background-color: #F0F9FF;
-}
-
-.file-input-main-content {
-  min-height: 40px;
-}
-
-.file-input-extra-components {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-}
-
-.browse-btn, .upload-btn {
-  padding: 8px 16px;
-  border: 1px solid #E6A23C;
-  border-radius: 6px;
-  background-color: #E6A23C;
-  color: white;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.3s;
-  min-width: 80px;
-}
-
-.browse-btn:hover, .upload-btn:hover {
-  background-color: #CF9236;
-}
-
-.upload-btn {
-  background-color: #909399;
-  border-color: #909399;
-}
-
-.upload-btn:hover {
-  background-color: #82848A;
-}
-
-.file-info {
-  font-size: 11px;
-  color: #606266;
-  text-align: center;
-  max-width: 120px;
-  word-wrap: break-word;
-}
-
-.global-preview pre {
-  margin: 15px 0 0 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 12px;
-  line-height: 1.4;
-  background-color: white;
-  padding: 15px;
-  border-radius: 4px;
-  border: 1px solid #DCDFE6;
-}
-
-.config-preview {
-  margin-top: 10px;
-  padding: 15px;
-  background-color: #FFF9E6;
-  border-radius: 4px;
-  border-left: 4px solid #E6A23C;
-}
-
-.config-preview pre {
-  margin: 10px 0 0 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 12px;
-  line-height: 1.4;
-  background-color: white;
-  padding: 15px;
-  border-radius: 4px;
-  border: 1px solid #DCDFE6;
-  color: #E6A23C;
-}
 </style>
