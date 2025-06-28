@@ -171,7 +171,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(child, index) in currentNode?.children" :key="index" class="list-row">
+                    <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" class="list-row">
                       <td v-if="isDynamicList && !effectiveReadonly" class="action-cell">
                         <button @click="removeListItem(index)" class="btn-remove">删除</button>
                       </td>
@@ -216,7 +216,7 @@
                 <div v-else class="list-items">
                   <div
                     v-for="(child, index) in currentNode?.children"
-                    :key="index"
+                    :key="`${child.name}_${child.index}_${index}`"
                     class="list-item"
                     :style="{ paddingLeft: indentLevel + 'px' }"
                   >
@@ -486,6 +486,7 @@ function addListItem() {
   const newItem = createNewListItem()
   if (newItem && currentNode.value) {
     currentNode.value.addChild(newItem)
+    forceUpdate() // 强制刷新界面
     emit('update', {
       path: props.nodePath,
       action: 'addItem',
@@ -498,6 +499,7 @@ function removeListItem(index: number) {
   if (!isDynamicList.value || effectiveReadonly.value) return
   if (currentNode.value) {
     currentNode.value.removeChild(index)
+    forceUpdate() // 强制刷新界面
     emit('update', {
       path: props.nodePath,
       action: 'removeItem',
