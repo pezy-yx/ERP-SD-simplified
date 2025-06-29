@@ -460,7 +460,7 @@ export default {
   computed: {
     // 简单字符串树
     simpleStringTree(): VarTree {
-      const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '', config: {
+      const config: NodeStructure = { varType: 'string', name: '用户名', defaultValue: '', nameDisplay:'用户名:', config: {
         validators: [
           {
             creteria:(val: any) => {

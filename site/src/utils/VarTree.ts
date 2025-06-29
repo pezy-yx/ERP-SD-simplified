@@ -76,7 +76,7 @@ export class VarNode {
     this.nodeType = nodeType // "dict"|"list"|"leaf"
     this.varType = varType   // 对应组件的变量类型
     this.name = name         // 变量名称
-    this.nameDisplay = nameDisplay || name // 显示名称，默认为name
+    this.nameDisplay = nameDisplay || "" // 显示名称，默认为name
     this.defaultValue = defaultValue
     this.readonly = readonly
     this.children = children || []
@@ -168,7 +168,10 @@ export class VarNode {
    * @returns {string}
    */
   getNameDisplay(): string {
-    return this.nameDisplay || this.name || '';
+    if (this.nameDisplay == ""){
+      return this.name || ''
+    }
+    return this.nameDisplay;
   }
 
   /**
@@ -453,6 +456,7 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
     varType = 'string', // 默认类型为string
     nodeType = varType === 'dict' ? 'dict' : varType === 'dynamiclist' || varType === 'fixlist' ? 'list' : 'leaf',
     name = '',
+    nameDisplay = '',
     defaultValue = null,
     readonly = false,
     config = {},
@@ -472,14 +476,14 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
       }
       return createNodeFromConfig({ name: key, varType: 'string', defaultValue: String(child) })
     })
-    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config)
+    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config, nameDisplay)
   }
   if (Array.isArray(children) && children.length > 0 && nodeType !== 'leaf') {
     childNodes = children.map(child => createNodeFromConfig(child))
     return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config)
   }
   // leaf节点或无children
-  return new VarNode(nodeType, varType, name, defaultValue, readonly, [], config)
+  return new VarNode(nodeType, varType, name, defaultValue, readonly, [], config, nameDisplay)
 }
 
 export function createTreeFromConfig(struct: NodeStructure): VarTree {

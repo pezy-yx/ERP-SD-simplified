@@ -365,7 +365,7 @@ const inputStyle = computed(() => ({
   // width: '100%'
 }))
 const nameDisplay = computed(() => {
-  return currentNode.value?.nameDisplay || currentNode.value?.name || '未命名'
+  return currentNode.value?.getNameDisplay() || '未命名'
 })
 
 const baseClassPrefix = computed(() => {
