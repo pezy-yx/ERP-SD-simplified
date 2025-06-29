@@ -11,7 +11,7 @@
           v-bind="slotScopeData"
         >
           <!-- 外部组件钩子 config.customComponent -->
-          <div v-if="config?.customComponent !== undefined" class="custom-component">
+          <div v-if="config?.customComponent !== undefined" :class="`custom-component ${baseClassPrefix}--custom-component`">
             <component
               :is="config.customComponent"
               :modelValue="currentNode?.currentValue"
@@ -35,12 +35,12 @@
               </template>
             </component>
           </div>
-          <div v-else class="var-input-container" :style="containerStyle">
+          <div v-else :class="`var-input-container ${baseClassPrefix}--var-input-container`" :style="containerStyle">
             <!-- 叶子节点渲染 -->
-            <div v-if="isLeafNode" class="leaf-node">
-              <label v-if="showLabel" class="var-label">{{ nameDisplay }}</label>
+            <div v-if="isLeafNode" :class="`leaf-node ${baseClassPrefix}--leaf-node`">
+              <label v-if="showLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
               <!-- 输入框和额外组件的容器 -->
-              <div class="leaf-input-container">
+              <div :class="`leaf-input-container ${baseClassPrefix}--leaf-input-container`">
                 <!-- 基础类型输入框 -->
                 <component
                   :is="getLeafComponent()"
@@ -73,13 +73,13 @@
                   </slot>
                 </div>
               </div>
-              <div v-if="validationError" class="error-message">{{ validationError }}</div>
+              <div v-if="validationError" :class="`error-message ${baseClassPrefix}--error-message`">{{ validationError }}</div>
             </div>
 
             <!-- 字典节点渲染 -->
-            <div v-else-if="isDictNode" class="dict-node">
-              <div v-if="1 || showLabel" class="dict-header">
-                <label class="var-label">{{ nameDisplay }}</label>
+            <div v-else-if="isDictNode" :class="`dict-node ${baseClassPrefix}--dict-node`">
+              <div v-if="1 || showLabel" :class="`dict-header ${baseClassPrefix}--dict-header`">
+                <label :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
                 <!-- 字典节点的额外组件插槽 -->
                 <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
                   <slot
@@ -89,9 +89,9 @@
                   </slot>
                 </div>
               </div>
-              <div class="dict-content" :style="{ paddingLeft: indentLevel + 'px' }">
+              <div :class="`dict-content ${baseClassPrefix}--dict-content`" :style="{ paddingLeft: indentLevel + 'px' }">
                 <!-- 先渲染所有叶子节点 -->
-                <div v-if="leafChildren.length > 0" class="dict-leaf-section">
+                <div v-if="leafChildren.length > 0" :class="`dict-leaf-section ${baseClassPrefix}--dict-leaf-section`">
                   <VarInput
                     v-for="(child, index) in leafChildren"
                     :key="child.name + '_leaf_' + index"
@@ -101,7 +101,7 @@
                     :config="getChildConfig(child)"
                     :indentLevel="0"
                     :showLabel="true"
-                    :class="`dict-item dict-item--${child.nodeType}`"
+                    :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                   >
                     <!-- 透传插槽 -->
@@ -112,7 +112,7 @@
                 </div>
 
                 <!-- 再渲染所有复杂节点（dict和list） -->
-                <div v-if="complexChildren.length > 0" class="dict-complex-section">
+                <div v-if="complexChildren.length > 0" :class="`dict-complex-section ${baseClassPrefix}--dict-complex-section`">
                   <VarInput
                     v-for="(child, index) in complexChildren"
                     :key="child.name + '_complex_' + index"
@@ -122,7 +122,7 @@
                     :config="getChildConfig(child)"
                     :indentLevel="(indentLevel ?? 0) + 20"
                     :showLabel="true"
-                    :class="`dict-item dict-item--${child.nodeType}`"
+                    :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                   >
                     <!-- 透传插槽 -->
@@ -135,16 +135,16 @@
             </div>
 
             <!-- 列表节点渲染 -->
-            <div v-else-if="isListNode" class="list-node">
-              <div v-if="1 || showLabel" class="list-header">
-                <label class="var-label">{{ nameDisplay }}</label>
-                <div class="list-header-actions">
+            <div v-else-if="isListNode" :class="`list-node ${baseClassPrefix}--list-node`">
+              <div v-if="1 || showLabel" :class="`list-header ${baseClassPrefix}--list-header`">
+                <label :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+                <div :class="`list-header-actions ${baseClassPrefix}--list-header-actions`">
                   <!-- 动态列表的添加/删除按钮 -->
-                  <div v-if="isDynamicList && !effectiveReadonly" class="list-controls">
+                  <div v-if="isDynamicList && !effectiveReadonly" :class="`list-controls ${baseClassPrefix}--list-controls`">
                     <button
                       @click="addListItem"
                       :disabled="!!reachedMaxLength"
-                      class="btn-add"
+                      :class="`btn-add ${baseClassPrefix}--btn-add`"
                     >
                       添加项 +
                     </button>
@@ -160,24 +160,24 @@
                 </div>
               </div>
               <!-- 表格形式渲染列表 -->
-              <div class="list-content">
-                <table v-if="shouldRenderAsTable" class="list-table">
+              <div :class="`list-content ${baseClassPrefix}--list-content`">
+                <table v-if="shouldRenderAsTable" :class="`list-table ${baseClassPrefix}--list-table`">
                   <thead>
                     <tr>
-                      <th v-if="isDynamicList && !effectiveReadonly" class="action-column">操作</th>
+                      <th v-if="isDynamicList && !effectiveReadonly" :class="`action-column ${baseClassPrefix}--action-column`">操作</th>
                       <th v-for="(header, index) in getTableHeaders()" :key="index">
                         {{ header }}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" class="list-row">
-                      <td v-if="isDynamicList && !effectiveReadonly" class="action-cell">
-                        <button @click="removeListItem(index)" class="btn-remove">删除</button>
+                    <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
+                      <td v-if="isDynamicList && !effectiveReadonly" :class="`action-cell ${baseClassPrefix}--action-cell`">
+                        <button @click="removeListItem(index)" :class="`btn-remove ${baseClassPrefix}--btn-remove`">删除</button>
                       </td>
                       <!-- 如果子项是dict，则每个字段占一列 -->
                       <template v-if="child.nodeType === 'dict'">
-                        <td v-for="(dictChild, dictIndex) in child.children" :key="dictIndex" class="list-cell">
+                        <td v-for="(dictChild, dictIndex) in child.children" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
                           <VarInput
                             :varTree="varTree"
                             :nodePath="[...nodePath, index.toString(), dictChild.name]"
@@ -194,7 +194,7 @@
                         </td>
                       </template>
                       <!-- 如果子项不是dict，则整个子项占一列 -->
-                      <td v-else class="list-cell">
+                      <td v-else :class="`list-cell ${baseClassPrefix}--list-cell`">
                         <VarInput
                           :varTree="varTree"
                           :nodePath="[...nodePath, index.toString()]"
@@ -213,19 +213,19 @@
                   </tbody>
                 </table>
                 <!-- 非表格形式渲染列表 -->
-                <div v-else class="list-items">
+                <div v-else :class="`list-items ${baseClassPrefix}--list-items`">
                   <div
                     v-for="(child, index) in currentNode?.children"
                     :key="`${child.name}_${child.index}_${index}`"
-                    class="list-item"
+                    :class="`list-item ${baseClassPrefix}--list-item`"
                     :style="{ paddingLeft: indentLevel + 'px' }"
                   >
-                    <div class="list-item-header">
-                      <span class="item-index">[{{ index }}]</span>
+                    <div :class="`list-item-header ${baseClassPrefix}--list-item-header`">
+                      <span :class="`item-index ${baseClassPrefix}--item-index`">[{{ index }}]</span>
                       <button
                         v-if="isDynamicList && !effectiveReadonly"
                         @click="removeListItem(index)"
-                        class="btn-remove-inline"
+                        :class="`btn-remove-inline ${baseClassPrefix}--btn-remove-inline`"
                       >
                         删除
                       </button>
@@ -432,9 +432,13 @@ function getPlaceholder() {
 }
 
 function getInputClass() {
+  const pathReadonly = `${baseClassPrefix.value}--readonly`
+  const pathError = `${baseClassPrefix.value}--error`
   return {
     'readonly': effectiveReadonly.value,
-    'error': !!validationError.value
+    'error': !!validationError.value,
+    [pathReadonly]: effectiveReadonly.value,
+    [pathError]: !!validationError.value,
   }
 }
 
