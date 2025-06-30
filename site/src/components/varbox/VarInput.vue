@@ -100,6 +100,7 @@
                     :readonly="effectiveReadonly ?? false"
                     :config="getChildConfig(child)"
                     :indentLevel="0"
+                    :showLabel="true"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                   >
@@ -120,6 +121,7 @@
                     :readonly="effectiveReadonly ?? false"
                     :config="getChildConfig(child)"
                     :indentLevel="(indentLevel ?? 0) + 20"
+                    :showLabel="true"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                   >
@@ -162,7 +164,7 @@
                 <table v-if="shouldRenderAsTable" :class="`list-table ${baseClassPrefix}--list-table`">
                   <thead>
                     <tr>
-                      <th v-if="isDynamicList && !effectiveReadonly" :class="`action-column ${baseClassPrefix}--action-column`">操作</th>
+                      <th v-if="isDynamicList && !effectiveReadonly" :class="`action-column ${baseClassPrefix}--action-column`"></th>
                       <th v-for="(header, index) in getTableHeaders()" :key="index">
                         {{ header }}
                       </th>
@@ -198,6 +200,7 @@
                           :nodePath="[...nodePath, index.toString()]"
                           :readonly="effectiveReadonly ?? false"
                           :config="getChildConfig(child)"
+                          :showLabel="true"
                           @update="handleChildUpdate"
                         >
                             <!-- 透传插槽 -->
@@ -232,6 +235,7 @@
                       :nodePath="[...nodePath, index.toString()]"
                       :readonly="effectiveReadonly ?? false"
                       :config="getChildConfig(child)"
+                      :showLabel="true"
                       :indentLevel="(indentLevel ?? 0) + 20"
                       @update="handleChildUpdate"
                     >
@@ -344,7 +348,18 @@ const isDictNode = computed(() => currentNode.value && currentNode.value.nodeTyp
 const isListNode = computed(() => currentNode.value && currentNode.value.nodeType === 'list')
 const isDynamicList = computed(() => isListNode.value && currentNode.value?.varType === 'dynamiclist')
 const effectiveReadonly = computed(() => props.readonly || (currentNode.value && currentNode.value.readonly))
-const isShowLabel = computed(()=> !props.config?.hideLabel || props.showLabel)
+const isShowLabel = computed(()=> {
+  if (props.config?.hideLabel == true) {
+    return false
+  }
+  if (props.showLabel == undefined) {
+    return true
+  }
+  if (props.showLabel == false) {
+    return false
+  }
+  return true
+})
 const shouldRenderAsTable = computed(() => {
   if (!isListNode.value) return false
   return ['fixlist', 'dynamiclist'].includes((currentNode.value?.varType ?? '') as string)
@@ -425,7 +440,8 @@ function getPlaceholder() {
     'date': '请选择日期',
     'selection': '请选择',
   }
-  return typeMap[(currentNode.value?.varType ?? 'string')] || '请输入'
+  // return typeMap[(currentNode.value?.varType ?? 'string')] || '请输入'
+  return ""
 }
 
 function getInputClass() {
@@ -580,7 +596,8 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(.number-input-container),
 .leaf-node :deep(.date-input-container),
 .leaf-node :deep(.selection-input-container) {
-  /* width: 100%; */
+  display: flex;
+  grid-template-columns: 1fr;
 }
 
 /* 统一输入框样式 - 方形设计 */
@@ -588,11 +605,11 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(select) {
   width: 100%;
   min-width: 120px; /* 最小宽度 */
-  max-width: 300px; /* 最大宽度 */
   padding: 6px 12px;
   border: 1px solid #d1d5db;
   border-radius: 0px; /* 方形直角 */
   font-size: 14px;
+  height: 24px;
   line-height: 1.5;
   background: white;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -668,15 +685,11 @@ function createNewListItem(): VarNode | null {
 /* 叶子节点区域 - 网格布局 */
 .dict-leaf-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70%, 1fr));
+  grid-template-columns: repeat(1, 1fr);
   gap: 0px 24px; /* rowgap, colgap*/
   align-items: center;
   justify-items: start;
   margin-bottom: 16px;
-}
-
-:deep(.dict-leaf-section input) {
-  width: 50px;
 }
 
 .dict-leaf-section > .dict-item--leaf {
@@ -699,48 +712,67 @@ function createNewListItem(): VarNode | null {
 .list-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  /* border: 1px solid #e5e7eb; */
+  border-radius: 0px;
   overflow: hidden;
   margin-bottom: 16px;
-  table-layout: fixed; /* 固定表格布局，实现等宽列 */
 }
 
 .list-table th {
   background: #f9fafb;
-  padding: 8px 12px;
   text-align: left;
   font-weight: 600;
   color: #374151;
-  border-bottom: 1px solid #e5e7eb;
-  height: 40px; /* 固定表头高度 */
+  /* height: 40px; */
   white-space: nowrap; /* 防止文字换行 */
   overflow: hidden;
   text-overflow: ellipsis; /* 超出部分显示省略号 */
 }
 
 .list-table td {
-  padding: 6px 12px;
-  border-bottom: 1px solid #f3f4f6;
-  height: 36px; /* 固定单元格高度 */
+  padding: 0;
+  border-radius: 0px;
+  /* border-bottom: 1px solid #f3f4f6; */
+  /* height: 36px; */
   white-space: nowrap; /* 防止内容换行 */
   overflow: hidden;
   text-overflow: ellipsis; /* 超出部分显示省略号 */
   vertical-align: middle; /* 垂直居中对齐 */
 }
 
+.list-table th,
+.list-table td {
+  padding: 0;
+  border-radius: 0px;
+  white-space: nowrap; /* 防止内容换行 */
+  border: 1px solid #d1d5db;
+  width: auto;
+  height: 24px;
+}
+
 .list-table tr:hover {
   background: #f9fafb;
 }
-
+.list-table td :deep(.leaf-node) {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-content: center;
+}
 /* 表格内的输入框样式调整 */
+.list-table td :deep(*:not(input select)) {
+  /* display: none; */
+  padding: 0;
+  margin: 0;
+}
 .list-table td :deep(input),
 .list-table td :deep(select) {
   width: 100%;
   height: 24px; /* 固定输入框高度 */
-  padding: 2px 6px; /* 减少内边距 */
-  border: 1px solid #d1d5db;
-  border-radius: 3px;
+  padding: 0; /* 减少内边距 */
+  /* border: 1px solid #d1d5db; */
+  border: none;
+  border-radius: 0px;
   font-size: 13px; /* 稍小的字体 */
   line-height: 1.2;
   background: white;
@@ -755,11 +787,11 @@ function createNewListItem(): VarNode | null {
 
 /* 操作列宽度控制 */
 .list-table .action-column {
-  width: 80px; /* 固定操作列宽度 */
+  width: 40px; /* 固定操作列宽度 */
 }
 
 .list-table .action-cell {
-  width: 80px;
+  width: auto;
   text-align: center;
 }
 

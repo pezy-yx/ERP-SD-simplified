@@ -6,7 +6,7 @@
     :readonly="props.tree.root?.readonly"
     :config="props.tree.root?.config"
     :indentLevel="props.indentLevel"
-    :showLabel="props.showLabel"
+    :showLabel="true"
     :wrapperStyle="props.wrapperStyle"
   >
     <!-- 透传插槽 -->

@@ -695,4 +695,9 @@ pre {
   /* grid-template-columns: repeat(auto-fit, minmax(30%, 1fr)) !important; */
   grid-template-columns: 1fr 1fr 1fr;
 }
+
+:deep(.all1-testList--wrapper .list-content) {
+  max-width: 1000px;
+  overflow-x: auto;
+}
 </style>

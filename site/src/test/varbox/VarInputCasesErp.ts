@@ -36,6 +36,15 @@ export const testCases: TestCase = {
             cns("string","leaf","searchTerm",null,false,{},[],"Search Term"),
             cns("string","leaf","city",null,false,{},[],"City"),
             cns("string","leaf","postalCode",null,false,{},[],"Postal Code"),
+            cns("string","leaf","searchTerm1",null,false,{},[],"Search Term"),
+            cns("string","leaf","city1",null,false,{},[],"City"),
+            cns("string","leaf","postalCode1",null,false,{},[],"Postal Code"),
+            cns("string","leaf","searchTerm2",null,false,{},[],"Search Term"),
+            cns("string","leaf","city2",null,false,{},[],"City"),
+            cns("string","leaf","postalCode2",null,false,{},[],"Postal Code"),
+            cns("string","leaf","searchTerm3",null,false,{},[],"Search Term"),
+            cns("string","leaf","city3",null,false,{},[],"City"),
+            cns("string","leaf","postalCode3",null,false,{},[],"Postal Code"),
           ]))
         },[],"表格渲染组件")
       ])
