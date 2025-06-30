@@ -147,8 +147,24 @@
                     :disabled="!!reachedMaxLength"
                     :class="`btn-add ${baseClassPrefix}--btn-add`"
                   >
-                    添加项 +
+                    +
                   </button>
+                  <button
+                    @click="removeSelectedItems"
+                    :disabled="selectedRows.size === 0"
+                    :class="`btn-remove-selected ${baseClassPrefix}--btn-remove-selected`"
+                  >
+                    -
+                    <!-- ({{ selectedRows.size }}) -->
+                  </button>
+                  <!-- 列表节点的额外按钮插槽 -->
+                  <div v-if="$slots[`${pathString}--extra-buttons`]" :class="extraTableButtonsClass">
+                    <slot
+                      :name="`${pathString}--extra-buttons`"
+                      v-bind="slotScopeData"
+                    >
+                    </slot>
+                  </div>
                 </div>
                 <!-- 列表节点的额外组件插槽 -->
                 <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
@@ -164,7 +180,14 @@
                 <table v-if="shouldRenderAsTable" :class="`list-table ${baseClassPrefix}--list-table`">
                   <thead>
                     <tr>
-                      <th v-if="isDynamicList && !effectiveReadonly" :class="`action-column ${baseClassPrefix}--action-column`"></th>
+                      <th v-if="isDynamicList && !effectiveReadonly" :class="`select-column ${baseClassPrefix}--select-column`">
+                        <input
+                          type="checkbox"
+                          :checked="isAllSelected"
+                          @change="toggleAllSelection"
+                          :class="`select-all-checkbox ${baseClassPrefix}--select-all-checkbox`"
+                        />
+                      </th>
                       <th v-for="(header, index) in getTableHeaders()" :key="index">
                         {{ header }}
                       </th>
@@ -172,8 +195,13 @@
                   </thead>
                   <tbody>
                     <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
-                      <td v-if="isDynamicList && !effectiveReadonly" :class="`action-cell ${baseClassPrefix}--action-cell`">
-                        <button @click="removeListItem(index)" :class="`btn-remove ${baseClassPrefix}--btn-remove`">删除</button>
+                      <td v-if="isDynamicList && !effectiveReadonly" :class="`select-cell ${baseClassPrefix}--select-cell`">
+                        <input
+                          type="checkbox"
+                          :checked="selectedRows.has(index)"
+                          @change="toggleRowSelection(index)"
+                          :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
+                        />
                       </td>
                       <!-- 如果子项是dict，则每个字段占一列 -->
                       <template v-if="child.nodeType === 'dict'">
@@ -283,6 +311,10 @@ const emit = defineEmits<{
 const validationError = ref<string>('')
 const nodeValue = ref<any>(null)
 
+// 列表选择状态管理
+const selectedRows = ref<Set<number>>(new Set())
+const isAllSelected = ref<boolean>(false)
+
 const slotScopeData = computed(() => ({
   allProps: props,
   validationError: validationError,
@@ -316,6 +348,12 @@ const slotScopeData = computed(() => ({
   forceUpdateKey:forceUpdateKey.value,
   setNodeValue:setNodeValue,
   getNodeValue:getNodeValue,
+  // 选择相关
+  selectedRows: selectedRows.value,
+  isAllSelected: isAllSelected.value,
+  toggleRowSelection: toggleRowSelection,
+  toggleAllSelection: toggleAllSelection,
+  removeSelectedItems: removeSelectedItems,
 }));
 
 const forceUpdateKey = ref(0)
@@ -401,6 +439,10 @@ const extraComponentsClass = computed(() => {
   return `extra ${baseClassPrefix.value}--extra`
 })
 
+const extraTableButtonsClass = computed(() => {
+  return `extra-buttons ${baseClassPrefix.value}--extra-buttons`
+})
+
 // 分离叶子节点和复杂节点
 const leafChildren = computed(() => {
   if (!currentNode.value?.children) return []
@@ -415,6 +457,12 @@ const complexChildren = computed(() => {
 watch(currentNode, () => {
   initNodeValue()
 }, { immediate: true, deep: true })
+
+// 监听列表内容变化，重置选择状态
+watch(() => currentNode.value?.children?.length, () => {
+  selectedRows.value.clear()
+  isAllSelected.value = false
+}, { immediate: true })
 
 function initNodeValue() {
   if (isLeafNode.value && currentNode.value) {
@@ -519,6 +567,19 @@ function removeListItem(index: number) {
   if (!isDynamicList.value || effectiveReadonly.value) return
   if (currentNode.value) {
     currentNode.value.removeChild(index)
+    // 更新选择状态
+    selectedRows.value.delete(index)
+    // 重新映射选择状态（因为删除后索引会变化）
+    const newSelectedRows = new Set<number>()
+    selectedRows.value.forEach(selectedIndex => {
+      if (selectedIndex > index) {
+        newSelectedRows.add(selectedIndex - 1)
+      } else if (selectedIndex < index) {
+        newSelectedRows.add(selectedIndex)
+      }
+    })
+    selectedRows.value = newSelectedRows
+    updateAllSelectedState()
     forceUpdate() // 强制刷新界面
     emit('update', {
       path: props.nodePath,
@@ -527,6 +588,57 @@ function removeListItem(index: number) {
       node: currentNode.value
     })
   }
+}
+
+// 选择相关函数
+function toggleRowSelection(index: number) {
+  if (selectedRows.value.has(index)) {
+    selectedRows.value.delete(index)
+  } else {
+    selectedRows.value.add(index)
+  }
+  updateAllSelectedState()
+}
+
+function toggleAllSelection() {
+  if (isAllSelected.value) {
+    selectedRows.value.clear()
+  } else {
+    selectedRows.value.clear()
+    const childrenCount = currentNode.value?.children?.length || 0
+    for (let i = 0; i < childrenCount; i++) {
+      selectedRows.value.add(i)
+    }
+  }
+  updateAllSelectedState()
+}
+
+function updateAllSelectedState() {
+  const childrenCount = currentNode.value?.children?.length || 0
+  isAllSelected.value = childrenCount > 0 && selectedRows.value.size === childrenCount
+}
+
+function removeSelectedItems() {
+  if (!isDynamicList.value || effectiveReadonly.value || selectedRows.value.size === 0) return
+
+  // 从大到小删除，避免索引变化问题
+  const sortedIndices = Array.from(selectedRows.value).sort((a, b) => b - a)
+
+  for (const index of sortedIndices) {
+    if (currentNode.value) {
+      currentNode.value.removeChild(index)
+    }
+  }
+
+  selectedRows.value.clear()
+  isAllSelected.value = false
+  forceUpdate()
+
+  emit('update', {
+    path: props.nodePath,
+    action: 'removeSelectedItems',
+    node: currentNode.value || undefined
+  })
 }
 
 function createNewListItem(): VarNode | null {
@@ -716,6 +828,7 @@ function createNewListItem(): VarNode | null {
   width: 100%;
   border-collapse: collapse;
   /* border: 1px solid #e5e7eb; */
+  margin-top: 10px;
   border-radius: 0px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -788,14 +901,32 @@ function createNewListItem(): VarNode | null {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
-/* 操作列宽度控制 */
-.list-table .action-column {
-  width: 40px; /* 固定操作列宽度 */
+/* 选择列宽度控制 */
+.list-table .select-column {
+  width: 40px; /* 固定选择列宽度 */
+  text-align: center;
 }
 
-.list-table .action-cell {
-  width: auto;
+.list-table .select-cell {
+  width: 40px;
   text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+  height: 24px;
+}
+
+.select-all-checkbox,
+.row-select-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #409EFF;
+}
+
+.select-all-checkbox:disabled,
+.row-select-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* 列表头部布局 */
@@ -828,7 +959,15 @@ function createNewListItem(): VarNode | null {
 .list-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  /* gap: 1px; */
+}
+
+.list-controls > button,
+.list-controls > .extra-buttons button {
+  margin: 0 2px;
+  padding: 1px;
+  width: 24px;
+  height: 24px;
 }
 
 .list-header .var-input--extra {
@@ -859,6 +998,30 @@ function createNewListItem(): VarNode | null {
   background: #dc2626;
   color: white;
   border-color: #dc2626;
+}
+
+.btn-remove-selected {
+  padding: 4px 8px;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+  background: #dc2626;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.btn-remove-selected:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.btn-remove-selected:disabled {
+  background: #c0c4cc;
+  border-color: #c0c4cc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* 错误信息样式 */

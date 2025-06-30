@@ -31,6 +31,30 @@ export const testCases: TestCase = {
   "只读布尔值": {
     tree: createTreeFromConfig({ varType: "boolean", name: "isReadonly", defaultValue: false, readonly: true, nameDisplay: "只读状态" }),
   },
+  "动态列表选择测试": {
+    tree: createTreeFromConfig({
+      ...cns("dynamiclist", "list", "testList", null, false, {
+        maxLength: 5,
+        childTemplate: cns("dict", "dict", "item", {}, false, {}, [
+          cns("string", "leaf", "name", "项目", false, {}, [], "名称"),
+          cns("number", "leaf", "value", 100, false, {}, [], "数值"),
+          cns("boolean", "leaf", "enabled", true, false, {}, [], "启用")
+        ])
+      }),
+      children: [
+        cns("dict", "dict", "0", {}, false, {}, [
+          cns("string", "leaf", "name", "项目1", false),
+          cns("number", "leaf", "value", 100, false),
+          cns("boolean", "leaf", "enabled", true, false)
+        ]),
+        cns("dict", "dict", "1", {}, false, {}, [
+          cns("string", "leaf", "name", "项目2", false),
+          cns("number", "leaf", "value", 200, false),
+          cns("boolean", "leaf", "enabled", false, false)
+        ])
+      ]
+    }),
+  },
       // 用cns构造的NodeStructure案例ฅ^•ﻌ•^ฅ
       "cns-简单字符串": {
         tree: createTreeFromConfig({ ...cns("string", "leaf", "cnsStr", "咕噜咕噜", false), nameDisplay: "cns昵称" }),
