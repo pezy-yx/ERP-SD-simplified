@@ -22,7 +22,7 @@ export type VarNodeConfig = {
   maxDate?: string; // 最大日期（ISO格式）
   options?: string[]; // 选择项列表（用于selection类型）
   classPrefix?: string; // CSS类名前缀，用于自定义布局样式
-  
+  hideLabel?: boolean; // 是否隐藏当前的Label
 }
 
 export type NodeStructure = {
@@ -480,7 +480,7 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
   }
   if (Array.isArray(children) && children.length > 0 && nodeType !== 'leaf') {
     childNodes = children.map(child => createNodeFromConfig(child))
-    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config)
+    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config, nameDisplay)
   }
   // leaf节点或无children
   return new VarNode(nodeType, varType, name, defaultValue, readonly, [], config, nameDisplay)

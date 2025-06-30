@@ -38,7 +38,7 @@
           <div v-else :class="`var-input-container ${baseClassPrefix}--var-input-container`" :style="containerStyle">
             <!-- 叶子节点渲染 -->
             <div v-if="isLeafNode" :class="`leaf-node ${baseClassPrefix}--leaf-node`">
-              <label v-if="showLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+              <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
               <!-- 输入框和额外组件的容器 -->
               <div :class="`leaf-input-container ${baseClassPrefix}--leaf-input-container`">
                 <!-- 基础类型输入框 -->
@@ -78,16 +78,16 @@
 
             <!-- 字典节点渲染 -->
             <div v-else-if="isDictNode" :class="`dict-node ${baseClassPrefix}--dict-node`">
-              <div v-if="1 || showLabel" :class="`dict-header ${baseClassPrefix}--dict-header`">
-                <label :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
-                <!-- 字典节点的额外组件插槽 -->
-                <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
-                  <slot
-                    :name="`${pathString}--extra`"
-                    v-bind="slotScopeData"
-                  >
-                  </slot>
-                </div>
+              <div v-if="isShowLabel" :class="`dict-header ${baseClassPrefix}--dict-header`">
+                <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+              </div>
+              <!-- 字典节点的额外组件插槽 -->
+              <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
+                <slot
+                  :name="`${pathString}--extra`"
+                  v-bind="slotScopeData"
+                >
+                </slot>
               </div>
               <div :class="`dict-content ${baseClassPrefix}--dict-content`" :style="{ paddingLeft: indentLevel + 'px' }">
                 <!-- 先渲染所有叶子节点 -->
@@ -100,7 +100,6 @@
                     :readonly="effectiveReadonly ?? false"
                     :config="getChildConfig(child)"
                     :indentLevel="0"
-                    :showLabel="true"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                   >
@@ -121,7 +120,6 @@
                     :readonly="effectiveReadonly ?? false"
                     :config="getChildConfig(child)"
                     :indentLevel="(indentLevel ?? 0) + 20"
-                    :showLabel="true"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                   >
@@ -136,27 +134,27 @@
 
             <!-- 列表节点渲染 -->
             <div v-else-if="isListNode" :class="`list-node ${baseClassPrefix}--list-node`">
-              <div v-if="1 || showLabel" :class="`list-header ${baseClassPrefix}--list-header`">
-                <label :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
-                <div :class="`list-header-actions ${baseClassPrefix}--list-header-actions`">
-                  <!-- 动态列表的添加/删除按钮 -->
-                  <div v-if="isDynamicList && !effectiveReadonly" :class="`list-controls ${baseClassPrefix}--list-controls`">
-                    <button
-                      @click="addListItem"
-                      :disabled="!!reachedMaxLength"
-                      :class="`btn-add ${baseClassPrefix}--btn-add`"
-                    >
-                      添加项 +
-                    </button>
-                  </div>
-                  <!-- 列表节点的额外组件插槽 -->
-                  <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
-                    <slot
-                      :name="`${pathString}--extra`"
-                      v-bind="slotScopeData"
-                    >
-                    </slot>
-                  </div>
+              <div v-if="isShowLabel" :class="`list-header ${baseClassPrefix}--list-header`">
+                <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+              </div>
+              <div :class="`list-header-actions ${baseClassPrefix}--list-header-actions`">
+                <!-- 动态列表的添加/删除按钮 -->
+                <div v-if="isDynamicList && !effectiveReadonly" :class="`list-controls ${baseClassPrefix}--list-controls`">
+                  <button
+                    @click="addListItem"
+                    :disabled="!!reachedMaxLength"
+                    :class="`btn-add ${baseClassPrefix}--btn-add`"
+                  >
+                    添加项 +
+                  </button>
+                </div>
+                <!-- 列表节点的额外组件插槽 -->
+                <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
+                  <slot
+                    :name="`${pathString}--extra`"
+                    v-bind="slotScopeData"
+                  >
+                  </slot>
                 </div>
               </div>
               <!-- 表格形式渲染列表 -->
@@ -200,7 +198,6 @@
                           :nodePath="[...nodePath, index.toString()]"
                           :readonly="effectiveReadonly ?? false"
                           :config="getChildConfig(child)"
-                          :showLabel="false"
                           @update="handleChildUpdate"
                         >
                             <!-- 透传插槽 -->
@@ -236,7 +233,6 @@
                       :readonly="effectiveReadonly ?? false"
                       :config="getChildConfig(child)"
                       :indentLevel="(indentLevel ?? 0) + 20"
-                      :showLabel="true"
                       @update="handleChildUpdate"
                     >
                       <!-- 透传插槽 -->
@@ -348,6 +344,7 @@ const isDictNode = computed(() => currentNode.value && currentNode.value.nodeTyp
 const isListNode = computed(() => currentNode.value && currentNode.value.nodeType === 'list')
 const isDynamicList = computed(() => isListNode.value && currentNode.value?.varType === 'dynamiclist')
 const effectiveReadonly = computed(() => props.readonly || (currentNode.value && currentNode.value.readonly))
+const isShowLabel = computed(()=> !props.config?.hideLabel || props.showLabel)
 const shouldRenderAsTable = computed(() => {
   if (!isListNode.value) return false
   return ['fixlist', 'dynamiclist'].includes((currentNode.value?.varType ?? '') as string)
@@ -377,15 +374,15 @@ const baseClassPrefix = computed(() => {
 })
 
 const wrapperClass = computed(() => {
-  return `${baseClassPrefix.value}--wrapper`
+  return `wrapper ${baseClassPrefix.value}--wrapper`
 })
 
 const mainContentClass = computed(() => {
-  return `${baseClassPrefix.value}--main`
+  return `main ${baseClassPrefix.value}--main`
 })
 
 const extraComponentsClass = computed(() => {
-  return `${baseClassPrefix.value}--extra`
+  return `extra ${baseClassPrefix.value}--extra`
 })
 
 // 分离叶子节点和复杂节点
@@ -544,8 +541,9 @@ function createNewListItem(): VarNode | null {
   grid-template-columns: 120px 1fr;
   gap: 16px;
   align-items: center;
+  justify-content: center;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  /* border-bottom: 1px solid #f0f0f0; */
 }
 
 .var-label {
@@ -561,8 +559,8 @@ function createNewListItem(): VarNode | null {
 .leaf-input-container {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
+  /* gap: 8px; */
+  /* width: 100%; */
 }
 
 .leaf-input-container > :first-child {
@@ -582,7 +580,7 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(.number-input-container),
 .leaf-node :deep(.date-input-container),
 .leaf-node :deep(.selection-input-container) {
-  width: 100%;
+  /* width: 100%; */
 }
 
 /* 统一输入框样式 - 方形设计 */
@@ -619,9 +617,9 @@ function createNewListItem(): VarNode | null {
 }
 
 .dict-header {
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e5e7eb;
+  /* margin-bottom: 12px;
+  padding-bottom: 8px; */
+  border-bottom: 1px solid #4E635E;
 }
 
 .dict-header {
@@ -657,18 +655,21 @@ function createNewListItem(): VarNode | null {
 }
 
 .dict-content {
-  padding: 16px;
-  background: #fafafa;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  width: 100%;
+  padding-top: 16px;
+  padding-left: 8px;
+  /* background: #fafafa;
+  border: 1px solid #e5e7eb; */
+  background: transparent;
+  border: none;
+  border-radius: 0px;
+  /* width: 100%; */
 }
 
 /* 叶子节点区域 - 网格布局 */
 .dict-leaf-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(35%, 1fr));
-  gap: 16px 24px;
+  grid-template-columns: repeat(auto-fit, minmax(70%, 1fr));
+  gap: 0px 24px; /* rowgap, colgap*/
   align-items: center;
   justify-items: start;
   margin-bottom: 16px;
@@ -686,7 +687,7 @@ function createNewListItem(): VarNode | null {
 .dict-complex-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0px;
 }
 
 .dict-complex-section > .dict-item--dict,
@@ -831,6 +832,13 @@ function createNewListItem(): VarNode | null {
   font-size: 12px;
   color: #dc2626;
   line-height: 1.4;
+}
+
+/* 叶子节点默认居中显示 */
+.dict-leaf-section .wrapper {
+  display: grid;
+  width: 100%;
+  justify-content: center;
 }
 
 /* 响应式布局 */
