@@ -4,7 +4,7 @@ import type { Component } from 'vue'
  * VarNode类：变量节点
  * 每个节点包含类型、名称、默认值、只读状态和子节点
  */
-export type VarTypeString = 'string' | 'date' | 'selection' | 'dict' | 'dynamiclist' | 'fixlist' | 'number'
+export type VarTypeString = 'string' | 'date' | 'selection' | 'dict' | 'dynamiclist' | 'fixlist' | 'number' | 'boolean'
 export type NodeTypeString = 'dict' | 'list' | 'leaf'
 export type VarNodeValue = Object | null
 export type VarNodeValueValidator = {

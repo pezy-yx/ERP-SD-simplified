@@ -61,3 +61,17 @@ export const SimpleInputBoxEmitsWithNum = {
     return typeof message === 'string' && message.length > 0;
   },
 };
+export const SimpleInputBoxEmitsWithBool = {
+  'update:modelValue': (value: boolean): boolean => {
+    return typeof value === 'boolean';
+  },
+  'blur': (value: string): boolean => {
+    return typeof value === 'string';
+  },
+  'enter': (value: string): boolean => {
+    return typeof value === 'string';
+  },
+  'validation-error': (message: string): boolean => {
+    return typeof message === 'string' && message.length > 0;
+  },
+};

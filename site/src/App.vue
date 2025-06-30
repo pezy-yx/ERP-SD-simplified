@@ -2,29 +2,39 @@
   <div id="app">
     <div class="page-switcher">
       <button
-        @click="currentPage = 'new'"
-        :class="{ active: currentPage === 'new' }"
+        @click="currentPage = 'erp'"
+        :class="{ active: currentPage === 'erp' }"
         class="switch-btn"
       >
         VarTree测试
       </button>
+      <button
+        @click="currentPage = 'base'"
+        :class="{ active: currentPage === 'base' }"
+        class="switch-btn"
+      >
+        VarBoxCases测试
+      </button>
     </div>
     
-    <test-page v-if="currentPage === 'new'" />
+    <test-page v-if="currentPage === 'erp'" />
+    <test-page-base v-if="currentPage === 'base'" />
   </div>
 </template>
 
 <script>
 import TestPage from '@/test/varbox/TestPageErp.vue'
+import TestPageBase from '@/test/varbox/TestPage.vue'
 
 export default {
   name: 'App',
   components: {
-    TestPage
+    TestPage,
+    TestPageBase
   },
   data() {
     return {
-      currentPage: 'new' // 默认显示新版
+      currentPage: 'erp' // 默认显示新版
     }
   }
 }

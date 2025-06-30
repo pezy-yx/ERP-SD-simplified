@@ -25,6 +25,12 @@ export const testCases: TestCase = {
   "带选项的选择框": {
     tree: createTreeFromConfig({ varType: "selection", name: "sel", config: { options: ["A", "B", "C"] }, defaultValue: "B" }),
   },
+  "布尔值开关": {
+    tree: createTreeFromConfig({ varType: "boolean", name: "isEnabled", defaultValue: true, nameDisplay: "是否启用" }),
+  },
+  "只读布尔值": {
+    tree: createTreeFromConfig({ varType: "boolean", name: "isReadonly", defaultValue: false, readonly: true, nameDisplay: "只读状态" }),
+  },
       // 用cns构造的NodeStructure案例ฅ^•ﻌ•^ฅ
       "cns-简单字符串": {
         tree: createTreeFromConfig({ ...cns("string", "leaf", "cnsStr", "咕噜咕噜", false), nameDisplay: "cns昵称" }),

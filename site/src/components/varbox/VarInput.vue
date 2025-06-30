@@ -262,6 +262,7 @@ import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
 import SelectionInput from './inputs/StringInput.vue'
+import BooleanInput from './inputs/BooleanInput.vue'
 
 import {getPathString} from './utils'
 
@@ -429,6 +430,7 @@ function getLeafComponent() {
     'number': StringInput,
     'date': DateInput,
     'selection': SelectionInput,
+    'boolean': BooleanInput,
   }
   return typeMap[currentNode.value.varType] || StringInput
 }
@@ -439,6 +441,7 @@ function getPlaceholder() {
     'number': '请输入数字',
     'date': '请选择日期',
     'selection': '请选择',
+    'boolean': '请选择是否',
   }
   // return typeMap[(currentNode.value?.varType ?? 'string')] || '请输入'
   return ""
