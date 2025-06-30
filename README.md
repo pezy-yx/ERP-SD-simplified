@@ -225,6 +225,7 @@ const tree = createTreeFromConfig(nodeStructure)
 - **NumberInput**：数字输入组件
 - **DateInput**：日期输入组件
 - **SelectionInput**：选择输入组件
+- **BooleanInput**：布尔值输入组件（复选框形式）
 
 **标准Props：**
 - `modelValue`：当前值
@@ -259,6 +260,7 @@ VarInput通过`varTree`和`nodePath`定位到具体的VarNode，实现双向数�
 - `number`：数字类型
 - `date`：日期类型
 - `selection`：选择类型
+- `boolean`：布尔值类型
 - `dict`：字典类型（对象）
 - `dynamiclist`：动态列表
 - `fixlist`：固定列表
@@ -322,6 +324,59 @@ classPrefix缺省则使用路径字符串作为前缀
 </style>
 ```
 
+**TestPage中的实际应用案例：**
+
+1. **水平布局的搜索输入框**：
+```vue
+<!-- 通过classPrefix精确定位到特定节点 -->
+<var-input
+  :varTree="tree"
+  :config="{ classPrefix: 'search-input' }"
+>
+  <template #用户名--extra="allProps">
+    <button class="search-btn">🔍 搜索</button>
+    <button class="clear-btn">✖️ 清除</button>
+  </template>
+</var-input>
+
+<style scoped>
+:deep(.search-input--wrapper) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+}
+</style>
+```
+
+2. **垂直布局的数值输入框**：
+```vue
+<var-input
+  :varTree="numberTree"
+  :config="{ classPrefix: 'number-input' }"
+>
+  <template #年龄--extra="allProps">
+    <div class="number-controls">
+      <button @click="increment(allProps)">+ 增加</button>
+      <button @click="decrement(allProps)">- 减少</button>
+    </div>
+  </template>
+</var-input>
+
+<style scoped>
+:deep(.number-input--wrapper) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #E4E7ED;
+  border-radius: 6px;
+  padding: 12px;
+}
+</style>
+```
+
 **自定义组件钩子：**
 ```vue
 <var-input
@@ -377,6 +432,12 @@ const dynamicListNode = cns('dynamiclist', 'list', 'hobbies', [], false, {
 - 通过`config.maxLength`控制列表最大长度
 - 通过`config.childTemplate`定义新增子项的结构，这个参数强烈建议传入
 - 自动生成添加/删除按钮
+- **列表选择功能**：现代化的表格交互体验
+  - 第一列为复选框选择列，替代原有的单行删除按钮
+  - 表头复选框支持全选/清除全选操作
+  - 删除按钮移至添加按钮旁边，支持批量删除选中行
+  - 删除按钮显示选中行数：`删除选中 (2)`
+  - 自动管理选择状态，删除行后重新映射索引
 
 ```vue
 <var-input
@@ -389,11 +450,32 @@ const dynamicListNode = cns('dynamiclist', 'list', 'hobbies', [], false, {
 
 #### 1.3.5 特性说明
 
-**路径字符串生成：**
-`getPathString()`函数处理特殊字符转义，确保插槽名称在同一棵树内部的唯一性：
+**路径字符串生成与类名系统：**
+
+VarInput为每个节点自动生成基于路径的类名前缀，支持精确的样式定位：
+
 ```typescript
 // 路径 ['user', 'profile', 'name']
 // 生成插槽名称：'user-profile-name--extra'
+// 生成类名前缀：'user-profile-name'
+```
+
+**类名生成规则（共30余种，仅展示部分，可在VarInput组件中查看）：**
+- `${baseClassPrefix}--wrapper`：节点容器类名
+- `${baseClassPrefix}--main`：主要内容区域类名
+- `${baseClassPrefix}--extra`：额外组件区域类名
+- `${baseClassPrefix}--leaf-node`：叶子节点类名
+- `${baseClassPrefix}--dict-item`：字典项类名
+- `${baseClassPrefix}--list-row`：列表行类名
+
+**自定义类名前缀：**
+```vue
+<!-- 使用config.classPrefix覆盖默认的路径前缀 -->
+<var-input
+  :varTree="tree"
+  :config="{ classPrefix: 'custom-prefix' }"
+/>
+<!-- 生成类名：custom-prefix--wrapper, custom-prefix--main 等 -->
 ```
 
 **透传机制：**
@@ -407,6 +489,16 @@ import { ref } from 'vue'
 const treeRef = ref(createTreeFromConfig(nodeStructure))
 // 自动响应数据变化
 ```
+
+**TestPage实践指南：**
+
+TestPage展示了多种高级用法，包括：
+- 通过路径精确定位节点并应用自定义样式
+- 使用`:deep()`穿透作用域样式，改变叶子节点的布局方式
+- 组合使用插槽和CSS类名实现复杂的UI需求
+- 不同布局模式的实现（水平、垂直、网格等）
+
+查看`site/src/test/varbox/TestPage.vue`, `site/src/test/varbox/TestPageErp.vue`获取更多实现示例。
 
 ### 1.4. 在复杂ERP系统前端中可能可以解决的问题
 
