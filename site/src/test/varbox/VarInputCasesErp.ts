@@ -81,4 +81,16 @@ export const testCases: TestCase = {
       ])
     }),
   },
+  "客户查询": {
+    tree: createTreeFromConfig(
+      cns("string", "leaf", "customer_id", null, false, {
+        validators: [
+          {
+            creteria: (val: any) => typeof val === 'string' && /^\d{6}$/.test(val),
+            message: "客户ID必须是六位数字"
+          }
+        ]
+      })
+    ),
+  },
 };

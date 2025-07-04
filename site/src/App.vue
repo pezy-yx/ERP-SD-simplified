@@ -1,102 +1,36 @@
 <template>
   <div id="app">
-    <div class="page-switcher">
-      <button
-        @click="currentPage = 'erp'"
-        :class="{ active: currentPage === 'erp' }"
-        class="switch-btn"
-      >
-        VarTree测试
-      </button>
-      <button
-        @click="currentPage = 'base'"
-        :class="{ active: currentPage === 'base' }"
-        class="switch-btn"
-      >
-        VarBoxCases测试
-      </button>
-    </div>
-    
-    <test-page v-if="currentPage === 'erp'" />
-    <test-page-base v-if="currentPage === 'base'" />
+    <router-view />
   </div>
 </template>
 
-<script>
-import TestPage from '@/test/varbox/TestPageErp.vue'
-import TestPageBase from '@/test/varbox/TestPage.vue'
+<script lang="ts"> // 注意这里可能需要添加 lang="ts" 如果你的项目使用 TypeScript
+import { defineComponent } from 'vue';
 
-export default {
+export default defineComponent({
   name: 'App',
-  components: {
-    TestPage,
-    TestPageBase
-  },
-  data() {
-    return {
-      currentPage: 'erp' // 默认显示新版
-    }
-  }
-}
+});
 </script>
 
 <style>
+/* 全局样式保持不变，确保html和body占据整个视口 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin: 0;
-  padding: 0;
-}
-
-/* 重置样式 */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #f5f7fa;
-}
-
-/* 页面切换器样式 */
-.page-switcher {
+  text-align: center;
+  color: #25482C;
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  background-color: white;
-  border-bottom: 1px solid #EBEEF5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.switch-btn {
-  padding: 10px 20px;
-  border: 1px solid #DCDFE6;
-  border-radius: 6px;
-  background-color: white;
-  color: #606266;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s;
-}
-
-.switch-btn:hover {
-  border-color: #409EFF;
-  color: #409EFF;
-}
-
-.switch-btn.active {
-  background-color: #409EFF;
-  border-color: #409EFF;
-  color: white;
-}
-
-.switch-btn.active:hover {
-  background-color: #337ECC;
-  border-color: #337ECC;
+  flex-direction: column;
 }
 </style>
