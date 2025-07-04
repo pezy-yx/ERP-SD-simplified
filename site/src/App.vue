@@ -34,3 +34,8 @@ html, body {
   flex-direction: column;
 }
 </style>
+
+<!--<template>
+  <router-view />
+</template>
+<script lang="ts" setup></script>!-->

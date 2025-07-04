@@ -10,19 +10,19 @@
         :readonly="readonly"
         :placeholder="placeholder"
         :class="inputClass"
-        @input="handleInput"
         @blur="handleBlur"
         @keyup.enter="handleEnter"
-      />
+      >
+      <span class="readonly-indicator">{{ modelValue }}</span>
     </slot>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { VarNode } from '@/utils/VarTree'
 import { SimpleInputBoxProps, SimpleInputBoxEmits } from './InputProps';
 import {getPathString} from '../utils'
+
 const props = defineProps({...SimpleInputBoxProps,
   modelValue:{
     type: [String, Number],
@@ -32,7 +32,6 @@ const props = defineProps({...SimpleInputBoxProps,
 const emit = defineEmits(SimpleInputBoxEmits)
 
 const slotScopeData = computed(() => ({
-  handleInput: handleInput,
   blur: handleBlur,
   handleEnter: handleEnter,
   allProps: props,
@@ -49,17 +48,27 @@ const inputClass = computed(()=>({
         'readonly': props.readonly
       }))
 
-watch(() => props.modelValue, (newValue)=>{
-  if (typeof newValue === 'number' || typeof newValue === 'string') {
-    inputValue.value = String(newValue);
-  } else {
-    inputValue.value = '';
-  }
-}, { immediate: true })
+// 监听 inputValue 的变化，并 emit 给父组件
+watch(inputValue, (newValue) => {
+  console.log("inputValue 变化了，通过 watch emit 给父组件:", newValue);
+  emit('update:modelValue', newValue);
+});
 
-function handleInput() {
-  emit('update:modelValue', inputValue.value);
-}
+// 监听 props.modelValue 的变化，同步更新 inputValue
+// 这用于处理父组件直接改变 modelValue 的情况 (例如重置)
+watch(() => props.modelValue, (newValue) => {
+  const newStringValue = (typeof newValue === 'number' || typeof newValue === 'string')
+    ? String(newValue)
+    : '';
+
+  // 只有当 prop 的值与当前 inputValue 不同时才更新，避免无限循环
+  // 因为 inputValue 的变化也会通过 watch 触发 update:modelValue
+  if (inputValue.value !== newStringValue) {
+    console.log("Prop modelValue 变化，同步到 inputValue:", newStringValue);
+    inputValue.value = newStringValue;
+  }
+}, { immediate: true });
+
 
 function handleBlur() {
   emit('blur', inputValue.value);
@@ -82,7 +91,6 @@ function handleEnter() {
   emit('enter', inputValue.value);
   emit('validation-error', '');
 }
-
 </script>
 
 <style scoped>

@@ -19,7 +19,7 @@ export const SimpleInputBoxProps = {
     default: () => ({})
   },
   node: {
-    type: Object as PropType<VarNode>,
+    type: Object as PropType<VarNode | null>,
     default: null
   },
   tree: {
