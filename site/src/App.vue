@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div id="app">
     <div class="page-switcher">
       <button
@@ -99,4 +99,8 @@ body {
   background-color: #337ECC;
   border-color: #337ECC;
 }
-</style>
+</style> -->
+<template>
+  <router-view />
+</template>
+<script lang="ts" setup></script>
