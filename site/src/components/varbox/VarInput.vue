@@ -26,7 +26,7 @@
               :class="getInputClass()"
               @update="handleChildUpdate"
               @update:modelValue="handleValueChange"
-              @blur="handleValidation"
+              @blur="handleBlur"
               @validation-error="handleValidationError"
             >
               <!-- 透传插槽 -->
@@ -55,8 +55,9 @@
                   :nodePath="nodePath"
 
                   @update:modelValue="handleValueChange"
-                  @blur="handleValidation"
+                  @blur="handleBlur"
                   @validation-error="handleValidationError"
+                  @focus="handleFocus"
                 >
                   <!-- 透传插槽 -->
                   <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
@@ -70,6 +71,20 @@
                     :name="`${pathString}--extra`"
                     v-bind="slotScopeData"
                   >
+                  </slot>
+                </div>
+                <!-- 搜索按钮插槽 -->
+                <div v-if="displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
+                  <slot
+                    :name="`${pathString}--search-button`"
+                    v-bind="slotScopeData"
+                  >
+                    <button
+                      :class="searchButtonClass"
+                      @click="handleSearchButtonClick"
+                    >
+                      🔍
+                    </button>
                   </slot>
                 </div>
               </div>
@@ -103,6 +118,7 @@
                     :showLabel="true"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
+                    @focus="handleFocus"
                   >
                     <!-- 透传插槽 -->
                     <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
@@ -354,12 +370,18 @@ const slotScopeData = computed(() => ({
   toggleRowSelection: toggleRowSelection,
   toggleAllSelection: toggleAllSelection,
   removeSelectedItems: removeSelectedItems,
+
+  //
+  handleFocus: handleFocus
 }));
 
 const forceUpdateKey = ref(0)
 const forceUpdate = () => {
   forceUpdateKey.value++
 }
+const displaySearchButton = ref(false)
+const searchButtonCounter = ref(0)
+const focusCounter = ref(0)
 
 const currentNode = computed<VarNode | null>(() => {return props.varTree.findNodeByPath(props.nodePath)})
 const pathString = computed<string>(()=>getPathString(props.varTree,props.nodePath))
@@ -439,8 +461,8 @@ const extraComponentsClass = computed(() => {
   return `extra ${baseClassPrefix.value}--extra`
 })
 
-const extraTableButtonsClass = computed(() => {
-  return `extra-buttons ${baseClassPrefix.value}--extra-buttons`
+const searchButtonClass = computed(() => {
+  return `search-button ${baseClassPrefix.value}--search-button`
 })
 
 // 分离叶子节点和复杂节点
@@ -463,6 +485,19 @@ watch(() => currentNode.value?.children?.length, () => {
   selectedRows.value.clear()
   isAllSelected.value = false
 }, { immediate: true })
+
+function handleFocus() {
+  displaySearchButton.value = true
+  searchButtonCounter.value++
+  // console.log(`Focus on node: ${pathString.value}`)
+}
+
+function handleSearchButtonClick() {
+  // 处理搜索按钮点击事件
+  // console.log('Search clicked')
+  searchButtonCounter.value++
+  displaySearchButton.value = false
+}
 
 function initNodeValue() {
   if (isLeafNode.value && currentNode.value) {
@@ -539,6 +574,17 @@ function handleChildUpdate(updateInfo: any) {
   emit('update', updateInfo)
 }
 
+function handleBlur() {
+  handleValidation()
+  //延迟
+  const currentSearchButtonCounter = searchButtonCounter.value
+  const currentFocusCount = focusCounter.value
+  setTimeout(() => {
+    if (searchButtonCounter.value !== currentSearchButtonCounter) return
+    if (focusCounter.value !== currentFocusCount) return
+      displaySearchButton.value = false
+  }, 333)
+}
 function handleValidation() {
   // validationError.value = ''
   return
@@ -669,12 +715,29 @@ function createNewListItem(): VarNode | null {
 /* SAP风格叶子节点布局 */
 .leaf-node {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   align-items: center;
   justify-content: center;
   padding: 8px 0;
   /* border-bottom: 1px solid #f0f0f0; */
+}
+
+.search-button-container .search-button {
+  background: transparent;
+  border: 1px solid var(--theme-color-dark);
+  margin-left: -24px;
+  width: 24px;
+  font-size: 14px;
+  padding: 0;
+  height: 24px;
+  line-height: 1.5;
+  z-index: 1; /* 确保按钮在输入框上方 */
+  cursor: pointer;
+}
+.search-button-container .search-button:hover {
+  background: var(--theme-color-dark);
+  color: white;
 }
 
 .var-label {
@@ -720,27 +783,27 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(select) {
   width: 100%;
   min-width: 120px; /* 最小宽度 */
-  padding: 6px 12px;
-  border: 1px solid #d1d5db;
+  padding: 0;
+  border: 1px solid var(--theme-color-dark);
   border-radius: 0px; /* 方形直角 */
   font-size: 14px;
   height: 24px;
   line-height: 1.5;
-  background: white;
+  background: transparent;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .leaf-node :deep(input:focus),
 .leaf-node :deep(select:focus) {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--theme-color-dark);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.leaf-node :deep(input:readonly),
+.leaf-node :deep(input.readonly),
 .leaf-node :deep(select:disabled) {
-  background-color: #f9fafb;
-  cursor: default;
+  background: var(--theme-color-input-readonly);
+  cursor: not-allowed;
 }
 
 /* SAP风格字典节点布局 */
@@ -835,10 +898,10 @@ function createNewListItem(): VarNode | null {
 }
 
 .list-table th {
-  background: #f9fafb;
+  background: var(--theme-color-table-header-bg);
   text-align: left;
-  font-weight: 600;
-  color: #374151;
+  font-weight: 450;
+  color: var(--theme-color-table-header-text);
   /* height: 40px; */
   white-space: nowrap; /* 防止文字换行 */
   overflow: hidden;
@@ -867,7 +930,7 @@ function createNewListItem(): VarNode | null {
 }
 
 .list-table tr:hover {
-  background: #f9fafb;
+  background: var(--theme-color-lighter-a);
 }
 .list-table td :deep(.leaf-node) {
   display: grid;
@@ -891,7 +954,7 @@ function createNewListItem(): VarNode | null {
   border-radius: 0px;
   font-size: 13px; /* 稍小的字体 */
   line-height: 1.2;
-  background: white;
+  background: transparent;
 }
 
 .list-table td :deep(input:focus),

@@ -11,6 +11,7 @@
         :placeholder="placeholder"
         :class="inputClass"
         @blur="handleBlur"
+        @focus="handleFocus"
         @keyup.enter="handleEnter"
       >
       <span class="readonly-indicator">{{ modelValue }}</span>
@@ -50,7 +51,7 @@ const inputClass = computed(()=>({
 
 // 监听 inputValue 的变化，并 emit 给父组件
 watch(inputValue, (newValue) => {
-  console.log("inputValue 变化了，通过 watch emit 给父组件:", newValue);
+  // console.log("inputValue 变化了，通过 watch emit 给父组件:", newValue);
   emit('update:modelValue', newValue);
 });
 
@@ -64,7 +65,7 @@ watch(() => props.modelValue, (newValue) => {
   // 只有当 prop 的值与当前 inputValue 不同时才更新，避免无限循环
   // 因为 inputValue 的变化也会通过 watch 触发 update:modelValue
   if (inputValue.value !== newStringValue) {
-    console.log("Prop modelValue 变化，同步到 inputValue:", newStringValue);
+    // console.log("Prop modelValue 变化，同步到 inputValue:", newStringValue);
     inputValue.value = newStringValue;
   }
 }, { immediate: true });
@@ -72,6 +73,10 @@ watch(() => props.modelValue, (newValue) => {
 
 function handleBlur() {
   emit('blur', inputValue.value);
+}
+
+function handleFocus() {
+  emit('focus');
 }
 
 function handleEnter() {
@@ -94,7 +99,7 @@ function handleEnter() {
 </script>
 
 <style scoped>
-.string-input {
+/* .string-input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #DCDFE6;
@@ -111,5 +116,5 @@ function handleEnter() {
 .string-input.readonly {
   background-color: #F5F7FA;
   cursor: not-allowed;
-}
+} */
 </style>

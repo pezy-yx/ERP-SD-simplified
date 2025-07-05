@@ -14,7 +14,7 @@ const initialScreenTree = createTreeFromConfig(
       cns('string','leaf','businessPartner1','',false,{},[],"Business Partner 1:"),
       cns('string','leaf','businessPartner2','',false,{},[],"Business Partner 2:"),
       cns('date','leaf','validFrom','',false,{},[],"Valid From:"),
-      cns('date','leaf','validTo','',false,{},[],"Valid To:")
+      cns('date','leaf','validTo','',true,{},[],"Valid To:"),
     ],'Default')
   ],"")
 )

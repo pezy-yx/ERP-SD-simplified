@@ -12,6 +12,7 @@
 
 <script>
 import NavigationBar from '@/components/NavigationBar.vue';
+import '@/theme.css';
 
 export default {
   name: 'Application',
@@ -80,7 +81,7 @@ export default {
   min-height: 100vh;
   height: 100vh;
   max-height: 100vh;
-  background-color: #25484C; /* 应用的背景色 */
+  background-color: var(--theme-color-dark); /* 应用的背景色 */
 }
 
 .application-content {
@@ -90,7 +91,7 @@ export default {
 
 :deep(.page-content) {
  flex-grow: 1;
- background-color: #e6e5d8;
+ background-color: var(--theme-color-page);
  padding: 20px;
  margin: 20px;
  border-radius: 8px;
@@ -121,18 +122,18 @@ export default {
 }
 
 :deep(.execute-button) {
-  background-color: #25484C;
+  background-color: var(--theme-color-execute-button);
   color: white;
   border: none;
   border-radius: 5px;
   height: 100%;
 }
 :deep(.execute-button:hover) {
-  background-color: #1e393c;
+  background-color: var(--theme-color-execute-button-hover);
   color: white;
 }
 :deep(.execute-button:active) {
-  background-color: #374c4f;
+  background-color: var(--theme-color-execute-button-active);
   color: black;
 }
 </style>

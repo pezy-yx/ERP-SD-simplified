@@ -44,6 +44,9 @@ export const SimpleInputBoxEmits = {
   },
   'validation-error': (message: string) => {
     return typeof message === 'string' && message.length > 0;
+  },
+  'focus': () => {
+    return true;
   }
 };
 
