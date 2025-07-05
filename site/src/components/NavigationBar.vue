@@ -63,12 +63,16 @@ export default {
       window.history.back(); // 简单回退浏览器历史记录
     },
     goToHomePage() {
-      const homePageUrl = '/test/erppage'; // 定义主页路径
-      console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
-      // 使用 this.$router.push 进行导航
-      this.$router.push(homePageUrl);
-      // 或者如果你希望替换当前路由，而不是添加到历史记录
-      // this.$router.replace(homePageUrl);
+      // 检查当前是否在application路由下
+      if (this.$route.path.startsWith('/application')) {
+        const homePageUrl = '/application/test/erppage'; // application子路径
+        console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
+        this.$router.push(homePageUrl);
+      } else {
+        const homePageUrl = '/test/erppage'; // 原有路径
+        console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
+        this.$router.push(homePageUrl);
+      }
     },
     toggleSearchInput() {
       this.showSearchInput = !this.showSearchInput;

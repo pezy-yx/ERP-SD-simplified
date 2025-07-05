@@ -1,7 +1,5 @@
 <template>
- <div class="maintain-business-partner-view">
-   <NavigationBar pageTitle="Maintain Business Partner" @search="handleGlobalSearch"/>
-
+ <div class="maintain-business-partner-content">
    <FilterTabs :tabs="businessPartnerTabs" @tab-selected="handleTabSelected"/>
 
 <div class="page-content">
@@ -34,7 +32,6 @@
 </template>
 
 <script>
-import NavigationBar from '@/components/NavigationBar.vue';
 import FilterTabs from '@/components/FilterTabs.vue';
 import AdvancedSearchModal from '@/components/AdvancedSearchModal.vue'; // 引用高级搜索弹窗组件
 import { VarTree, createTreeFromConfig, cns } from '../utils/VarTree';
@@ -56,9 +53,8 @@ const customerQueryStructure = cns(
 );
 
 export default {
-  name: 'MaintainBusinessPartnerView',
+  name: 'MaintainBusinessPartnerContent',
   components: {
-    NavigationBar,
     FilterTabs,
     AdvancedSearchModal, // 注册高级搜索弹窗组件
     VarInput // 注册 VarInput 组件，以便在模板中使用
@@ -84,11 +80,6 @@ export default {
     };
   },
   methods: {
-
-    handleGlobalSearch(query) {
-      console.log('全局搜索:', query);
-      // 处理全局搜索逻辑
-    },
     handleTabSelected(tabValue) {
       this.activeContentKey = tabValue;
     },
@@ -127,11 +118,11 @@ export default {
 </script>
 
 <style scoped>
-.maintain-business-partner-view {
+.maintain-business-partner-content {
  display: flex;
  flex-direction: column;
  min-height: 100vh;
- background-color: #25484C;
+ /* 背景色由Application.vue提供 */
 }
 
 .page-content {
