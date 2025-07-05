@@ -371,8 +371,15 @@ const slotScopeData = computed(() => ({
   toggleAllSelection: toggleAllSelection,
   removeSelectedItems: removeSelectedItems,
 
-  //
-  handleFocus: handleFocus
+  // 输入框、搜索按钮相关
+  handleFocus: handleFocus,
+  handleBlur: handleBlur,
+  focusCounter: focusCounter.value,
+  searchButtonCounter: searchButtonCounter.value,
+  handleSearchButtonClick: handleSearchButtonClick,
+  displaySearchButton: displaySearchButton.value,
+
+
 }));
 
 const forceUpdateKey = ref(0)
