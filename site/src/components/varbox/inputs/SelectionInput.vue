@@ -99,7 +99,7 @@ function handleBlur() {
 </script>
 
 <style scoped>
-.selection-input {
+/* .selection-input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #DCDFE6;
@@ -124,7 +124,7 @@ function handleBlur() {
 .selection-input.readonly {
   background-color: #F5F7FA;
   cursor: not-allowed;
-}
+} */
 
 /* 自定义下拉箭头样式 */
 .selection-input {

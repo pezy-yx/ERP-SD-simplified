@@ -170,25 +170,25 @@ function hideDatePicker() {
   align-items: center;
 }
 
-.date-input {
+/* .date-input {
   flex: 1;
   padding: 8px 12px;
   border: 1px solid #DCDFE6;
   border-radius: 4px 0 0 4px;
   font-size: 14px;
   transition: border-color 0.2s;
-}
+} */
 
-.date-input:focus {
+/* .date-input:focus {
   outline: none;
   border-color: #409EFF;
-}
+} */
 
-.date-input.readonly {
+/* .date-input.readonly {
   background-color: #F5F7FA;
   cursor: not-allowed;
   border-radius: 4px;
-}
+} */
 
 .date-picker-btn {
   padding: 8px 12px;

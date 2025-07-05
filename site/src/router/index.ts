@@ -1,12 +1,16 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from "vue-router";
+import Application from '@/views/Application.vue';
 import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue'; 
+import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerContent.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
+import CreateBp from '@/views/BPRelationship/Create.vue';
 
 const routes = [
+  // 保留原有的路径
   {
     path: '/',
     name: 'Home',
@@ -22,8 +26,49 @@ const routes = [
     name: 'MaintainBPTest',
     component: TestPageErp // 引入你的测试文件
   },
-    { path: '/login', component: Login },
-    { path: '/register', component: Register }
+  {
+    path: '/test/erppage/vake',
+    name: 'Test-Page-Vake',
+    component: CreateBp
+  },
+  { path: '/login', component: Login },
+  { path: '/register', component: Register },
+  
+  // 新增的Application父路由，包含导航栏和背景
+  {
+    path: '/application',
+    component: Application,
+    children: [
+      {
+        path: '',
+        redirect: '/application/maintain-bp' // 默认重定向到业务伙伴维护页面
+      },
+      {
+        path: 'maintain-bp',
+        name: 'ApplicationMaintainBusinessPartner',
+        component: MaintainBusinessPartnerContent,
+        meta: { title: 'Maintain Business Partner' }
+      },
+      {
+        path: 'test/erppage/vake',
+        name: 'ApplicationTest-Page-Vake',
+        component: CreateBp,
+        meta: { title: 'Create BP Relationship' }
+      },
+      {
+        path: 'test/erppage',
+        name: 'ApplicationTestPageErp',
+        component: TestPageErp,
+        meta: { title: 'Test Page' }
+      },
+      {
+        path: 'home',
+        name: 'ApplicationHome',
+        component: Home,
+        meta: { title: 'Home' }
+      }
+    ]
+  }
   // 你可以在这里添加其他页面路由
 ];
 

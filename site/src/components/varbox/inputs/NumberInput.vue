@@ -83,7 +83,7 @@ function handleEnter() {
 </script>
 
 <style scoped>
-.number-input {
+/* .number-input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #DCDFE6;
@@ -100,7 +100,7 @@ function handleEnter() {
 .number-input.readonly {
   background-color: #F5F7FA;
   cursor: not-allowed;
-}
+} */
 
 /* 隐藏数字输入框的上下箭头 */
 .number-input::-webkit-outer-spin-button,
