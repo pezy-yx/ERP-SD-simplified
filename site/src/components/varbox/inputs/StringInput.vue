@@ -14,7 +14,7 @@
         @focus="handleFocus"
         @keyup.enter="handleEnter"
       >
-      <span class="readonly-indicator">{{ modelValue }}</span>
+      
     </slot>
   </div>
 </template>
