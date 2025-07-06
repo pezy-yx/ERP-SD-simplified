@@ -74,7 +74,7 @@
                   </slot>
                 </div>
                 <!-- 搜索按钮插槽 -->
-                <div v-if="1||displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
+                <div v-if="displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
                   <slot
                     :name="`${pathString}--search-button`"
                     v-bind="slotScopeData"
@@ -508,6 +508,7 @@ function handleSearchButtonClick() {
   // console.log('Search clicked')
   searchButtonCounter.value++
   displaySearchButton.value = false
+  displaySearchIcon.value = false
 }
 
 function handleSearchButtonEnter(){
@@ -602,7 +603,6 @@ function handleBlur() {
     if (searchButtonCounter.value !== currentSearchButtonCounter) return
     if (focusCounter.value !== currentFocusCount) return
       displaySearchButton.value = false
-      displaySearchIcon.value = false
   }, 333)
 }
 function handleValidation() {
@@ -745,9 +745,11 @@ function createNewListItem(): VarNode | null {
 
 .search-button-container .search-button {
   background: transparent;
-  border: 1px solid var(--theme-color-dark);
+  border-bottom: 1px solid var(--theme-color-dark);
+  border-right: 1px solid var(--theme-color-dark);
+  border-top: 1px solid var(--theme-color-dark);
   width: 25px;
-  height: 25px;
+  height: 24px;
   font-size: 14px;
   padding: 0;
   z-index: 1; /* 确保按钮在输入框上方 */
