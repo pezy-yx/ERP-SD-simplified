@@ -1,0 +1,102 @@
+/* src/assets/styles/_base.css */
+
+/* --- 1. CSS Reset / Normalize (可选，但推荐) --- */
+/* 这是为了抹平不同浏览器之间的默认样式差异，确保一致的起点 */
+/* 这里的示例只是最基础的，你可以使用 Normalize.css 或 Reset.css 库 */
+*, *::before, *::after {
+    box-sizing: border-box; /* 统一所有元素的盒模型为 border-box */
+    margin: 0;
+    padding: 0;
+}
+
+/* --- 2. 根元素和基础布局 --- */
+html, body, #app {
+    height: 100%; /* 确保 html, body 和 Vue 根容器占据整个视口高度 */
+    width: 100%; /* 确保它们占据整个视口宽度 */
+    overflow: hidden; /*可选：防止出现全局滚动条，如果内容超出则可能需要局部滚动 */
+}
+
+/* --- 3. 全局字体设置 --- */
+/* 你可以在这里设置应用的基础字体。*/
+/* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
+/* 通常我们会在这里设置一个全局的无衬线字体，因为它们阅读性更强 */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.5; /* 增加行高，提升阅读体验 */
+    color: var(--color-text-primary); /* 使用你定义的全局文本颜色变量 */
+    background-color: var(--color-bg-body); /* 使用你定义的全局背景颜色变量 */
+}
+
+
+/* --- 4. 表单元素通用样式覆盖 --- */
+/* 强制 input, button 等表单元素继承父元素的字体，并移除一些浏览器默认外观 */
+input, button, textarea, select {
+    font-family: inherit; /* **关键：继承父元素的字体** */
+    font-size: inherit; /* 继承父元素的字体大小 */
+    line-height: inherit; /* 继承父元素的行高 */
+    color: inherit; /* 继承父元素的文本颜色 */
+
+    /* 移除特定浏览器的默认外观，以便你完全控制样式 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* 后面你可以在具体组件中添加边框、背景、内边距等 */
+    border: none; /* 如果你希望它们默认无边框 */
+    background: none; /* 如果你希望它们默认无背景 */
+    outline: none; /* 移除点击时的蓝色轮廓 */
+}
+
+/* --- 5. 链接通用样式 --- */
+a {
+    text-decoration: none; /* 移除所有链接的下划线 */
+    cursor: pointer; /* 确保鼠标悬停是手型 */
+    color: var(--color-link-default); /* 使用你定义的全局链接颜色变量 */
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: var(--color-link-hover); /* 悬停时改变颜色 */
+}
+
+:root {
+    /* ... 你的所有 CSS 变量 ... */
+    --color-text-primary: #333; /* 示例通用文本颜色 */
+    --color-bg-body: #f4f4f4; /* 示例通用页面背景 */
+    --color-link-default: #007bff;
+    --color-link-hover: #e6f0d7;
+    --color-link-default:#727471;
+
+    /* 你的登录页颜色变量 */
+    --login-bg-1: #25484c;
+    --login-bg-2: #e6f0d7;
+    --login-text:#e6f0d7;
+    --login-input-bg:#516d70;
+    --login-link-hover:#ffffff;
+    --login-link-text:#727471;
+    --login-text-placeholder: #aab8c2;
+
+    /* 你的按钮颜色变量 */
+    --btn-default-bg: #e6f0d7;
+    --btn-default-text: #25484c;
+    --btn-default-border: transparent;
+    --btn-default-shadow: rgba(0, 0, 0, 0.1);
+
+    --btn-hover-bg: #305e63;
+    --btn-hover-text: #ffffff;
+    --btn-hover-border: transparent;
+    --btn-hover-shadow: rgba(0, 0, 0, 0.15);
+
+    --btn-active-bg: #1c3c40;
+    --btn-active-text: #ffffff;
+    --btn-active-border: transparent;
+    --btn-active-shadow: rgba(0, 0, 0, 0.05);
+
+    --btn-disabled-bg: #7f9091;
+    --btn-disabled-text: #aab7b8;
+    --btn-disabled-border: transparent;
+    --btn-disabled-shadow: none;
+
+    --btn-focus-border: #bec8c9;
+    --btn-focus-shadow: rgba(67, 128, 192, 0.25);
+    --btn-focus-outline: none;
+}

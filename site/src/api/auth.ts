@@ -32,11 +32,11 @@ const API_BASE_URL = 'http://localhost:3000/api'; // 替换为你的后端地址
 // 模拟注册和登录接口
 // 这里使用简单的逻辑模拟注册和登录，实际应用中应连接后端服务
 export async function register(username: string, password: string) {
-    return { success: true, message: '注册成功' };
+    return { success: true, message: 'Registered Successfully' };
 }
 export async function login(username: string, password: string) {
     if (username === 'admin' && password === '123456') {
-        return { success: true, token: 'fake-token', message: '登录成功' };
+        return { success: true, token: 'fake-token', message: 'Login Successfully' };
     }
-    return { success: false, message: '用户名或密码错误' };
+    return { success: false, message: 'Wrong username or password' };
 }

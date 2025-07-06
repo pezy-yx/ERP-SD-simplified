@@ -8,13 +8,18 @@ import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
+import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 
 const routes = [
   // 保留原有的路径
   {
+    path:'/',
+    redirect: '/login' // 默认重定向到登录页面
+  },
+  {
     path: '/',
     name: 'Home',
-    component: MaintainBusinessPartnerView // 你的系统主页或默认页面
+    component: Home // 你的系统主页或默认页面
   },
   {
     path: '/maintain-bp',
@@ -31,8 +36,6 @@ const routes = [
     name: 'Test-Page-Vake',
     component: CreateBp
   },
-  { path: '/login', component: Login },
-  { path: '/register', component: Register },
   
   // 新增的Application父路由，包含导航栏和背景
   {
@@ -68,6 +71,21 @@ const routes = [
         meta: { title: 'Home' }
       }
     ]
+  },
+  { 
+    path: '/login',
+    name: 'Login',
+    component: Login 
+  },
+  { 
+    path: '/register', 
+    name: 'Register',
+    component: Register 
+  },
+  {
+    path: '/getMyPassBack',
+    name: 'GetMyPassBack',
+    component: getMyPassBack // 主页组件
   }
   // 你可以在这里添加其他页面路由
 ];
