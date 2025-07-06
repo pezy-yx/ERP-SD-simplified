@@ -200,12 +200,15 @@
                   <thead>
                     <tr>
                       <th :class="`select-column ${baseClassPrefix}--select-column`">
-                        <input
-                          type="checkbox"
-                          :checked="isAllSelected"
-                          @change="toggleAllSelection"
-                          :class="`select-all-checkbox ${baseClassPrefix}--select-all-checkbox`"
-                        />
+                        <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
+                          <input
+                            type="checkbox"
+                            :checked="isAllSelected"
+                            @change="toggleAllSelection"
+                            :class="`var-checkbox select-all-checkbox ${baseClassPrefix}--select-all-checkbox`"
+                          />
+                          <span class="checkmark"></span>
+                        </label>
                       </th>
                       <th v-for="(header, index) in getTableHeaders()" :key="index">
                         {{ header }}
@@ -215,12 +218,15 @@
                   <tbody>
                     <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
                       <td :class="`select-cell ${baseClassPrefix}--select-cell`">
-                        <input
-                          type="checkbox"
-                          :checked="selectedRows.has(index)"
-                          @change="toggleRowSelection(index)"
-                          :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
-                        />
+                        <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
+                          <input
+                            type="checkbox"
+                            :checked="selectedRows.has(index)"
+                            @change="toggleRowSelection(index)"
+                            :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
+                          />
+                          <span class="checkmark"></span>
+                        </label>
                       </td>
                       <!-- 如果子项是dict，则每个字段占一列 -->
                       <template v-if="child.nodeType === 'dict'">
@@ -898,6 +904,12 @@ function createNewListItem(): VarNode | null {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.leaf-node :deep(input[type="checkbox"]) {
+  width: 12px;
+  min-width: 12px;
+  height: 12px;
+}
+
 .leaf-node :deep(input:focus),
 .leaf-node :deep(select:focus) {
   outline: none;
@@ -1049,7 +1061,7 @@ function createNewListItem(): VarNode | null {
   padding: 0;
   margin: 0;
 }
-.list-table td :deep(input),
+.list-table td :deep(input:not([type='checkbox'])),
 .list-table td :deep(select) {
   width: 100%;
   height: 24px; /* 固定输入框高度 */
@@ -1062,7 +1074,7 @@ function createNewListItem(): VarNode | null {
   background: transparent;
 }
 
-.list-table td :deep(input:focus),
+.list-table td :deep(input:not([type='checkbox']):focus),
 .list-table td :deep(select:focus) {
   outline: none;
   border-color: #2563eb;
@@ -1083,18 +1095,25 @@ function createNewListItem(): VarNode | null {
   height: 24px;
 }
 
-.select-all-checkbox,
-.row-select-checkbox {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: #409EFF;
+.select-column .checkmark {
+  border: 1px solid rgb(122, 122, 122);
+  border-radius: 0;
+}
+.select-cell .checkmark {
+  border: 1px solid var(--theme-color-dark);
+  border-radius: 0;
 }
 
-.select-all-checkbox:disabled,
-.row-select-checkbox:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.select-column .var-checkbox > input,
+.select-cell .var-checkbox > input,
+.select-column .var-checkbox > span,
+.select-cell .var-checkbox > span {
+  width: 16px;
+  height: 16px;
+  top: 4px;
+}
+.select-column .var-checkbox > input:checked + .checkmark::after {
+  border-color: white;
 }
 
 /* 列表头部布局 */

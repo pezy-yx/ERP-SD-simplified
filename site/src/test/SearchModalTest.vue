@@ -113,7 +113,8 @@ const createSearchMethods = (): SearchMethod[] => [
         cns('string', 'leaf', 'keyword', '', false, {}, [], '关键词'),
         cns('string', 'leaf', 'category', '', false, {}, [], '分类'),
         cns('date', 'leaf', 'startDate', null, false, {}, [], '开始日期'),
-        cns('date', 'leaf', 'endDate', null, false, {}, [], '结束日期')
+        cns('date', 'leaf', 'endDate', null, false, {}, [], '结束日期'),
+        cns('boolean', 'leaf', 'strict', null, false, {}, [], '完全匹配'),
       ], '搜索参数')
     ) as VarTree,
     serviceUrl: '/api/search/advanced'
