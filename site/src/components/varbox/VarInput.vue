@@ -468,9 +468,10 @@ const extraComponentsClass = computed(() => {
   return `extra ${baseClassPrefix.value}--extra`
 })
 
-const searchButtonClass = computed(() => {
-  return `search-button ${baseClassPrefix.value}--search-button`
+const extraTableButtonsClass = computed(() => {
+  return `extra-table-buttons ${baseClassPrefix.value}--extra-table-buttons`
 })
+
 const searchButtonClass = computed(() => {
   return `search-button ${baseClassPrefix.value}--search-button`
 })
