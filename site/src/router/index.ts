@@ -4,6 +4,7 @@ import Application from '@/views/Application.vue';
 import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue'; 
 import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerView.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
+import SearchModalTest from "@/test/SearchModalTest.vue";
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
@@ -63,6 +64,12 @@ const routes = [
         name: 'ApplicationTestPageErp',
         component: TestPageErp,
         meta: { title: 'Test Page' }
+      },
+      {
+        path: 'test/search-modal',
+        name: 'ApplicationSearchModalTest',
+        component: SearchModalTest,
+        meta: { title: 'Search Modal Test' }
       },
       {
         path: 'home',

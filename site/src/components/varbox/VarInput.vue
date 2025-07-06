@@ -74,7 +74,7 @@
                   </slot>
                 </div>
                 <!-- 搜索按钮插槽 -->
-                <div v-if="displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
+                <div v-if="shouldShowSearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
                   <slot
                     :name="`${pathString}--search-button`"
                     v-bind="slotScopeData"
@@ -199,7 +199,7 @@
                 <table v-if="shouldRenderAsTable" :class="`list-table ${baseClassPrefix}--list-table`">
                   <thead>
                     <tr>
-                      <th v-if="isDynamicList && !effectiveReadonly" :class="`select-column ${baseClassPrefix}--select-column`">
+                      <th :class="`select-column ${baseClassPrefix}--select-column`">
                         <input
                           type="checkbox"
                           :checked="isAllSelected"
@@ -214,7 +214,7 @@
                   </thead>
                   <tbody>
                     <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
-                      <td v-if="isDynamicList && !effectiveReadonly" :class="`select-cell ${baseClassPrefix}--select-cell`">
+                      <td :class="`select-cell ${baseClassPrefix}--select-cell`">
                         <input
                           type="checkbox"
                           :checked="selectedRows.has(index)"
@@ -299,17 +299,26 @@
         </slot>
       </div>
     </slot>
+
+    <!-- 搜索弹窗 -->
+    <SearchModal
+      :visible="showSearchModal"
+      :searchMethods="searchMethods"
+      @close="handleSearchModalClose"
+      @confirm="handleSearchModalConfirm"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig, NodeStructure } from '@/utils/VarTree'
+import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig, NodeStructure, cns, createTreeFromConfig, SearchMethod, SearchResultHandler } from '@/utils/VarTree'
 import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
 import SelectionInput from './inputs/StringInput.vue'
 import BooleanInput from './inputs/BooleanInput.vue'
+import SearchModal from '@/components/searchModel/SearchModal.vue'
 
 import {getPathString} from './utils'
 
@@ -393,8 +402,21 @@ const displaySearchButton = ref(false)
 const displaySearchIcon = ref(false)
 const searchButtonCounter = ref(0)
 const focusCounter = ref(0)
+const showSearchModal = ref(false)
+
+
 
 const currentNode = computed<VarNode | null>(() => {return props.varTree.findNodeByPath(props.nodePath)})
+
+// 从config获取搜索方法配置
+const searchMethods = computed<SearchMethod[]>(() => {
+  return currentNode.value?.config?.searchMethods || []
+})
+
+// 是否应该显示搜索按钮（基于配置和当前状态）
+const shouldShowSearchButton = computed(() => {
+  return displaySearchButton.value && searchMethods.value && searchMethods.value.length > 0
+})
 const pathString = computed<string>(()=>getPathString(props.varTree,props.nodePath))
 const setNodeValue = (val: any, refresh:boolean=true, update:boolean=true) => {
   if (currentNode.value) {
@@ -509,6 +531,7 @@ function handleSearchButtonClick() {
   searchButtonCounter.value++
   displaySearchButton.value = false
   displaySearchIcon.value = false
+  showSearchModal.value = true
 }
 
 function handleSearchButtonEnter(){
@@ -518,6 +541,55 @@ function handleSearchButtonEnter(){
 function handleSearchButtonLeave(){
   displaySearchIcon.value = false
 }
+
+function handleSearchModalClose() {
+  showSearchModal.value = false
+}
+
+function handleSearchModalConfirm(data: any) {
+  // 处理搜索确认逻辑，接收SearchModal传来的完整结果
+  console.log('搜索确认', data)
+
+  if (!currentNode.value || !data) {
+    showSearchModal.value = false
+    return
+  }
+
+  // 检查是否有自定义搜索结果处理函数
+  const customHandler = currentNode.value.config?.customSearchResultHandler
+
+  if (customHandler && typeof customHandler === 'function') {
+    // 执行自定义处理逻辑
+    try {
+      customHandler(data, currentNode.value)
+    } catch (error) {
+      console.error('自定义搜索结果处理函数执行失败:', error)
+    }
+  } else {
+    // 默认处理逻辑：将 firstSelectedResult 的 result 字段赋值给 currentNode
+    if (data.firstSelectedResult && data.firstSelectedResult.result !== undefined) {
+      setNodeValue(data.firstSelectedResult.result)
+    } else if (data.selectedResults && data.selectedResults.length > 0) {
+      // 如果没有 firstSelectedResult，使用第一个选中结果
+      const firstResult = data.selectedResults[0]
+      if (firstResult && firstResult.result !== undefined) {
+        setNodeValue(firstResult.result)
+      }
+    }
+  }
+
+  // 触发update事件通知父组件
+  emit('update', {
+    path: props.nodePath,
+    value: currentNode.value.currentValue,
+    node: currentNode.value,
+    action: 'search_result'
+  })
+
+  showSearchModal.value = false
+}
+
+
 
 function initNodeValue() {
   if (isLeafNode.value && currentNode.value) {
@@ -682,6 +754,12 @@ function toggleAllSelection() {
 function updateAllSelectedState() {
   const childrenCount = currentNode.value?.children?.length || 0
   isAllSelected.value = childrenCount > 0 && selectedRows.value.size === childrenCount
+  // config.selected update
+  if (currentNode.value) {
+    currentNode.value.children.forEach((child, index) => {
+      child.config.selected = selectedRows.value.has(index)
+    })
+  }
 }
 
 function removeSelectedItems() {
