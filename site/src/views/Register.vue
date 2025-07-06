@@ -93,7 +93,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import StringInput from '@/components/varbox/inputs/StringInput.vue';
+import StringInput from '@/components/customeStringInput.vue';
 import { VarTree, createTreeFromConfig, cns, validators } from '@/utils/VarTree';
 import { register } from '@/api/auth';
 

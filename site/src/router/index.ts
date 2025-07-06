@@ -9,6 +9,10 @@ import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 
 const routes = [
   {
+    path:'/',
+    redirect: '/login' // 默认重定向到登录页面
+  },
+  {
     path: '/',
     name: 'Home',
     component: Home // 你的系统主页或默认页面
