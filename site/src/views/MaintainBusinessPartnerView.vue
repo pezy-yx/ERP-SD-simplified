@@ -1,8 +1,6 @@
 <template>
-<div class="maintain-business-partner-view">
-  <NavigationBar pageTitle="Maintain Business Partner" @search="handleGlobalSearch"/>
-
-  <FilterTabs :tabs="businessPartnerTabs" @tab-selected="handleTabSelected"/>
+ <div class="maintain-business-partner-view">
+   <FilterTabs :tabs="businessPartnerTabs" @tab-selected="handleTabSelected"/>
 
 <div class="page-content">
   <div v-if="activeContentKey === 'sales_and_dist' || !activeContentKey" class="business-partner-search">
@@ -20,11 +18,6 @@
 
       </div>
   </div>
-
-  <AdvancedSearchModal
-    v-if="showAdvancedSearchModal"
-    @close="toggleAdvancedSearchModal"
-  />
 </div>
 
   <div class="bottom-actions">
@@ -34,9 +27,7 @@
 </template>
 
 <script>
-import NavigationBar from '@/components/NavigationBar.vue';
 import FilterTabs from '@/components/FilterTabs.vue';
-import AdvancedSearchModal from '@/components/AdvancedSearchModal.vue'; // 引用高级搜索弹窗组件
 import { VarTree, createTreeFromConfig, cns } from '../utils/VarTree';
 // 导入 VarInput 组件
 import VarInput from '../components/varbox/VarBox.vue';
@@ -58,9 +49,7 @@ const customerQueryStructure = cns(
 export default {
   name: 'MaintainBusinessPartnerView',
   components: {
-    NavigationBar,
     FilterTabs,
-    AdvancedSearchModal, // 注册高级搜索弹窗组件
     VarInput // 注册 VarInput 组件，以便在模板中使用
   },
   data() {
@@ -74,53 +63,10 @@ export default {
         { label: 'company code', value: 'company_code' },
         { label: 'more', value: 'more' },
       ],
-      businessPartnerQuery: '', // 绑定业务伙伴查询输入框（如果不再使用，可以删除）
-      showAdvancedSearchModal: false, // 控制高级搜索弹窗的显示
-      advancedSearchCriteria: {}, // 存储高级搜索条件
-      // -----------------------------------------------------------
-      // 新增或修改的部分：为客户ID查询创建 VarTree 实例
-      // -----------------------------------------------------------
       customerQueryTree: createTreeFromConfig(customerQueryStructure),
     };
   },
   methods: {
-    handleGlobalSearch(query) {
-      console.log('全局搜索:', query);
-      // 处理全局搜索逻辑
-    },
-    handleTabSelected(tabValue) {
-      this.activeContentKey = tabValue;
-    },
-    toggleAdvancedSearchModal() {
-      this.showAdvancedSearchModal = !this.showAdvancedSearchModal;
-    },
-    applyAdvancedSearch(criteria) {
-      this.advancedSearchCriteria = criteria;
-      this.showAdvancedSearchModal = false;
-      console.log('应用高级搜索条件:', criteria);
-      // 注意：这里可能需要调整，高级搜索如果也是通过 VarTree 管理，则逻辑会有不同
-      // 这里为了兼容性，暂时保持原样，但高级搜索的实现可能也需要一个独立的 VarTree
-      this.performBusinessPartnerSearch(true); // 执行带高级搜索的查询
-    },
-    // -----------------------------------------------------------
-    // 修改 performBusinessPartnerSearch 方法来从 VarTree 中获取值并进行验证
-    // -----------------------------------------------------------
-    performBusinessPartnerSearch(isAdvanced = false) {
-      // 从 customerQueryTree 中获取客户ID的值
-      const customerId = this.customerQueryTree.root?.currentValue;
-
-      // 执行 VarTree 内部的验证
-      const isValid = this.customerQueryTree.root?.validateAll();
-      if (!isValid) {
-        alert('客户ID格式不正确，请检查！');
-        console.error('验证失败:', this.customerQueryTree.root?.getAllErrors());
-        return; // 验证失败，停止搜索
-      }
-
-      console.log(`执行客户ID查询: ${customerId}`, '高级搜索:', isAdvanced ? this.advancedSearchCriteria : '否');
-      // TODO: 在这里添加实际的查询逻辑，使用 customerId 进行 API 调用
-      alert(`执行业务伙伴搜索: ${customerId} (高级: ${isAdvanced ? JSON.stringify(this.advancedSearchCriteria) : '否'})`);
-    }
   }
 };
 </script>
