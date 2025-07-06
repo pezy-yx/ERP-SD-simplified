@@ -12,7 +12,6 @@
 
 <script>
 import NavigationBar from '@/components/NavigationBar.vue';
-import '@/theme.css';
 
 export default {
   name: 'Application',

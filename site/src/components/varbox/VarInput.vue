@@ -471,6 +471,9 @@ const extraComponentsClass = computed(() => {
 const searchButtonClass = computed(() => {
   return `search-button ${baseClassPrefix.value}--search-button`
 })
+const searchButtonClass = computed(() => {
+  return `search-button ${baseClassPrefix.value}--search-button`
+})
 
 // 分离叶子节点和复杂节点
 const leafChildren = computed(() => {
