@@ -11,11 +11,6 @@
         :nodePath="[]"
         class="bp-input-var-input"
       />
-      
-      <button class="bp-search-button" @click="performBusinessPartnerSearch">
-        <img src="../assets/search-plus.png" alt="Search" class="search-icon" />
-      </button>
-
       </div>
   </div>
 </div>
