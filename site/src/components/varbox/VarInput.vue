@@ -83,7 +83,7 @@
                       :class="searchButtonClass"
                       @click="handleSearchButtonClick"
                     >
-                      🔍
+                    <img src="../../assets/search-plus.png" :name="`${pathString}--button-icon`" />
                     </button>
                   </slot>
                 </div>
@@ -734,13 +734,23 @@ function createNewListItem(): VarNode | null {
   background: transparent;
   border: 1px solid var(--theme-color-dark);
   margin-left: -24px;
-  width: 24px;
+  width: 32px;
   font-size: 14px;
   padding: 0;
-  height: 24px;
+  height: 32px;
+  border-radius: 4px;
   line-height: 1.5;
   z-index: 1; /* 确保按钮在输入框上方 */
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-button-container .search-button .button-icon {
+  width: 18px; /* 控制图标大小，使其略小于按钮宽高，留有边距 */
+  height: 18px;
+  object-fit: contain; /* 确保图片在框内完整显示，不裁剪 */
+  display: block; /* 移除图片默认的底部间隙 */
 }
 .search-button-container .search-button:hover {
   background: var(--theme-color-dark);

@@ -38,9 +38,6 @@ import { VarTree, createTreeFromConfig, cns } from '../utils/VarTree';
 // 导入 VarInput 组件
 import VarInput from '../components/varbox/VarBox.vue';
 
-// -----------------------------------------------------------
-// 定义客户ID的 NodeStructure（放在组件定义之外，因为它是一个静态配置）
-// -----------------------------------------------------------
 const customerQueryStructure = cns(
   "string", "leaf", "customer_id", null, false, {
     validators: [

@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Application from '@/views/Application.vue';
 import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue'; 
-import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerContent.vue';
+import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerView.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
@@ -46,7 +46,7 @@ const routes = [
       {
         path: 'maintain-bp',
         name: 'ApplicationMaintainBusinessPartner',
-        component: MaintainBusinessPartnerContent,
+        component: MaintainBusinessPartnerView,
         meta: { title: 'Maintain Business Partner' }
       },
       {
