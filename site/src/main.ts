@@ -7,6 +7,7 @@ import { createApp } from 'vue'
 // 包含渲染函数、数据、方法等
 import App from './App.vue'
 import router from './router'
+import './assets/styles/_base.css'
 // 创建Vue应用，把App.vue挂载到index.html的<div id="app">元素上
 // 启动页面渲染
 createApp(App).use(router).mount('#app')
