@@ -74,7 +74,7 @@
                   </slot>
                 </div>
                 <!-- 搜索按钮插槽 -->
-                <div v-if="displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
+                <div v-if="1||displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
                   <slot
                     :name="`${pathString}--search-button`"
                     v-bind="slotScopeData"
@@ -82,8 +82,11 @@
                     <button
                       :class="searchButtonClass"
                       @click="handleSearchButtonClick"
+                      @mouseenter="handleSearchButtonEnter"
+                      @mouseleave="handleSearchButtonLeave"
                     >
-                    <img src="../../assets/search-plus.png" :name="`${pathString}--button-icon`" />
+                    <img v-if="displaySearchIcon" src="../../assets/search-plus-light.png" width="20px"/>
+                    <img v-else src="../../assets/search-plus-dark.png" width="20px"/>
                     </button>
                   </slot>
                 </div>
@@ -387,6 +390,7 @@ const forceUpdate = () => {
   forceUpdateKey.value++
 }
 const displaySearchButton = ref(false)
+const displaySearchIcon = ref(false)
 const searchButtonCounter = ref(0)
 const focusCounter = ref(0)
 
@@ -468,10 +472,6 @@ const extraComponentsClass = computed(() => {
   return `extra ${baseClassPrefix.value}--extra`
 })
 
-const extraTableButtonsClass = computed(() => {
-  return `extra-table-buttons ${baseClassPrefix.value}--extra-table-buttons`
-})
-
 const searchButtonClass = computed(() => {
   return `search-button ${baseClassPrefix.value}--search-button`
 })
@@ -508,6 +508,14 @@ function handleSearchButtonClick() {
   // console.log('Search clicked')
   searchButtonCounter.value++
   displaySearchButton.value = false
+}
+
+function handleSearchButtonEnter(){
+  displaySearchIcon.value = true
+}
+
+function handleSearchButtonLeave(){
+  displaySearchIcon.value = false
 }
 
 function initNodeValue() {
@@ -594,6 +602,7 @@ function handleBlur() {
     if (searchButtonCounter.value !== currentSearchButtonCounter) return
     if (focusCounter.value !== currentFocusCount) return
       displaySearchButton.value = false
+      displaySearchIcon.value = false
   }, 333)
 }
 function handleValidation() {
@@ -737,28 +746,23 @@ function createNewListItem(): VarNode | null {
 .search-button-container .search-button {
   background: transparent;
   border: 1px solid var(--theme-color-dark);
-  margin-left: -24px;
-  width: 32px;
+  width: 25px;
+  height: 25px;
   font-size: 14px;
   padding: 0;
-  height: 32px;
-  border-radius: 4px;
-  line-height: 1.5;
   z-index: 1; /* 确保按钮在输入框上方 */
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
 }
-.search-button-container .search-button .button-icon {
-  width: 18px; /* 控制图标大小，使其略小于按钮宽高，留有边距 */
-  height: 18px;
-  object-fit: contain; /* 确保图片在框内完整显示，不裁剪 */
-  display: block; /* 移除图片默认的底部间隙 */
-}
+
 .search-button-container .search-button:hover {
   background: var(--theme-color-dark);
   color: white;
+  
 }
 
 .var-label {
