@@ -18,6 +18,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'ERP Backend API is running!' });
 });
 
+// API路由
+app.use('/api/search', require('./routes/search'));
+
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);

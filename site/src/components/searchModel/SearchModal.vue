@@ -111,6 +111,7 @@ import { ref, computed, watch } from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue'
 import ParamInput from './ParamInput.vue'
 import { VarTree, createTreeFromConfig, cns, SearchMethod } from '@/utils/VarTree'
+import { SearchService, SearchResponse } from '@/api/searchService'
 
 // 定义props
 const props = defineProps<{
@@ -182,40 +183,75 @@ function handleParamUpdate(payload: any) {
 // 执行搜索
 async function handleExecute() {
   if (!currentMethod.value) return
-  
+
   try {
-    // 在Modal内部执行搜索请求
-    console.log('执行搜索:', currentMethod.value.name, currentMethod.value.paramTree?.root?.currentValue, currentMethod.value.serviceUrl)
-    
-    // 这里应该发送HTTP请求到后端
-    // const response = await fetch(currentMethod.value.serviceUrl, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(paramData.value)
-    // })
-    // const results = await response.json()
-    
-    // 模拟搜索结果（实际应该使用上面的API响应）
-    // 这里创建一个示例结果树
-    const mockResultTree = createTreeFromConfig(
-      cns('dynamiclist', 'list', 'searchResults', [], false, {}, [
-        cns('dict', 'dict', 'result1', {}, false, {}, [
-          cns('string', 'leaf', 'id', '001', true),
-          cns('string', 'leaf', 'result', '示例结果1', true),
-          cns('string', 'leaf', 'description', '这是一个搜索结果示例', true)
-        ]),
-        cns('dict', 'dict', 'result2', {}, false, {}, [
-          cns('string', 'leaf', 'id', '002', true),
-          cns('string', 'leaf', 'result', '示例结果2', true),
-          cns('string', 'leaf', 'description', '这是另一个搜索结果示例', true)
-        ])
-      ], 'Results --- 仅为示例，后端地址未连接')
+    // 获取搜索参数
+    const searchParams = currentMethod.value.paramTree?.root?.currentValue || {}
+
+    console.log('执行搜索:', {
+      method: currentMethod.value.name,
+      params: searchParams,
+      url: currentMethod.value.serviceUrl
+    })
+
+    // 调用真实的后端API
+    const response: SearchResponse = await SearchService.executeSearch(
+      currentMethod.value,
+      searchParams
     )
-    
-    resultTree.setRoot(mockResultTree.root)
-    stage.value = 1
+
+    if (response.success && response.data) {
+      // 将后端返回的数据转换为VarTree格式
+      const resultNodes = response.data.map((item, index) => {
+        return cns('dict', 'dict', `result${index + 1}`, {}, false, { selected: false }, [
+          cns('string', 'leaf', 'id', item.id, true, {}, [], 'ID'),
+          cns('string', 'leaf', 'result', item.result, true, {}, [], '结果'),
+          cns('string', 'leaf', 'description', item.description, true, {}, [], '描述'),
+          // 添加其他字段
+          ...Object.entries(item).filter(([key]) => !['id', 'result', 'description'].includes(key))
+            .map(([key, value]) => cns('string', 'leaf', key, String(value), true, {}, [], key))
+        ])
+      })
+
+      const searchResultTree = createTreeFromConfig(
+        cns('dynamiclist', 'list', 'searchResults', [], false, {}, resultNodes,
+          `搜索结果 (${response.total}条) - ${response.message || ''}`)
+      )
+
+      resultTree.setRoot(searchResultTree.root)
+      stage.value = 1
+    } else {
+      // 处理搜索失败的情况
+      console.error('搜索失败:', response.message || response.error)
+
+      const errorResultTree = createTreeFromConfig(
+        cns('dynamiclist', 'list', 'searchResults', [], false, {}, [
+          cns('dict', 'dict', 'error', {}, false, {}, [
+            cns('string', 'leaf', 'message', response.message || '搜索失败', true, {}, [], '错误信息'),
+            cns('string', 'leaf', 'error', response.error || '未知错误', true, {}, [], '错误详情')
+          ])
+        ], '搜索失败')
+      )
+
+      resultTree.setRoot(errorResultTree.root)
+      stage.value = 1
+    }
+
   } catch (error) {
     console.error('搜索执行失败:', error)
+
+    // 创建错误结果树
+    const errorResultTree = createTreeFromConfig(
+      cns('dynamiclist', 'list', 'searchResults', [], false, {}, [
+        cns('dict', 'dict', 'error', {}, false, {}, [
+          cns('string', 'leaf', 'message', '网络请求失败', true, {}, [], '错误信息'),
+          cns('string', 'leaf', 'error', error instanceof Error ? error.message : '未知错误', true, {}, [], '错误详情')
+        ])
+      ], '搜索异常')
+    )
+
+    resultTree.setRoot(errorResultTree.root)
+    stage.value = 1
   }
 }
 

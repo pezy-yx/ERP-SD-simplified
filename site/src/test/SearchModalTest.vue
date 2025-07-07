@@ -104,7 +104,7 @@ const createSearchMethods = (): SearchMethod[] => [
   {
     name: '简单搜索',
     paramTree: null,
-    serviceUrl: '/api/search/simple'
+    serviceUrl: '/api/search/mock/simple'
   },
   {
     name: '高级搜索',
@@ -114,10 +114,35 @@ const createSearchMethods = (): SearchMethod[] => [
         cns('string', 'leaf', 'category', '', false, {}, [], '分类'),
         cns('date', 'leaf', 'startDate', null, false, {}, [], '开始日期'),
         cns('date', 'leaf', 'endDate', null, false, {}, [], '结束日期'),
-        cns('boolean', 'leaf', 'strict', null, false, {}, [], '完全匹配'),
+        cns('boolean', 'leaf', 'strict', false, false, {}, [], '完全匹配'),
       ], '搜索参数')
     ) as VarTree,
-    serviceUrl: '/api/search/advanced'
+    serviceUrl: '/api/search/mock/advanced'
+  },
+  {
+    name: '业务伙伴搜索',
+    paramTree: createTreeFromConfig(
+      cns('dict', 'dict', 'bpSearchParams', {}, false, {}, [
+        cns('string', 'leaf', 'bpId', '', false, {}, [], '业务伙伴ID'),
+        cns('string', 'leaf', 'companyName', '', false, {}, [], '公司名称'),
+        cns('selection', 'leaf', 'bpType', '', false, {
+          options: ['客户', '供应商', '合作伙伴']
+        }, [], '业务伙伴类型')
+      ], '业务伙伴搜索参数')
+    ) as VarTree,
+    serviceUrl: '/api/search/mock/business-partner'
+  },
+  {
+    name: '产品搜索',
+    paramTree: createTreeFromConfig(
+      cns('dict', 'dict', 'productSearchParams', {}, false, {}, [
+        cns('string', 'leaf', 'productCode', '', false, {}, [], '产品编码'),
+        cns('string', 'leaf', 'productName', '', false, {}, [], '产品名称'),
+        cns('number', 'leaf', 'minPrice', null, false, {}, [], '最低价格'),
+        cns('number', 'leaf', 'maxPrice', null, false, {}, [], '最高价格')
+      ], '产品搜索参数')
+    ) as VarTree,
+    serviceUrl: '/api/search/mock/product'
   }
 ]
 
@@ -125,7 +150,7 @@ const createMultiSearchMethods = (): SearchMethod[] => [
   {
     name: '快速搜索',
     paramTree: null,
-    serviceUrl: '/api/search/quick'
+    serviceUrl: '/api/search/mock/simple'
   },
   {
     name: '精确搜索',
@@ -135,7 +160,7 @@ const createMultiSearchMethods = (): SearchMethod[] => [
         cns('string', 'leaf', 'code', '', false, {}, [], '编码')
       ], '精确搜索参数')
     ) as VarTree,
-    serviceUrl: '/api/search/exact'
+    serviceUrl: '/api/search/mock/business-partner'
   },
   {
     name: '模糊搜索',
@@ -145,7 +170,43 @@ const createMultiSearchMethods = (): SearchMethod[] => [
         cns('number', 'leaf', 'similarity', 0.8, false, {}, [], '相似度阈值')
       ], '模糊搜索参数')
     ) as VarTree,
-    serviceUrl: '/api/search/fuzzy'
+    serviceUrl: '/api/search/mock/product'
+  },
+  {
+    name: '业务伙伴高级搜索',
+    paramTree: createTreeFromConfig(
+      cns('dict', 'dict', 'bpAdvancedParams', {}, false, {}, [
+        cns('string', 'leaf', 'bpId', '', false, {}, [], '业务伙伴ID'),
+        cns('string', 'leaf', 'companyName', '', false, {}, [], '公司名称'),
+        cns('selection', 'leaf', 'bpType', '', false, {
+          options: ['客户', '供应商', '合作伙伴']
+        }, [], '业务伙伴类型'),
+        cns('string', 'leaf', 'contactPerson', '', false, {}, [], '联系人'),
+        cns('selection', 'leaf', 'status', '', false, {
+          options: ['活跃', '暂停', '停用']
+        }, [], '状态')
+      ], '业务伙伴高级搜索参数')
+    ) as VarTree,
+    serviceUrl: '/api/search/mock/business-partner'
+  },
+  {
+    name: '产品高级搜索',
+    paramTree: createTreeFromConfig(
+      cns('dict', 'dict', 'productAdvancedParams', {}, false, {}, [
+        cns('string', 'leaf', 'productCode', '', false, {}, [], '产品编码'),
+        cns('string', 'leaf', 'productName', '', false, {}, [], '产品名称'),
+        cns('selection', 'leaf', 'category', '', false, {
+          options: ['电子产品', '可穿戴设备', '音频设备', '办公设备']
+        }, [], '产品分类'),
+        cns('number', 'leaf', 'minPrice', null, false, {}, [], '最低价格'),
+        cns('number', 'leaf', 'maxPrice', null, false, {}, [], '最高价格'),
+        cns('number', 'leaf', 'minStock', null, false, {}, [], '最低库存'),
+        cns('selection', 'leaf', 'status', '', false, {
+          options: ['在售', '缺货', '停产']
+        }, [], '产品状态')
+      ], '产品高级搜索参数')
+    ) as VarTree,
+    serviceUrl: '/api/search/mock/product'
   }
 ]
 
