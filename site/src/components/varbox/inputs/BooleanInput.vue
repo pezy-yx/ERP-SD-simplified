@@ -5,17 +5,18 @@
       v-bind="slotScopeData"
     >
       <div class="boolean-input-wrapper">
-        <input
-          type="checkbox"
-          v-model="inputValue"
-          :disabled="readonly"
-          :class="inputClass"
-          @change="handleInput"
-          @blur="handleBlur"
-          @keyup.enter="handleEnter"
-        />
-        <!-- <span v-if="!readonly" class="boolean-label">{{ inputValue ? '是' : '否' }}</span>
-        <span v-else class="boolean-label readonly">{{ inputValue ? '是' : '否' }}</span> -->
+        <label class="var-checkbox">
+          <input
+            type="checkbox"
+            v-model="inputValue"
+            :disabled="readonly"
+            :class="inputClass"
+            @change="handleInput"
+            @blur="handleBlur"
+            @keyup.enter="handleEnter"
+          />
+          <span class="checkmark"></span>
+        </label>
       </div>
     </slot>
   </div>
@@ -98,7 +99,6 @@ function handleEnter() {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #409EFF;
 }
 
 .boolean-input:disabled {
@@ -117,7 +117,6 @@ function handleEnter() {
 }
 
 .boolean-input:focus {
-  outline: 2px solid #409EFF;
   outline-offset: 2px;
 }
 </style>

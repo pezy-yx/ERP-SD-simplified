@@ -58,11 +58,73 @@ a:hover {
     color: var(--color-link-hover); /* 悬停时改变颜色 */
 }
 
+
+.var-checkbox {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.var-checkbox input[type="checkbox"] {
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.checkmark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: 2px solid var(--theme-color-dark);
+  border-radius: 4px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.var-checkbox:hover .checkmark {
+  background: var(--theme-color-light-a);
+}
+
+.var-checkbox:active .checkmark {
+  background: var(--theme-color-light);
+}
+
+.var-checkbox input[type="checkbox"]:checked + .checkmark::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  width: 6px;
+  height: 12px;
+  border: 1px solid var(--theme-color-dark);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  display: block;
+}
+
+.var-checkbox input[type="checkbox"]:disabled + .checkmark {
+  background: #606266;
+  border-color: transparent;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 :root {
     /* ... 你的所有 CSS 变量 ... */
     
     --theme-color-lighter-a: rgb(192, 192, 192, 0.2);
     --theme-color-lighter: #c0c0c0;
+    --theme-color-light-a: rgb(72, 92, 94, 0.2);
     --theme-color-light: #485c5e;
     --theme-color-dark: #25484C;
     --theme-color-darker: #153c40;

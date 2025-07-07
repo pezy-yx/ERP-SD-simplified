@@ -26,7 +26,15 @@
             @click="showDatePicker"
             :disabled="readonly"
           >
-            📅
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <rect x="3" y="5" width="14" height="12" rx="2" stroke="#606266" stroke-width="1.5" fill="#fff"/>
+              <path d="M3 8H17" stroke="#606266" stroke-width="1.5"/>
+              <rect x="6" y="11" width="2" height="2" rx="1" fill="#606266"/>
+              <rect x="9" y="11" width="2" height="2" rx="1" fill="#606266"/>
+              <rect x="12" y="11" width="2" height="2" rx="1" fill="#606266"/>
+              <path d="M7 3V6" stroke="#606266" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M13 3V6" stroke="#606266" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
           </button>
         </div>
       </slot>
@@ -191,13 +199,14 @@ function hideDatePicker() {
 } */
 
 .date-picker-btn {
-  padding: 8px 12px;
-  border: 1px solid #DCDFE6;
+  /* padding: 8px 12px; */
+  /* border: 1px solid #DCDFE6; */
+  border: none;
   border-left: none;
   border-radius: 0 4px 4px 0;
-  background-color: #F5F7FA;
+  background-color: transparent;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   transition: background-color 0.2s;
 }
 
