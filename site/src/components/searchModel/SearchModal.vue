@@ -280,8 +280,8 @@ defineExpose({
 }
 
 .search-modal {
-  width: 53vw;
-  height: 62vh;
+  width: 33vw;
+  height: 42vh;
   background-color: var(--theme-color-page);
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
