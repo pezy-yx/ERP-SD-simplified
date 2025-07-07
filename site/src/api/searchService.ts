@@ -1,7 +1,7 @@
 import { SearchMethod } from '@/utils/VarTree'
 
-// 搜索服务配置
-const API_BASE_URL = 'http://localhost:3000'
+// 搜索服务配置 - 从环境变量读取
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 
 // 搜索响应接口
 export interface SearchResponse {
@@ -81,7 +81,7 @@ export class SearchService {
     const method: SearchMethod = {
       name: '业务伙伴搜索',
       paramTree: null,
-      serviceUrl: '/api/search/mock/business-partner'
+      serviceUrl: '/search/mock/business-partner'
     }
     
     return this.executeSearch(method, params)
@@ -100,7 +100,7 @@ export class SearchService {
     const method: SearchMethod = {
       name: '产品搜索',
       paramTree: null,
-      serviceUrl: '/api/search/mock/product'
+      serviceUrl: '/search/mock/product'
     }
     
     return this.executeSearch(method, params)
@@ -114,7 +114,7 @@ export class SearchService {
     const method: SearchMethod = {
       name: '简单搜索',
       paramTree: null,
-      serviceUrl: '/api/search/mock/simple'
+      serviceUrl: '/search/mock/simple'
     }
     
     return this.executeSearch(method, { query })
@@ -134,7 +134,7 @@ export class SearchService {
     const method: SearchMethod = {
       name: '高级搜索',
       paramTree: null,
-      serviceUrl: '/api/search/mock/advanced'
+      serviceUrl: '/search/mock/advanced'
     }
     
     return this.executeSearch(method, params)
