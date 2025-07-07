@@ -1,7 +1,7 @@
 import { SearchMethod } from '@/utils/VarTree'
 
 // 搜索服务配置 - 从环境变量读取
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000/api'
 
 // 搜索响应接口
 export interface SearchResponse {
