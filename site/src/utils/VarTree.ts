@@ -13,6 +13,22 @@ export type VarNodeValueValidator = {
 }
 export type VarNodeValueValidators = VarNodeValueValidator[]
 
+// 搜索方法接口
+export interface SearchMethod {
+  name: string
+  paramTree: VarTree | null
+  serviceUrl: string
+}
+
+// 搜索结果处理函数类型
+export type SearchResultHandler = (data: {
+  method: SearchMethod
+  params: any
+  results: any
+  selectedResults: any[]
+  firstSelectedResult: any
+}, currentNode: VarNode) => void
+
 export type VarNodeConfig = {
   childTemplate?: NodeStructure; // 子节点模板，用于动态列表
   maxLength?: number; // 最大长度，用于动态列表
@@ -23,6 +39,9 @@ export type VarNodeConfig = {
   options?: string[]; // 选择项列表（用于selection类型）
   classPrefix?: string; // CSS类名前缀，用于自定义布局样式
   hideLabel?: boolean; // 是否隐藏当前的Label
+  searchMethods?: SearchMethod[] | null; // 搜索方法配置
+  customSearchResultHandler?: SearchResultHandler; // 自定义搜索结果处理函数
+  selected?: boolean; // 是否为选中状态
 }
 
 export type NodeStructure = {
@@ -83,7 +102,9 @@ export class VarNode {
     this.index = -1          // 中序遍历位置，由VarTree初始化时设置
     this.config = config || {} // 自定义配置参数
     // this._currentValue = defaultValue; // 初始化object
-    this.currentValue = defaultValue; // 设置初始值
+    if (this.nodeType === 'leaf') {
+      this.currentValue = defaultValue; // 设置初始值
+    }
   }
 
   /**

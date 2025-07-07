@@ -8,9 +8,10 @@
     :indentLevel="props.indentLevel"
     :showLabel="true"
     :wrapperStyle="props.wrapperStyle"
+    @update="handleUpdate"
   >
     <!-- 透传插槽 -->
-    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
       <slot :name="slotName" v-bind="slotProps"></slot>
     </template>
   </VarInput>
@@ -25,4 +26,10 @@ const props = defineProps<{
   showLabel?: boolean,
   wrapperStyle?: Record<string, any>
 }>()
+const emit = defineEmits<{
+  (e: 'update', payload: any): void
+}>()
+function handleUpdate(payload: any) {
+  emit('update', payload)
+}
 </script>
