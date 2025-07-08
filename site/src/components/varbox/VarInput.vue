@@ -193,7 +193,8 @@
               </div>
               <!-- 表格形式渲染列表 -->
               <div :class="`list-content ${baseClassPrefix}--list-content`">
-                <table v-if="shouldRenderAsTable" :class="`list-table ${baseClassPrefix}--list-table`">
+                <div v-if="shouldRenderAsTable" :class="`table-container ${baseClassPrefix}--table-container`">
+                  <table :class="`list-table ${baseClassPrefix}--list-table`">
                   <thead>
                     <tr>
                       <th v-if="isDynamicList && !effectiveReadonly" :class="`select-column ${baseClassPrefix}--select-column`">
@@ -255,7 +256,8 @@
                       </td>
                     </tr>
                   </tbody>
-                </table>
+                  </table>
+                </div>
                 <!-- 非表格形式渲染列表 -->
                 <div v-else :class="`list-items ${baseClassPrefix}--list-items`">
                   <div
@@ -457,7 +459,8 @@ const baseClassPrefix = computed(() => {
 })
 
 const wrapperClass = computed(() => {
-  return `wrapper ${baseClassPrefix.value}--wrapper`
+  const t = currentNode.value?.nodeType
+  return `wrapper ${baseClassPrefix.value}--wrapper ${t}-node-varinput ${baseClassPrefix.value}--${t}-node-varinput`
 })
 
 const mainContentClass = computed(() => {
@@ -715,6 +718,19 @@ function createNewListItem(): VarNode | null {
 </script>
 
 <style scoped>
+.wrapper,
+.main,
+.var-input-container,
+.dict-node, .leaf-node, .list-node,
+.leaf-input-container, .dict-content, .dict-leaf-section, .dict-complex-section, .list-header-actions, .list-content {
+  max-width: 100%;
+  min-width: 100%;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
 /* 默认容器样式 */
 .var-input-container {
   font-family: Arial, sans-serif;
@@ -823,7 +839,7 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(input.readonly),
 .leaf-node :deep(select:disabled) {
   background: var(--theme-color-input-readonly);
-  cursor: not-allowed;
+  /* cursor: not-allowed; */
 }
 
 /* SAP风格字典节点布局 */
@@ -906,15 +922,37 @@ function createNewListItem(): VarNode | null {
   width: 100%; /* 复杂节点独占一行 */
 }
 
+/* 表格容器样式 */
+.table-container {
+  overflow-x: auto; /* 水平滚动 */
+  overflow-y: auto; /* 垂直滚动 */
+  max-height: 100%; /* 默认最大高度 */
+  border: 1px solid var(--theme-color-light);
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+.table-container::-webkit-scrollbar {
+  display: none;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--theme-color-light);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-color-lighter);
+}
+
 /* SAP风格列表表格 */
 .list-table {
   width: 100%;
+  min-width: 100%; /* 确保表格至少占满容器宽度 */
   border-collapse: collapse;
-  /* border: 1px solid #e5e7eb; */
-  margin-top: 10px;
+  margin: 0; /* 移除margin，由容器控制 */
   border-radius: 0px;
-  overflow: hidden;
-  margin-bottom: 16px;
+  position: relative;
 }
 
 .list-table th {
@@ -984,18 +1022,44 @@ function createNewListItem(): VarNode | null {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
-/* 选择列宽度控制 */
+/* 选择列宽度控制和固定位置 */
 .list-table .select-column {
   width: 40px; /* 固定选择列宽度 */
+  min-width: 40px; /* 最小宽度 */
+  max-width: 40px; /* 最大宽度 */
   text-align: center;
+  position: sticky;
+  left: 0;
+  z-index: 11; /* 表头层级更高 */
+  background-color: var(--theme-color-table-header-bg);
+  border-right: 2px solid var(--theme-color-dark); /* 增强分隔线 */
 }
 
 .list-table .select-cell {
   width: 40px;
+  min-width: 40px;
+  max-width: 40px;
   text-align: center;
   padding-left: 4px;
   padding-right: 4px;
   height: 24px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: var(--theme-color-page);
+  border-right: 2px solid var(--theme-color-dark); /* 增强分隔线 */
+}
+
+/* 鼠标悬停时保持固定列背景 */
+.list-table tr:hover .select-cell {
+  background-color: var(--theme-color-lighter-a);
+}
+
+/* 确保其他列有合适的宽度 */
+.list-table th:not(.select-column),
+.list-table td:not(.select-cell) {
+  min-width: 100px; /* 设置最小列宽 */
+  max-width: 250px; /* 设置最大列宽 */
 }
 
 .select-all-checkbox,
@@ -1120,6 +1184,12 @@ function createNewListItem(): VarNode | null {
   display: grid;
   width: 100%;
   justify-content: center;
+}
+
+.list-node-varinput.wrapper {
+  display: flex;
+  justify-content: start;
+  width: 100%;
 }
 
 /* 响应式布局 */
