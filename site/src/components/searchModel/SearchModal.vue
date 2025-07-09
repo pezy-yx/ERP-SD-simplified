@@ -204,12 +204,8 @@ async function handleExecute() {
       // 将后端返回的数据转换为VarTree格式
       const resultNodes = response.data.map((item, index) => {
         return cns('dict', 'dict', `result${index + 1}`, {}, false, { selected: false }, [
-          cns('string', 'leaf', 'id', item.id, true, {}, [], 'ID'),
-          cns('string', 'leaf', 'result', item.result, true, {}, [], '结果'),
-          cns('string', 'leaf', 'description', item.description, true, {}, [], '描述'),
-          // 添加其他字段
-          ...Object.entries(item).filter(([key]) => !['id', 'result', 'description'].includes(key))
-            .map(([key, value]) => cns('string', 'leaf', key, String(value), true, {}, [], key))
+          ...Object.entries(item)
+            .map(([key, value]) => cns('string', 'leaf', key, String(value), true, {}, [], currentMethod.value.resultHeaderDisplay?.[key] || key))
         ])
       })
 
