@@ -210,6 +210,12 @@ export default {
           "routePath": "/test/app-content",
           "tags": ["test"]
         },
+        {
+          "applicationName": "Example Application",
+          "lore": "展示VarTree/VarBox、ApplicationContent和SearchModal的综合应用示例",
+          "routePath": "/example",
+          "tags": ["example"]
+        },
       ]
     };
   },
@@ -241,7 +247,8 @@ export default {
         'delivery management': '交付管理',
         'financial management': '财务管理',
         'chore': '其他',
-        'test': '测试'
+        'test': '测试',
+        'example': '示例'
       };
       return tagNames[tag] || tag;
     },

@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 
 // API路由
 app.use('/api/search', require('./routes/search'));
+app.use('/api/employee', require('./routes/employee'));
 
 // 启动服务器
 app.listen(PORT, () => {
