@@ -18,6 +18,7 @@ export interface SearchMethod {
   name: string
   paramTree: VarTree | null
   serviceUrl: string
+  resultHeaderDisplay?: Record<string, string>
 }
 
 // 搜索结果处理函数类型
