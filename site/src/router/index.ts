@@ -7,6 +7,7 @@ import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerView.
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import SearchModalTest from "@/test/SearchModalTest.vue";
 import AppContentTest from "@/test/AppContentTest.vue";
+import ExampleApplication from '@/views/example/ExampleApplication.vue';
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
@@ -80,6 +81,12 @@ const routes = [
         name: 'ApplicationAppContentTest',
         component: AppContentTest,
         meta: { title: 'AppContent Component Test' }
+      },
+      {
+        path: 'example',
+        name: 'ApplicationExample',
+        component: ExampleApplication,
+        meta: { title: 'Example Application' }
       },
       {
         path: 'home',
