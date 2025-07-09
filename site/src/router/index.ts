@@ -1,7 +1,8 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from "vue-router";
 import Application from '@/views/Application.vue';
-import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue'; 
+import ApplicationDirectory from '@/views/ApplicationDirectory.vue';
+import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue';
 import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerView.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import SearchModalTest from "@/test/SearchModalTest.vue";
@@ -45,7 +46,9 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/application/maintain-bp' // 默认重定向到业务伙伴维护页面
+        name: 'ApplicationDirectory',
+        component: ApplicationDirectory,
+        meta: { title: '应用程序目录' }
       },
       {
         path: 'maintain-bp',

@@ -1,0 +1,411 @@
+<template>
+  <div class="page-content">
+    <div>
+      <!-- 标签筛选器 -->
+      <div class="tag-filter-section">
+        <div class="tag-filter-container">
+          <button 
+            class="tag-filter-button"
+            :class="{ active: selectedTag === null }"
+            @click="selectTag(null)"
+          >
+            全部
+          </button>
+          <button 
+            v-for="tag in availableTags" 
+            :key="tag"
+            class="tag-filter-button"
+            :class="{ active: selectedTag === tag }"
+            @click="selectTag(tag)"
+          >
+            {{ getTagDisplayName(tag) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 应用程序网格 -->
+      <div class="applications-grid">
+        <div 
+          v-for="app in filteredApplications" 
+          :key="app.applicationName"
+          class="application-card"
+          @click="navigateToApplication(app)"
+        >
+          <div class="application-header">
+            <p class="application-name">{{ app.applicationName }}</p>
+            <!-- <div class="application-tags">
+              <span 
+                v-for="tag in app.tags" 
+                :key="tag"
+                class="application-tag"
+                :class="`tag-${tag.replace(/\s+/g, '-')}`"
+              >
+                {{ getTagDisplayName(tag) }}
+              </span>
+            </div> -->
+          </div>
+          <span class="spacer"></span>
+          <div class="application-lore" v-if="app.lore">
+            {{ app.lore }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 统计信息 -->
+      <div class="directory-stats">
+        <span>显示 {{ filteredApplications.length }} / {{ applications.length }} 个应用程序</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'ApplicationDirectory',
+  data() {
+    return {
+      selectedTag: null,
+      applications: [
+        {
+          "applicationName": "Curricular Material PDF",
+          "lore": "Download Curricula",
+          "routePath": "/CurricularMaterialPDF",
+          "tags": ["chore"]
+        },
+        {
+          "applicationName": "Maintain Business Partner",
+          "lore": "",
+          "routePath": "/MaintainBusinessPartner",
+          "tags": ["customer management"]
+        },
+        {
+          "applicationName": "Display BP relationship",
+          "lore": "",
+          "routePath": "/DisplayBPRelationship",
+          "tags": ["customer management"]
+        },
+        {
+          "applicationName": "Change BP relationship",
+          "lore": "",
+          "routePath": "/ChangeBPRelationship",
+          "tags": ["customer management"]
+        },
+        {
+          "applicationName": "Create Inquiry",
+          "lore": "",
+          "routePath": "/CreateInquiry",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Change Inquiry",
+          "lore": "",
+          "routePath": "/ChangeInquiry",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Display Inquiry",
+          "lore": "",
+          "routePath": "/DisplayInquiry",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Manage Sales Quotations",
+          "lore": "",
+          "routePath": "/ManageSalesQuotations",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Create Sales Order",
+          "lore": "",
+          "routePath": "/CreateSalesOrder",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Sales Order Fulfillment",
+          "lore": "All issues",
+          "routePath": "/SalesOrderFulfillment",
+          "tags": ["order management", "delivery management"]
+        },
+        {
+          "applicationName": "List Sales Orders",
+          "lore": "",
+          "routePath": "/ListSalesOrders",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Manage Sales Orders",
+          "lore": "",
+          "routePath": "/ManageSalesOrders",
+          "tags": ["order management"]
+        },
+        {
+          "applicationName": "Manage Outbound Deliveries",
+          "lore": "",
+          "routePath": "/ManageOutboundDeliveries",
+          "tags": ["delivery management"]
+        },
+        {
+          "applicationName": "Pick Outbound Deliveries",
+          "lore": "From Sales Orders",
+          "routePath": "/PickOutboundDeliveries",
+          "tags": ["delivery management"]
+        },
+        {
+          "applicationName": "Material Documents Overview",
+          "lore": "",
+          "routePath": "/MaterialDocumentsOverview",
+          "tags": ["chore"]
+        },
+        {
+          "applicationName": "Manage Stock",
+          "lore": "",
+          "routePath": "/ManageStock",
+          "tags": ["chore"]
+        },
+        {
+          "applicationName": "Display Stock Overview",
+          "lore": "",
+          "routePath": "/DisplayStockOverview",
+          "tags": ["chore"]
+        },
+        {
+          "applicationName": "Create Billing Documents VRF11",
+          "lore": "VRF11",
+          "routePath": "/CreateBillingDocuments",
+          "tags": ["financial management"]
+        },
+        {
+          "applicationName": "Display Billing Documents",
+          "lore": "76\nBilling Due List Items",
+          "routePath": "/DisplayBillingDocuments",
+          "tags": ["financial management"]
+        },
+        {
+          "applicationName": "Change Billing Document VR02",
+          "lore": "VR02",
+          "routePath": "/ChangeBillingDocument",
+          "tags": ["financial management"]
+        },
+        {
+          "applicationName": "Display Billing Document VR03",
+          "lore": "VR03",
+          "routePath": "/DisplayBillingDocument",
+          "tags": ["financial management"]
+        },
+        {
+          "applicationName": "Manage Billing Documents",
+          "lore": "",
+          "routePath": "/ManageBillingDocuments",
+          "tags": ["financial management"]
+        },
+        {
+          "applicationName": "Post Incoming Payments",
+          "lore": "",
+          "routePath": "/PostIncomingPayments",
+          "tags": ["financial management"]
+        },
+      ]
+    };
+  },
+  computed: {
+    availableTags() {
+      const tags = new Set();
+      this.applications.forEach(app => {
+        app.tags.forEach(tag => tags.add(tag));
+      });
+      return Array.from(tags).sort();
+    },
+    filteredApplications() {
+      if (!this.selectedTag) {
+        return this.applications;
+      }
+      return this.applications.filter(app => 
+        app.tags.includes(this.selectedTag)
+      );
+    }
+  },
+  methods: {
+    selectTag(tag) {
+      this.selectedTag = tag;
+    },
+    getTagDisplayName(tag) {
+      const tagNames = {
+        'customer management': '客户管理',
+        'order management': '订单管理',
+        'delivery management': '交付管理',
+        'financial management': '财务管理',
+        'chore': '其他'
+      };
+      return tagNames[tag] || tag;
+    },
+    navigateToApplication(app) {
+      const fullPath = `/application${app.routePath}`;
+      console.log(`导航到应用: ${app.applicationName} -> ${fullPath}`);
+      this.$router.push(fullPath);
+    }
+  },
+  mounted() {
+    // 设置页面标题
+    this.$emit('update-title', '应用程序目录');
+  }
+};
+</script>
+
+<style scoped>
+.tag-filter-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: var(--theme-color-lighter-a);
+  border-radius: 8px;
+}
+
+.tag-filter-label {
+  color: var(--theme-color-dark);
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.tag-filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-filter-button {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--theme-color-light);
+  background-color: transparent;
+  color: var(--theme-color-dark);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.tag-filter-button:hover {
+  background-color: var(--theme-color-light-a);
+}
+
+.tag-filter-button.active {
+  background-color: var(--theme-color-dark);
+  color: var(--theme-color-contrast);
+  border-color: var(--theme-color-dark);
+}
+
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-auto-rows: 15vh;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.application-card {
+  background-color: var(--theme-color-contrast);
+  border: 1px solid var(--theme-color-lighter);
+  border-radius: 8px;
+  padding: 1.2rem;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+}
+.application-card::-webkit-scrollbar {
+  display: none;
+}
+
+.application-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--theme-color-light);
+}
+
+.application-header {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.application-name {
+  color: var(--theme-color-dark);
+  font-size: 1.3rem;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.application-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.application-tag {
+  background-color: var(--theme-color-light-a);
+  color: var(--theme-color-dark);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.application-lore {
+  color: var(--theme-color-light);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  min-height: 1.4rem;
+  text-align: right;
+}
+
+.application-route {
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+  font-family: monospace;
+  background-color: var(--theme-color-lighter-a);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border-left: 3px solid var(--theme-color-light);
+}
+
+.directory-stats {
+  text-align: center;
+  color: var(--theme-color-light);
+  font-size: 0.9rem;
+  padding: 1rem;
+  border-top: 1px solid var(--theme-color-lighter);
+}
+
+/* 标签特定颜色 */
+.tag-customer-management {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: #2980b9;
+}
+
+.tag-order-management {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+}
+
+.tag-delivery-management {
+  background-color: rgba(155, 89, 182, 0.2);
+  color: #8e44ad;
+}
+
+.tag-financial-management {
+  background-color: rgba(230, 126, 34, 0.2);
+  color: #d35400;
+}
+
+.tag-chore {
+  background-color: rgba(149, 165, 166, 0.2);
+  color: #7f8c8d;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+</style>
