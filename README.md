@@ -508,3 +508,180 @@ TestPage展示了多种高级用法，包括：
 - **数据录入表单**：根据业务规则动态生成的录入界面
 - **递归组件设计**：避免了硬编码的层级限制
 - **标准化接口**：确保了组件间的一致性和可维护性
+
+
+## 2. 搜索模态框 (SearchModal)
+
+### 2.1. 核心概念
+`SearchModal`是一个与`VarInput`紧密集成的高度可复用搜索组件。其核心思想是将**搜索的定义（需要哪些参数）**、**搜索的执行（调用哪个后端服务）** 与**搜索的触发（在哪个输入框上）** 完全解耦。
+
+通过在`VarNode`的`config`中提供一个`SearchMethod`对象，任何`VarInput`都可以被赋予一个搜索功能，用于帮助用户查找并填充该输入框的值。
+
+### 2.2. SearchMethod 接口详解
+`SearchMethod`是配置搜索功能的核心接口，它定义了一个完整搜索操作所需的所有信息。
+
+```typescript
+// 定义于: src/api/searchService.ts (示例)
+export interface SearchMethod {
+  name: string;
+  paramTree: VarTree | null;
+  serviceUrl: string;
+}
+```
+
+**参数详解:**
+
+-   **`name: string`**
+    -   **描述**: 搜索模态框的标题。
+    -   **作用**: 用于向用户明确当前正在搜索什么内容，例如“搜索客户”或“选择物料”。
+
+-   **`paramTree: VarTree | null`**
+    -   **描述**: 一个`VarTree`实例，用于动态生成搜索参数的输入表单。
+    -   **作用**: 这是`SearchModal`强大灵活性的关键。开发者可以通过构建一个`VarTree`来定义搜索需要的所有参数，包括参数的类型、名称、默认值、校验规则等。`SearchModal`内部会使用`VarBox`组件将这个`VarTree`渲染成一个交互式表单。如果某个搜索不需要参数，可以设为`null`。
+
+-   **`serviceUrl: string`**
+    -   **描述**: 后端提供搜索服务的API端点URL。
+    -   **作用**: 当用户在模态框中点击“搜索”时，`SearchModal`会收集`paramTree`表单中的所有参数，并将它们作为请求体发送到这个URL。
+
+### 2.3. 使用与集成
+
+#### 2.3.1 定义一个SearchMethod
+首先，你需要在一个统一的地方（例如 `src/api/searchService.ts`）定义具体的搜索方法对象。
+
+```typescript
+// src/api/searchService.ts
+import { VarTree, cns, createTreeFromConfig } from '@/utils/VarTree';
+
+// 1. 为“搜索客户”功能定义参数树
+const customerSearchParamStruct = cns('dict', 'dict', 'params', null, false, {}, [
+  cns('string', 'leaf', 'customerName', '客户名称', false),
+  cns('string', 'leaf', 'customerCode', '客户代码', false)
+]);
+const customerSearchParamTree = createTreeFromConfig(customerSearchParamStruct);
+
+// 2. 创建SearchMethod对象
+export const searchCustomer: SearchMethod = {
+  name: '搜索客户',
+  paramTree: customerSearchParamTree,
+  serviceUrl: '/api/search/customer' // 后端搜索客户的API地址
+};
+```
+
+#### 2.3.2 在VarNode中配置
+然后，在你的业务页面中，将这个`SearchMethod`对象配置到需要搜索功能的`VarNode`的`config`属性中。
+
+```typescript
+// 在你的视图组件中
+import { cns } from '@/utils/VarTree';
+import { searchCustomer } from '@/api/searchService'; // 引入定义好的搜索方法
+
+// 在构建NodeStructure时，为customerId字段配置searchMethod
+const orderStruct = cns('dict', 'dict', 'order', null, false, {}, [
+  cns('string', 'leaf', 'orderId', '订单号', true),
+  cns('string', 'leaf', 'customerId', '客户ID', false, {
+    // 将searchMethod对象传入config
+    searchMethod: searchCustomer
+  })
+]);
+```
+
+### 2.4. 数据流转说明
+1.  **触发**: 用户点击`VarInput`输入框（如“客户ID”）旁边的搜索图标。
+2.  **识别**: `VarInput`组件检测到其对应的`VarNode`的`config`中存在`searchMethod`属性。
+3.  **打开模态框**: `VarInput`触发一个全局事件，打开`SearchModal`组件，并将`searchCustomer`对象作为参数传入。
+4.  **渲染表单**: `SearchModal`根据`searchCustomer.name`设置标题，并使用`searchCustomer.paramTree`通过`ParamInput`组件渲染出“客户名称”和“客户代码”两个输入框。
+5.  **执行搜索**: 用户填写参数后点击“搜索”，`SearchModal`将参数发送到`searchCustomer.serviceUrl` (`/api/search/customer`)，并展示返回的数据列表。
+6.  **回填数据**: 用户从列表中选择一行并点击“确认”，`SearchModal`关闭，并将选中行的数据返回给最初的`VarInput`，自动填充“客户ID”字段的值。
+
+## 3. 应用内容区 (ApplicationContent)
+
+### 3.1. 设计理念：多阶段流程控制器
+`ApplicationContent` (组件: `AppContent.vue`) 是一个用于构建复杂、分步骤业务流程的核心容器。它并非简单的内容展示区，而是一个**多阶段流程管理器**，旨在将一个完整的业务操作（如“创建订单”、“物料入库”）分解为多个逻辑清晰、有序的**阶段 (Stage)**。
+
+其核心设计思想是：
+-   **流程分解**: 将庞大、复杂的表单和操作分解为一系列引导式的步骤，降低用户的认知负荷。
+-   **状态隔离与集成**: 每个阶段都可以拥有独立的上下文和UI（通常是一个配置好的`VarBox`），同时组件又提供了统一的导航控制和生命周期钩子，将所有阶段串联成一个整体。
+-   **与`VarTree`生态深度集成**: `ApplicationContent`的每个阶段都是为承载`VarTree`实例而设计的。通过在不同阶段的插槽中放入不同的`VarBox`组件，可以轻松构建出向导式的动态表单。
+
+### 3.2. 核心Props与配置
+
+#### 3.2.1 `stages: string[]`
+-   **描述**: (必需) 一个字符串数组，用于定义流程的所有阶段名称。数组的顺序决定了流程的步骤顺序。
+-   **示例**: `['填写基本信息', '确认物料清单', '完成']`
+
+#### 3.2.2 `footerConfig?: any[]`
+-   **描述**: 一个数组，用于为每个阶段自定义底部导航按钮的行为和文本。
+-   **作用**: 可以为特定阶段修改“上一步”、“下一步”按钮的文本，或者隐藏它们。
+-   **示例**: `[{ nextText: '下一步：确认清单' }, { prevText: '返回修改信息', nextText: '提交订单' }]`
+
+#### 3.2.3 导航钩子: `beforeNext` & `beforePrev`
+-   **类型**: `(currentStage: number, targetStage: number) => boolean | Promise<boolean>`
+-   **描述**: 在用户点击“下一步”或“上一步”时触发的生命周期钩子。
+-   **作用**: 这是实现阶段性校验或数据提交的关键。你可以在这里执行`VarTree`的校验方法，或者向后端发送当前阶段的数据。如果钩子函数返回`false`或一个解析为`false`的Promise，导航将被阻止。
+-   **示例**:
+    ```javascript
+    async function handleBeforeNext(currentStage, targetStage) {
+      if (currentStage === 0) {
+        // 假设 firstStepTree 是第一阶段的 VarTree 实例
+        const isValid = await firstStepTree.validate(); // 执行校验
+        if (!isValid) {
+          alert('请检查基本信息是否填写正确！');
+          return false; // 阻止导航
+        }
+      }
+      return true; // 允许导航
+    }
+    ```
+
+### 3.3. 应用模式：通过插槽构建流程
+
+`ApplicationContent`通过具名插槽来填充每个阶段的内容。插槽的名称遵循`stage-阶段名`的格式。
+
+**示例：一个两阶段的订单创建流程**
+```vue
+<template>
+  <AppContent
+    ref="appContentRef"
+    :stages="['填写客户信息', '添加商品']"
+    :before-next="onBeforeNext"
+  >
+    <!-- 阶段一：填写客户信息 -->
+    <template #stage-填写客户信息="{ next, prev, goToStage }">
+      <h1>第一步：客户信息</h1>
+      <VarBox :tree="customerInfoTree" />
+    </template>
+
+    <!-- 阶段二：添加商品 -->
+    <template #stage-添加商品="{ next, prev, goToStage }">
+      <h1>第二步：选择商品</h1>
+      <VarBox :tree="productSelectionTree" />
+    </template>
+  </AppContent>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import AppContent from '@/components/applicationContent/AppContent.vue';
+import VarBox from '@/components/varbox/VarBox.vue';
+// 假设 customerInfoTree 和 productSelectionTree 是已创建的 VarTree 实例
+const appContentRef = ref(null);
+
+async function onBeforeNext(currentStage) {
+  if (currentStage === 0) {
+    // 校验第一步的VarTree
+    const valid = await customerInfoTree.validate();
+    return valid;
+  }
+  return true;
+}
+</script>
+```
+
+### 3.4. 暴露的接口与方法
+可以通过`ref`获取`AppContent`组件实例，并调用其暴露的方法来编程式地控制流程。
+
+-   `goToStage(index: number)`: 跳转到指定索引的阶段。
+-   `next()` / `prev()`: 触发“下一步”/“上一步”操作（会执行导航钩子）。
+-   `getCurrentStageName(): string`: 获取当前阶段的名称。
+-   `isFirstStage(): boolean` / `isLastStage(): boolean`: 判断是否处于首/末阶段。
+-   `reset()`: 重置到第一个阶段。
