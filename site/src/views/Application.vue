@@ -118,7 +118,7 @@ export default {
   position: fixed;
   bottom: 1%;
   left: 1%;
-  height: 2vh;
+  height: 3vh;
   width: calc(100% - 2 * 1%);
   border-radius: 5px;
   background-color: rgba(47, 60, 72, 0.99);
@@ -127,6 +127,11 @@ export default {
   display: flex;
   flex-direction: row;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  gap: 5px;
+}
+
+:deep(.bottom-bar button) {
+  padding: 0px 8px;
 }
 
 :deep(.bottom-bar-spacer) {
