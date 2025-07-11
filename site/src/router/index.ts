@@ -1,9 +1,13 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from "vue-router";
 import Application from '@/views/Application.vue';
-import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue'; 
+import ApplicationDirectory from '@/views/ApplicationDirectory.vue';
+import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue';
 import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerView.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
+import SearchModalTest from "@/test/SearchModalTest.vue";
+import AppContentTest from "@/test/AppContentTest.vue";
+import ExampleApplication from '@/views/example/ExampleApplication.vue';
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
@@ -39,7 +43,9 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/application/maintain-business-partner' // 默认重定向到业务伙伴维护页面
+        name: 'ApplicationDirectory',
+        component: ApplicationDirectory,
+        meta: { title: '应用程序目录' }
       },
       {
         path: 'maintain-business-partner',
@@ -58,6 +64,24 @@ const routes = [
         name: 'ApplicationTestPageErp',
         component: TestPageErp,
         meta: { title: 'Test Page' }
+      },
+      {
+        path: 'test/search-modal',
+        name: 'ApplicationSearchModalTest',
+        component: SearchModalTest,
+        meta: { title: 'Search Modal Test' }
+      },
+      {
+        path: 'test/app-content',
+        name: 'ApplicationAppContentTest',
+        component: AppContentTest,
+        meta: { title: 'AppContent Component Test' }
+      },
+      {
+        path: 'example',
+        name: 'ApplicationExample',
+        component: ExampleApplication,
+        meta: { title: 'Example Application' }
       },
       {
         path: 'home',

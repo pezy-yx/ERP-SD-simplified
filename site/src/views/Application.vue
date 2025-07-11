@@ -74,6 +74,11 @@ export default {
 </script>
 
 <style scoped>
+.navigation-bar {
+  min-height: 4vh;
+  max-height: 4vh;
+  height: 4vh;
+}
 .application-layout {
   width: 100%;
   min-height: 100vh;
@@ -85,10 +90,11 @@ export default {
 .application-content {
   flex-grow: 1;
   /* 子组件会在这个区域内显示 */
+  max-height: calc(96vh);
 }
 
 :deep(.page-content) {
- flex-grow: 1;
+ /* flex-grow: 1; */
  background-color: var(--theme-color-page);
  padding: 20px;
  margin: 20px;
@@ -97,14 +103,20 @@ export default {
  display: flex;
  flex-direction: column;
  padding-top: 50px; /* 调整顶部内边距 */
- /* height: calc(100% - 50px - 40px - 40px); */
+ overflow-y: auto;
+ min-height: calc(100% - 40px);
+ max-height: calc(100% - 40px);
+}
+
+:deep(.page-content::-webkit-scrollbar) {
+  display: none;
 }
 
 :deep(.bottom-bar) {
   position: fixed;
   bottom: 1%;
   left: 1%;
-  height: 2vh;
+  height: 3vh;
   width: calc(100% - 2 * 1%);
   border-radius: 5px;
   background-color: rgba(47, 60, 72, 0.99);
@@ -113,6 +125,11 @@ export default {
   display: flex;
   flex-direction: row;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  gap: 5px;
+}
+
+:deep(.bottom-bar button) {
+  padding: 0px 8px;
 }
 
 :deep(.bottom-bar-spacer) {

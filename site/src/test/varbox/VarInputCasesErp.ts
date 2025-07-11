@@ -20,7 +20,7 @@ export const testCases: TestCase = {
       // ])
       cns("dict","dict","all1",null,false,{hideLabel:true},[
         cns("dict","dict","name",null,false,{},[
-          cns("string","leaf","title",null,false,{},[],"Title:"),
+          cns("string","leaf","title",'Default Title',false,{},[],"Title:"),
           cns("string","leaf","name",null,false,{},[],"Name:"),
         ],"Name"),
         cns("dict","dict","searchTerms",null,false,{},[
@@ -93,4 +93,20 @@ export const testCases: TestCase = {
       })
     ),
   },
+  "带默认值的列表": {
+    tree: createTreeFromConfig(
+      cns('dynamiclist', 'list', 'searchResults', [], true, {}, [
+        cns('dict', 'dict', 'result1', {}, false, {}, [
+          cns('string', 'leaf', 'id', '001', true),
+          cns('string', 'leaf', 'name', '示例结果1', true),
+          cns('string', 'leaf', 'description', '这是一个搜索结果示例', true)
+        ]),
+        cns('dict', 'dict', 'result2', {}, false, {}, [
+          cns('string', 'leaf', 'id', '002', true),
+          cns('string', 'leaf', 'name', '示例结果2', true),
+          cns('string', 'leaf', 'description', '这是另一个搜索结果示例', true)
+        ])
+      ], '搜索结果')
+    )
+  }
 };

@@ -66,8 +66,8 @@ export default {
     goToHomePage() {
       // 检查当前是否在application路由下
       if (this.$route.path.startsWith('/application')) {
-        const homePageUrl = '/application/test/erppage'; // application子路径
-        console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
+        const homePageUrl = '/application'; // 跳转到应用程序目录
+        console.log(`点击主页图标：回到应用程序目录 (${homePageUrl})`);
         this.$router.push(homePageUrl);
       } else {
         const homePageUrl = '/home'; // 原有路径

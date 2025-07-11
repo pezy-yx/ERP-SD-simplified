@@ -74,7 +74,7 @@
                   </slot>
                 </div>
                 <!-- 搜索按钮插槽 -->
-                <div v-if="displaySearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
+                <div v-if="shouldShowSearchButton" :class="`search-button-container ${baseClassPrefix}--search-button-container`">
                   <slot
                     :name="`${pathString}--search-button`"
                     v-bind="slotScopeData"
@@ -196,16 +196,20 @@
               </div>
               <!-- 表格形式渲染列表 -->
               <div :class="`list-content ${baseClassPrefix}--list-content`">
-                <table v-if="shouldRenderAsTable" :class="`list-table ${baseClassPrefix}--list-table`">
+                <div v-if="shouldRenderAsTable" :class="`table-container ${baseClassPrefix}--table-container`">
+                  <table :class="`list-table ${baseClassPrefix}--list-table`">
                   <thead>
                     <tr>
-                      <th v-if="isDynamicList && !effectiveReadonly" :class="`select-column ${baseClassPrefix}--select-column`">
-                        <input
-                          type="checkbox"
-                          :checked="isAllSelected"
-                          @change="toggleAllSelection"
-                          :class="`select-all-checkbox ${baseClassPrefix}--select-all-checkbox`"
-                        />
+                      <th :class="`select-column ${baseClassPrefix}--select-column`">
+                        <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
+                          <input
+                            type="checkbox"
+                            :checked="isAllSelected"
+                            @change="toggleAllSelection"
+                            :class="`var-checkbox select-all-checkbox ${baseClassPrefix}--select-all-checkbox`"
+                          />
+                          <span class="checkmark"></span>
+                        </label>
                       </th>
                       <th v-for="(header, index) in getTableHeaders()" :key="index">
                         {{ header }}
@@ -214,13 +218,16 @@
                   </thead>
                   <tbody>
                     <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
-                      <td v-if="isDynamicList && !effectiveReadonly" :class="`select-cell ${baseClassPrefix}--select-cell`">
-                        <input
-                          type="checkbox"
-                          :checked="selectedRows.has(index)"
-                          @change="toggleRowSelection(index)"
-                          :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
-                        />
+                      <td :class="`select-cell ${baseClassPrefix}--select-cell`">
+                        <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
+                          <input
+                            type="checkbox"
+                            :checked="selectedRows.has(index)"
+                            @change="toggleRowSelection(index)"
+                            :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
+                          />
+                          <span class="checkmark"></span>
+                        </label>
                       </td>
                       <!-- 如果子项是dict，则每个字段占一列 -->
                       <template v-if="child.nodeType === 'dict'">
@@ -258,7 +265,8 @@
                       </td>
                     </tr>
                   </tbody>
-                </table>
+                  </table>
+                </div>
                 <!-- 非表格形式渲染列表 -->
                 <div v-else :class="`list-items ${baseClassPrefix}--list-items`">
                   <div
@@ -299,17 +307,26 @@
         </slot>
       </div>
     </slot>
+
+    <!-- 搜索弹窗 -->
+    <SearchModal
+      :visible="showSearchModal"
+      :searchMethods="searchMethods"
+      @close="handleSearchModalClose"
+      @confirm="handleSearchModalConfirm"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig, NodeStructure } from '@/utils/VarTree'
+import { VarTree, VarNode, VarNodeConfig, createNodeFromConfig, NodeStructure, cns, createTreeFromConfig, SearchMethod, SearchResultHandler } from '@/utils/VarTree'
 import StringInput from './inputs/StringInput.vue'
 import NumberInput from './inputs/NumberInput.vue'
 import DateInput from './inputs/DateInput.vue'
 import SelectionInput from './inputs/StringInput.vue'
 import BooleanInput from './inputs/BooleanInput.vue'
+import SearchModal from '@/components/searchModel/SearchModal.vue'
 
 import {getPathString} from './utils'
 
@@ -393,8 +410,21 @@ const displaySearchButton = ref(false)
 const displaySearchIcon = ref(false)
 const searchButtonCounter = ref(0)
 const focusCounter = ref(0)
+const showSearchModal = ref(false)
+
+
 
 const currentNode = computed<VarNode | null>(() => {return props.varTree.findNodeByPath(props.nodePath)})
+
+// 从config获取搜索方法配置
+const searchMethods = computed<SearchMethod[]>(() => {
+  return currentNode.value?.config?.searchMethods || []
+})
+
+// 是否应该显示搜索按钮（基于配置和当前状态）
+const shouldShowSearchButton = computed(() => {
+  return displaySearchButton.value && searchMethods.value && searchMethods.value.length > 0
+})
 const pathString = computed<string>(()=>getPathString(props.varTree,props.nodePath))
 const setNodeValue = (val: any, refresh:boolean=true, update:boolean=true) => {
   if (currentNode.value) {
@@ -461,7 +491,8 @@ const baseClassPrefix = computed(() => {
 })
 
 const wrapperClass = computed(() => {
-  return `wrapper ${baseClassPrefix.value}--wrapper`
+  const t = currentNode.value?.nodeType
+  return `wrapper ${baseClassPrefix.value}--wrapper ${t}-node-varinput ${baseClassPrefix.value}--${t}-node-varinput`
 })
 
 const mainContentClass = computed(() => {
@@ -509,6 +540,7 @@ function handleSearchButtonClick() {
   searchButtonCounter.value++
   displaySearchButton.value = false
   displaySearchIcon.value = false
+  showSearchModal.value = true
 }
 
 function handleSearchButtonEnter(){
@@ -518,6 +550,55 @@ function handleSearchButtonEnter(){
 function handleSearchButtonLeave(){
   displaySearchIcon.value = false
 }
+
+function handleSearchModalClose() {
+  showSearchModal.value = false
+}
+
+function handleSearchModalConfirm(data: any) {
+  // 处理搜索确认逻辑，接收SearchModal传来的完整结果
+  console.log('搜索确认', data)
+
+  if (!currentNode.value || !data) {
+    showSearchModal.value = false
+    return
+  }
+
+  // 检查是否有自定义搜索结果处理函数
+  const customHandler = currentNode.value.config?.customSearchResultHandler
+
+  if (customHandler && typeof customHandler === 'function') {
+    // 执行自定义处理逻辑
+    try {
+      customHandler(data, currentNode.value)
+    } catch (error) {
+      console.error('自定义搜索结果处理函数执行失败:', error)
+    }
+  } else {
+    // 默认处理逻辑：将 firstSelectedResult 的 result 字段赋值给 currentNode
+    if (data.firstSelectedResult && data.firstSelectedResult.result !== undefined) {
+      setNodeValue(data.firstSelectedResult.result)
+    } else if (data.selectedResults && data.selectedResults.length > 0) {
+      // 如果没有 firstSelectedResult，使用第一个选中结果
+      const firstResult = data.selectedResults[0]
+      if (firstResult && firstResult.result !== undefined) {
+        setNodeValue(firstResult.result)
+      }
+    }
+  }
+
+  // 触发update事件通知父组件
+  emit('update', {
+    path: props.nodePath,
+    value: currentNode.value.currentValue,
+    node: currentNode.value,
+    action: 'search_result'
+  })
+
+  showSearchModal.value = false
+}
+
+
 
 function initNodeValue() {
   if (isLeafNode.value && currentNode.value) {
@@ -682,6 +763,12 @@ function toggleAllSelection() {
 function updateAllSelectedState() {
   const childrenCount = currentNode.value?.children?.length || 0
   isAllSelected.value = childrenCount > 0 && selectedRows.value.size === childrenCount
+  // config.selected update
+  if (currentNode.value) {
+    currentNode.value.children.forEach((child, index) => {
+      child.config.selected = selectedRows.value.has(index)
+    })
+  }
 }
 
 function removeSelectedItems() {
@@ -725,6 +812,19 @@ function createNewListItem(): VarNode | null {
 </script>
 
 <style scoped>
+.wrapper,
+.main,
+.var-input-container,
+.dict-node, .leaf-node, .list-node,
+.leaf-input-container, .dict-content, .dict-leaf-section, .dict-complex-section, .list-header-actions, .list-content {
+  max-width: 100%;
+  min-width: 100%;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
 /* 默认容器样式 */
 .var-input-container {
   font-family: Arial, sans-serif;
@@ -820,6 +920,12 @@ function createNewListItem(): VarNode | null {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.leaf-node :deep(input[type="checkbox"]) {
+  width: 12px;
+  min-width: 12px;
+  height: 12px;
+}
+
 .leaf-node :deep(input:focus),
 .leaf-node :deep(select:focus) {
   outline: none;
@@ -830,7 +936,7 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(input.readonly),
 .leaf-node :deep(select:disabled) {
   background: var(--theme-color-input-readonly);
-  cursor: not-allowed;
+  /* cursor: not-allowed; */
 }
 
 /* SAP风格字典节点布局 */
@@ -913,15 +1019,37 @@ function createNewListItem(): VarNode | null {
   width: 100%; /* 复杂节点独占一行 */
 }
 
+/* 表格容器样式 */
+.table-container {
+  overflow-x: auto; /* 水平滚动 */
+  overflow-y: auto; /* 垂直滚动 */
+  max-height: 100%; /* 默认最大高度 */
+  border: 1px solid var(--theme-color-light);
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+.table-container::-webkit-scrollbar {
+  display: none;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--theme-color-light);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-color-lighter);
+}
+
 /* SAP风格列表表格 */
 .list-table {
   width: 100%;
+  min-width: 100%; /* 确保表格至少占满容器宽度 */
   border-collapse: collapse;
-  /* border: 1px solid #e5e7eb; */
-  margin-top: 10px;
+  margin: 0; /* 移除margin，由容器控制 */
   border-radius: 0px;
-  overflow: hidden;
-  margin-bottom: 16px;
+  position: relative;
 }
 
 .list-table th {
@@ -971,7 +1099,7 @@ function createNewListItem(): VarNode | null {
   padding: 0;
   margin: 0;
 }
-.list-table td :deep(input),
+.list-table td :deep(input:not([type='checkbox'])),
 .list-table td :deep(select) {
   width: 100%;
   height: 24px; /* 固定输入框高度 */
@@ -984,39 +1112,72 @@ function createNewListItem(): VarNode | null {
   background: transparent;
 }
 
-.list-table td :deep(input:focus),
+.list-table td :deep(input:not([type='checkbox']):focus),
 .list-table td :deep(select:focus) {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
-/* 选择列宽度控制 */
+/* 选择列宽度控制和固定位置 */
 .list-table .select-column {
   width: 40px; /* 固定选择列宽度 */
+  min-width: 40px; /* 最小宽度 */
+  max-width: 40px; /* 最大宽度 */
   text-align: center;
+  position: sticky;
+  left: 0;
+  z-index: 11; /* 表头层级更高 */
+  background-color: var(--theme-color-table-header-bg);
+  border-right: 2px solid var(--theme-color-dark); /* 增强分隔线 */
 }
 
 .list-table .select-cell {
   width: 40px;
+  min-width: 40px;
+  max-width: 40px;
   text-align: center;
   padding-left: 4px;
   padding-right: 4px;
   height: 24px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: var(--theme-color-page);
+  border-right: 2px solid var(--theme-color-dark); /* 增强分隔线 */
 }
 
-.select-all-checkbox,
-.row-select-checkbox {
+/* 鼠标悬停时保持固定列背景 */
+.list-table tr:hover .select-cell {
+  background-color: var(--theme-color-lighter-a);
+}
+
+/* 确保其他列有合适的宽度 */
+.list-table th:not(.select-column),
+.list-table td:not(.select-cell) {
+  min-width: 100px; /* 设置最小列宽 */
+  max-width: 250px; /* 设置最大列宽 */
+}
+
+.select-column .checkmark {
+  border: 1px solid rgb(122, 122, 122);
+  border-radius: 0;
+}
+.select-cell .checkmark {
+  border: 1px solid var(--theme-color-dark);
+  border-radius: 0;
+}
+
+.select-column .var-checkbox > input,
+.select-cell .var-checkbox > input,
+.select-column .var-checkbox > span,
+.select-cell .var-checkbox > span {
   width: 16px;
   height: 16px;
-  cursor: pointer;
-  accent-color: #409EFF;
+  top: 4px;
 }
-
-.select-all-checkbox:disabled,
-.row-select-checkbox:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.select-column .var-checkbox > input:checked + .checkmark::after {
+  border-color: white;
 }
 
 /* 列表头部布局 */
@@ -1127,6 +1288,12 @@ function createNewListItem(): VarNode | null {
   display: grid;
   width: 100%;
   justify-content: center;
+}
+
+.list-node-varinput.wrapper {
+  display: flex;
+  justify-content: start;
+  width: 100%;
 }
 
 /* 响应式布局 */

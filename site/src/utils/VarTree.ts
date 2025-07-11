@@ -13,6 +13,23 @@ export type VarNodeValueValidator = {
 }
 export type VarNodeValueValidators = VarNodeValueValidator[]
 
+// 搜索方法接口
+export interface SearchMethod {
+  name: string
+  paramTree: VarTree | null
+  serviceUrl: string
+  resultHeaderDisplay?: Record<string, string>
+}
+
+// 搜索结果处理函数类型
+export type SearchResultHandler = (data: {
+  method: SearchMethod
+  params: any
+  results: any
+  selectedResults: any[]
+  firstSelectedResult: any
+}, currentNode: VarNode) => void
+
 export type VarNodeConfig = {
   childTemplate?: NodeStructure; // 子节点模板，用于动态列表
   maxLength?: number; // 最大长度，用于动态列表
@@ -23,6 +40,9 @@ export type VarNodeConfig = {
   options?: string[]; // 选择项列表（用于selection类型）
   classPrefix?: string; // CSS类名前缀，用于自定义布局样式
   hideLabel?: boolean; // 是否隐藏当前的Label
+  searchMethods?: SearchMethod[] | null; // 搜索方法配置
+  customSearchResultHandler?: SearchResultHandler; // 自定义搜索结果处理函数
+  selected?: boolean; // 是否为选中状态
 }
 
 export type NodeStructure = {
@@ -88,6 +108,10 @@ export class VarNode {
     this.config = config || {} // 自定义配置参数
     this.iconPath = iconPath; // **新增：设置iconPath**
     this.currentValue = defaultValue; // 设置初始值
+    // this._currentValue = defaultValue; // 初始化object
+    if (this.nodeType === 'leaf') {
+      this.currentValue = defaultValue; // 设置初始值
+    }
   }
 
   /**
@@ -299,7 +323,9 @@ export class VarTree {
    * @private
    */
   _inorderTraversal(node: VarNode) {
-    if (!node) return
+    if ( !node ) {
+      return
+    }
 
     // 为字典类型的子节点遍历
     if (node.nodeType === 'dict' && node.children) {
@@ -439,14 +465,16 @@ export class VarTree {
 export const validators = {
   // 日期格式检查
   date: (value: any) => {
-    if (!value) return true // 允许空值
+    if (!value) { return true } // 允许空值
     const date = new Date(value)
     return !isNaN(date.getTime())
   },
   
   // 数字检查
   number: (value: any) => {
-    if (value === '' || value === null || value === undefined) return true
+    if (value === '' || value === null || value === undefined) {
+      return true
+    }
     return !isNaN(Number(value))
   },
   
