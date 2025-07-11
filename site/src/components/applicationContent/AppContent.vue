@@ -214,7 +214,7 @@ const allInterfaces = computed(() => ({
   min-height: 0;
 }
 
-.nav-button {
+.bottom-bar > :global(.nav-button) {
   border: 1px solid #d0d0d0;
   border-radius: 4px;
   background: white;
@@ -223,27 +223,27 @@ const allInterfaces = computed(() => ({
   transition: all 0.2s ease;
 }
 
-.nav-button:hover:not(:disabled) {
+.bottom-bar > :global(.nav-button:hover:not(:disabled)) {
   background: #f5f5f5;
   border-color: #b0b0b0;
 }
 
-.nav-button:disabled {
+.bottom-bar > :global(.nav-button:disabled) {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.prev-button {
+.bottom-bar > :global(.prev-button) {
   color: #666;
 }
 
-.next-button {
+.bottom-bar > :global(.next-button) {
   background: #007bff;
   color: white;
   border-color: #007bff;
 }
 
-.next-button:hover:not(:disabled) {
+.bottom-bar > :global(.next-button:hover:not(:disabled)) {
   background: #0056b3;
   border-color: #0056b3;
 }
