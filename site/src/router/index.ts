@@ -93,6 +93,15 @@ const routes = [
         name: 'ApplicationHome',
         component: Home,
         meta: { title: 'Home' }
+      },
+
+
+
+      {
+        path: 'create-bp-relationship',
+        name: 'CreateBPRelationship',
+        component: CreateBp,
+        meta: { title: 'Create BP Relationship' }
       }
     ]
   },
