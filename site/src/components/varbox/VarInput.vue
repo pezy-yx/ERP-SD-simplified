@@ -217,7 +217,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
+                    <tr v-for="(child, index) in listItems" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
                       <td :class="`select-cell ${baseClassPrefix}--select-cell`">
                         <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
                           <input
@@ -516,6 +516,23 @@ const leafChildren = computed(() => {
 const complexChildren = computed(() => {
   if (!currentNode.value?.children) return []
   return currentNode.value.children.filter(child => child.nodeType === 'dict' || child.nodeType === 'list')
+})
+
+const listItems = computed(()=>{
+  if(currentNode.value?.varType !== 'dynamiclist'){
+    return []
+  }
+  if(!currentNode.value?.config?.childTemplate) {
+    return currentNode.value.children
+  }
+  const length = currentNode.value.children.length
+  const rowProvided = currentNode.value.config?.rowProvided || 3
+  if (length < rowProvided) {
+    for (let i = length; i < rowProvided; i++) {
+      currentNode.value.addChild(createNewListItem()!)
+    }
+  }
+  return currentNode.value.children
 })
 
 watch(currentNode, () => {
