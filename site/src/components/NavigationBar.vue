@@ -65,7 +65,7 @@ export default {
     },
     goToHomePage() {
       // 检查当前是否在application路由下
-      if (this.$route.path.startsWith('/application')) {
+      if (0 && this.$route.path.startsWith('/application')) {
         const homePageUrl = '/application'; // 跳转到应用程序目录
         console.log(`点击主页图标：回到应用程序目录 (${homePageUrl})`);
         this.$router.push(homePageUrl);
