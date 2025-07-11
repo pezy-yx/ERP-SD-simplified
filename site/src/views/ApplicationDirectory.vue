@@ -69,139 +69,145 @@ export default {
         {
           "applicationName": "Curricular Material PDF",
           "lore": "Download Curricula",
-          "routePath": "/CurricularMaterialPDF",
+          "routePath": "/curricular-material-pdf",
           "tags": ["chore"]
         },
         {
           "applicationName": "Maintain Business Partner",
           "lore": "",
-          "routePath": "/MaintainBusinessPartner",
+          "routePath": "/maintain-business-partner",
+          "tags": ["customer management"]
+        },
+        {
+          "applicationName": "Create BP relationship",
+          "lore": "",
+          "routePath": "/create-bp-relationship",
           "tags": ["customer management"]
         },
         {
           "applicationName": "Display BP relationship",
           "lore": "",
-          "routePath": "/DisplayBPRelationship",
+          "routePath": "/display-bp-relationship",
           "tags": ["customer management"]
         },
         {
           "applicationName": "Change BP relationship",
           "lore": "",
-          "routePath": "/ChangeBPRelationship",
+          "routePath": "/change-bp-relationship",
           "tags": ["customer management"]
         },
         {
           "applicationName": "Create Inquiry",
           "lore": "",
-          "routePath": "/CreateInquiry",
+          "routePath": "/create-inquiry",
           "tags": ["order management"]
         },
         {
           "applicationName": "Change Inquiry",
           "lore": "",
-          "routePath": "/ChangeInquiry",
+          "routePath": "/change-inquiry",
           "tags": ["order management"]
         },
         {
           "applicationName": "Display Inquiry",
           "lore": "",
-          "routePath": "/DisplayInquiry",
+          "routePath": "/display-inquiry",
           "tags": ["order management"]
         },
         {
           "applicationName": "Manage Sales Quotations",
           "lore": "",
-          "routePath": "/ManageSalesQuotations",
+          "routePath": "/manage-sales-quotations",
           "tags": ["order management"]
         },
         {
           "applicationName": "Create Sales Order",
           "lore": "",
-          "routePath": "/CreateSalesOrder",
+          "routePath": "/create-sales-order",
           "tags": ["order management"]
         },
         {
           "applicationName": "Sales Order Fulfillment",
           "lore": "All issues",
-          "routePath": "/SalesOrderFulfillment",
+          "routePath": "/sales-order-fulfillment",
           "tags": ["order management", "delivery management"]
         },
         {
           "applicationName": "List Sales Orders",
           "lore": "",
-          "routePath": "/ListSalesOrders",
+          "routePath": "/list-sales-orders",
           "tags": ["order management"]
         },
         {
           "applicationName": "Manage Sales Orders",
           "lore": "",
-          "routePath": "/ManageSalesOrders",
+          "routePath": "/manage-sales-orders",
           "tags": ["order management"]
         },
         {
           "applicationName": "Manage Outbound Deliveries",
           "lore": "",
-          "routePath": "/ManageOutboundDeliveries",
+          "routePath": "/manage-outbound-deliveries",
           "tags": ["delivery management"]
         },
         {
           "applicationName": "Pick Outbound Deliveries",
           "lore": "From Sales Orders",
-          "routePath": "/PickOutboundDeliveries",
+          "routePath": "/pick-outbound-deliveries",
           "tags": ["delivery management"]
         },
         {
           "applicationName": "Material Documents Overview",
           "lore": "",
-          "routePath": "/MaterialDocumentsOverview",
+          "routePath": "/material-documents-overview",
           "tags": ["chore"]
         },
         {
           "applicationName": "Manage Stock",
           "lore": "",
-          "routePath": "/ManageStock",
+          "routePath": "/manage-stock",
           "tags": ["chore"]
         },
         {
           "applicationName": "Display Stock Overview",
           "lore": "",
-          "routePath": "/DisplayStockOverview",
+          "routePath": "/display-stock-overview",
           "tags": ["chore"]
         },
         {
           "applicationName": "Create Billing Documents VRF11",
           "lore": "VRF11",
-          "routePath": "/CreateBillingDocuments",
+          "routePath": "/create-billing-documents",
           "tags": ["financial management"]
         },
         {
           "applicationName": "Display Billing Documents",
           "lore": "76\nBilling Due List Items",
-          "routePath": "/DisplayBillingDocuments",
+          "routePath": "/display-billing-documents",
           "tags": ["financial management"]
         },
         {
           "applicationName": "Change Billing Document VR02",
           "lore": "VR02",
-          "routePath": "/ChangeBillingDocument",
+          "routePath": "/change-billing-document",
           "tags": ["financial management"]
         },
         {
           "applicationName": "Display Billing Document VR03",
           "lore": "VR03",
-          "routePath": "/DisplayBillingDocument",
+          "routePath": "/display-billing-document",
           "tags": ["financial management"]
         },
         {
           "applicationName": "Manage Billing Documents",
           "lore": "",
-          "routePath": "/ManageBillingDocuments",
+          "routePath": "/manage-billing-documents",
           "tags": ["financial management"]
         },
         {
           "applicationName": "Post Incoming Payments",
           "lore": "",
-          "routePath": "/PostIncomingPayments",
+          "routePath": "/post-incoming-payments",
           "tags": ["financial management"]
         },
         {

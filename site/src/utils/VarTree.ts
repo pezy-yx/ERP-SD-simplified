@@ -209,7 +209,7 @@ export class VarNode {
    */
   clone(): VarNode {
     const clonedChildren: VarNode[] = this.children.map(child => child.clone())
-    return new VarNode(
+    const node = new VarNode(
       this.nodeType,
       this.varType,
       this.name,
@@ -220,6 +220,10 @@ export class VarNode {
       this.nameDisplay, // 传递 nameDisplay
       this.iconPath // **新增：传递 iconPath**
     )
+    if(node.nodeType==='leaf'){
+      node.currentValue = this.currentValue
+    }
+    return node
   }
 
   /**
@@ -273,6 +277,25 @@ export class VarTree {
   }
 
   /**
+   * 读值
+   */
+  getValue(): any {
+    if(!this.root) return {}
+    return this.root.currentValue
+  }
+
+  /**
+   * 读值
+   * @param {VarNodeValue} newValue
+   */
+  setValue(newValue: VarNodeValue): void {
+    if(!this.root) {
+      return
+    }
+    this.root.currentValue = newValue
+  }
+
+  /**
    * 设置根节点
    * @param {VarNode} rootNode 
    */
@@ -304,6 +327,14 @@ export class VarTree {
    */
   getRoot(): VarNode | null {
     return this.root
+  }
+
+  /**
+   * 克隆根节点
+   */
+  cloneRoot(): VarNode | null {
+    if (!this.root) return null
+    return this.root.clone()
   }
 
   /**
@@ -669,6 +700,16 @@ export function createNodeStructure(
 }
 export const cns = createNodeStructure
 
+export function isNodeStructure(obj: any): obj is NodeStructure {
+  if (obj?.children && Array.isArray(obj.children)){
+    for (const child of obj.children) {
+      if (!isNodeStructure(child)) {
+        return false
+      }
+    }
+  }
+  return obj && typeof obj === 'object' && 'varType' in obj && 'nodeType' in obj
+}
 // // example:
 // const exampleNode: NodeStructure = 
 // cns('string','leaf','exampleString','Hello, World!',false,{},[],'', 'path/to/icon.svg' // **示例：新增 iconPath**
