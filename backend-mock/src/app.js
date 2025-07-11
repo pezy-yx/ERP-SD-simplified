@@ -8,7 +8,9 @@ const PORT = process.env.PORT || 3000;
 
 // 中间件配置
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080'
+  origin: '*',
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,6 +22,7 @@ app.get('/', (req, res) => {
 
 // API路由
 app.use('/api/search', require('./routes/search'));
+app.use('/api/app', require('./routes/app'));
 app.use('/api/employee', require('./routes/employee'));
 
 // 启动服务器
