@@ -529,7 +529,7 @@ watch(() => currentNode.value?.children?.length, () => {
 }, { immediate: true })
 
 function handleFocus() {
-  displaySearchButton.value = true
+  displaySearchButton.value = true && !effectiveReadonly.value
   searchButtonCounter.value++
   // console.log(`Focus on node: ${pathString.value}`)
 }
@@ -540,7 +540,7 @@ function handleSearchButtonClick() {
   searchButtonCounter.value++
   displaySearchButton.value = false
   displaySearchIcon.value = false
-  showSearchModal.value = true
+  showSearchModal.value = true && !effectiveReadonly.value
 }
 
 function handleSearchButtonEnter(){

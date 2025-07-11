@@ -16,6 +16,7 @@
       <!-- 底部导航栏 -->
       <div class="bottom-bar">
         <!-- 自定义插槽内容 -->
+        <p>{{ footerMessage }}</p>
         <slot name="footer-content-left" v-bind="allInterfaces"></slot>
 
         <div class="bottom-bar-spacer"></div>
@@ -73,6 +74,7 @@ const emit = defineEmits<{
 const { stages } = toRefs(props)
 const currentStage = ref(0)
 const isNavigating = ref(false)
+const footerMessage = ref("")
 
 // 切换到指定stage
 async function goToStage(index: number) {
@@ -164,6 +166,7 @@ const hideMagicString = "/hide"
 
 // 暴露的方法和属性
 defineExpose({
+  footerMessage,
   currentStage,
   goToStage,
   next,
