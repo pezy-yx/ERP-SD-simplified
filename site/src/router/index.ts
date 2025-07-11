@@ -12,6 +12,7 @@ import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
+import CreateInquiry from "@/views/inquiry/Create.vue";
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 
 const routes = [
@@ -97,7 +98,13 @@ const routes = [
         name: 'CreateBPRelationship',
         component: CreateBp,
         meta: { title: 'Create BP Relationship' }
-      }
+      },
+      {
+        path: 'create-inquiry',
+        name: 'CreateInquiry',
+        component: CreateInquiry,
+        meta: { title: 'Create Inquiry' }
+      },
     ]
   },
   { 
