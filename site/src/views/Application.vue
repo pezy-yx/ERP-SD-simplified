@@ -81,8 +81,6 @@ export default {
 }
 .application-layout {
   width: 100%;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   height: 100vh;
   max-height: 100vh;

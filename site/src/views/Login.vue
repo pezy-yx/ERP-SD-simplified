@@ -151,7 +151,7 @@ async function handleLogin() {
 
         if (response.success) {
             localStorage.setItem('token', response.token ?? ''); // 存储 token
-            setTimeout(() => router.push('/'), 1000); // 登录成功后跳转到首页
+            setTimeout(() => router.push('/home'), 1000); // 登录成功后跳转到首页
         }
     } catch (error: any) {
         isSubmitting.value = false;
