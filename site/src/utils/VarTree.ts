@@ -54,6 +54,7 @@ export type NodeStructure = {
   readonly?: boolean;
   config?: VarNodeConfig;
   children?: NodeStructure[];
+  iconPath?: string; // **新增：图标路径，用于显示在UI上**
 }
 
 export class VarNode {
@@ -66,6 +67,7 @@ export class VarNode {
   public children: VarNode[];
   public index: number;
   public config: VarNodeConfig;
+  public iconPath?: string; // **新增：图标路径，用于显示在UI上**
 
   /**
    * 当前值，object，可读写
@@ -82,6 +84,7 @@ export class VarNode {
    * @param {boolean} readonly - 是否只读
    * @param {VarNode[]} children - 子节点数组
    * @param {VarNodeConfig} config - 其他配置参数，钩子等
+   * @param {string} iconPath - **新增：图标路径**
    */
   constructor(
     nodeType: NodeTypeString = 'leaf',
@@ -92,16 +95,19 @@ export class VarNode {
     children: VarNode[] = [],
     config: VarNodeValue = {},
     nameDisplay?: string,
+    iconPath?: string, // **新增参数**
   ) {
     this.nodeType = nodeType // "dict"|"list"|"leaf"
-    this.varType = varType   // 对应组件的变量类型
-    this.name = name         // 变量名称
+    this.varType = varType   // 对应组件的变量类型
+    this.name = name         // 变量名称
     this.nameDisplay = nameDisplay || "" // 显示名称，默认为name
     this.defaultValue = defaultValue
     this.readonly = readonly
     this.children = children || []
-    this.index = -1          // 中序遍历位置，由VarTree初始化时设置
+    this.index = -1          // 中序遍历位置，由VarTree初始化时设置
     this.config = config || {} // 自定义配置参数
+    this.iconPath = iconPath; // **新增：设置iconPath**
+    this.currentValue = defaultValue; // 设置初始值
     // this._currentValue = defaultValue; // 初始化object
     if (this.nodeType === 'leaf') {
       this.currentValue = defaultValue; // 设置初始值
@@ -151,7 +157,8 @@ export class VarNode {
       this.children = this.children.filter(child => !deletions.includes(child));
 
       for (let i = this.children.length; i < val.length; i++) {
-        const newChild = new VarNode('leaf', this.varType, '', val[i], this.readonly, [], this.config)
+        // 创建新子节点时，传递父节点的 varType, readonly, config, nameDisplay, iconPath
+        const newChild = new VarNode('leaf', this.varType, '', val[i], this.readonly, [], this.config, this.nameDisplay, this.iconPath) // **传递 iconPath**
         this.children.push(newChild)
       }
     } else {
@@ -210,7 +217,8 @@ export class VarNode {
       this.readonly,
       clonedChildren,
       { ...this.config }, // 深拷贝config对象
-      this.nameDisplay,
+      this.nameDisplay, // 传递 nameDisplay
+      this.iconPath // **新增：传递 iconPath**
     )
     if(node.nodeType==='leaf'){
       node.currentValue = this.currentValue
@@ -226,7 +234,8 @@ export class VarNode {
   template(): VarNode {
     const clearedChildren: VarNode[] = this.children.map(child => {
       if (child.isLeaf()) {
-        return new VarNode(child.nodeType, child.varType, child.name, null, child.readonly, [], child.config)
+        // 创建叶子节点模板时也传递 iconPath
+        return new VarNode(child.nodeType, child.varType, child.name, null, child.readonly, [], child.config, child.nameDisplay, child.iconPath) // **新增：传递 iconPath**
       } else {
         return child.template() // 递归清空子节点
       }
@@ -238,7 +247,9 @@ export class VarNode {
       null,
       this.readonly,
       clearedChildren,
-      { ...this.config } // 深拷贝config对象
+      { ...this.config }, // 深拷贝config对象
+      this.nameDisplay, // 传递 nameDisplay
+      this.iconPath // **新增：传递 iconPath**
     )
   }
 }
@@ -250,7 +261,7 @@ export class VarNode {
 export class VarTree {
   public root: VarNode | null;
   public nodeIndex: number;
- 
+  
   /**
    * 构造函数
    * @param {VarNode} rootNode - 根节点
@@ -293,6 +304,24 @@ export class VarTree {
     this._initializeTree()
   }
 
+
+  getChildren(node: VarNode): VarNode[] {
+    if (!node || !node.children) {
+      return []
+    } else if (node.nodeType === 'dict') {
+      // 返回字典类型的子节点
+      return node.children.filter(child => child.nodeType !== 'leaf')
+    }
+    else if (node.nodeType === 'list') {
+      // 返回列表类型的子节点
+      return node.children.filter(child => child.nodeType !== 'leaf')
+    }
+    else {
+      // 返回叶子节点的子节点（通常为空）
+      return []
+    }
+  }
+
   /**
    * 获取根节点
    */
@@ -325,7 +354,9 @@ export class VarTree {
    * @private
    */
   _inorderTraversal(node: VarNode) {
-    if (!node) return
+    if ( !node ) {
+      return
+    }
 
     // 为字典类型的子节点遍历
     if (node.nodeType === 'dict' && node.children) {
@@ -389,7 +420,7 @@ export class VarTree {
     if (!this.root || !path || path.length === 0) {
       return this.root
     }
- 
+  
     let currentNode = this.root
     
     for (const pathSegment of path) {
@@ -465,29 +496,31 @@ export class VarTree {
 export const validators = {
   // 日期格式检查
   date: (value: any) => {
-    if (!value) return true // 允许空值
+    if (!value) { return true } // 允许空值
     const date = new Date(value)
     return !isNaN(date.getTime())
   },
- 
+  
   // 数字检查
   number: (value: any) => {
-    if (value === '' || value === null || value === undefined) return true
+    if (value === '' || value === null || value === undefined) {
+      return true
+    }
     return !isNaN(Number(value))
   },
- 
+  
   // 非空检查
   required: (value: any) => {
     return value !== undefined && value !== null && value !== ''
   },
- 
+  
   // 邮箱格式检查
   email: (value: any) => {
     if (!value) return true
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(value)
   },
- 
+  
   // URL格式检查
   url: (value: any) => {
     if (!value) return true
@@ -514,9 +547,10 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
     defaultValue = null,
     readonly = false,
     config = {},
-    children
+    children,
+    iconPath = '' // **新增：从 struct 中解构出 iconPath**
   } = struct
-  // 结束递归
+  
   // 支持children为对象（dict）或数组（list）
   let childNodes: VarNode[] = []
   if (nodeType === 'dict' && children && typeof children === 'object' && !Array.isArray(children)) {
@@ -525,19 +559,33 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
       if (typeof child === 'object' && child !== null) {
         // 保证varType存在，优先(child as any).type/(child as any).varType，否则默认为'string'
         const c: any = child
-        const childStruct = { name: key, varType: c.type ?? c.varType ?? 'string', ...c }
+        const childStruct = { 
+          name: key, 
+          varType: c.type ?? c.varType ?? 'string', 
+          ...c,
+          iconPath: c.iconPath || '' // **新增：递归创建子节点时传递 iconPath**
+        }
         return createNodeFromConfig(childStruct)
       }
-      return createNodeFromConfig({ name: key, varType: 'string', defaultValue: String(child) })
+      // 如果 child 不是对象，而是原始值，为其创建叶子节点，并传递 iconPath
+      return createNodeFromConfig({ 
+        name: key, 
+        varType: 'string', 
+        defaultValue: String(child),
+        iconPath: (child as any).iconPath || '' // **新增：如果原始值有 iconPath**
+      })
     })
-    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config, nameDisplay)
+    // **新增：将 iconPath 传递给 VarNode 构造函数**
+    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config, nameDisplay, iconPath)
   }
   if (Array.isArray(children) && children.length > 0 && nodeType !== 'leaf') {
     childNodes = children.map(child => createNodeFromConfig(child))
-    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config, nameDisplay)
+    // **新增：将 iconPath 传递给 VarNode 构造函数**
+    return new VarNode(nodeType, varType, name, defaultValue, readonly, childNodes, config, nameDisplay, iconPath)
   }
   // leaf节点或无children
-  return new VarNode(nodeType, varType, name, defaultValue, readonly, [], config, nameDisplay)
+  // **新增：将 iconPath 传递给 VarNode 构造函数**
+  return new VarNode(nodeType, varType, name, defaultValue, readonly, [], config, nameDisplay, iconPath)
 }
 
 export function createTreeFromConfig(struct: NodeStructure): VarTree {
@@ -549,76 +597,81 @@ export function createTreeFromConfig(struct: NodeStructure): VarTree {
 
 // // 示例nodeStructure：
 // const simpleNodeStructure: NodeStructure = {
-//   varType: 'string',
-//   nodeType: 'leaf',
-//   name: 'exampleString',
-//   defaultValue: 'Hello, World!',
-//   readonly: false,
-//   config: {},
-//   children: []
+//   varType: 'string',
+//   nodeType: 'leaf',
+//   name: 'exampleString',
+//   defaultValue: 'Hello, World!',
+//   readonly: false,
+//   config: {},
+//   children: [],
+//   iconPath: 'path/to/simple-icon.svg' // **示例新增**
 // }
 // const complexNodeStructure: NodeStructure = {
-//   varType: 'dict',
-//   nodeType: 'dict',
-//   name: 'userProfile',
-//   defaultValue: null,
-//   readonly: false,
-//   config: {},
-//   children: [
-//     {
-//       varType: 'string',
-//       nodeType: 'leaf',
-//       name: 'username',
-//       defaultValue: 'JohnDoe',
-//       readonly: false
-//     },
-//     {
-//       varType: 'number',
-//       nodeType: 'leaf',
-//       name: 'age',
-//       defaultValue: 30,
-//       readonly: false
-//     },
-//     {
-//       varType: 'dict',
-//       nodeType: 'dict',
-//       name: 'address',
-//       defaultValue: null,
-//       readonly: false,
-//       children: [
-//         {
-//           varType: 'string',
-//           nodeType: 'leaf',
-//           name: 'city',
-//           defaultValue: 'New York',
-//           readonly: false
-//         },
-//         {
-//           varType: 'string',
-//           nodeType: 'leaf',
-//           name: 'country',
-//           defaultValue: 'USA',
-//           readonly: false
-//         }
-//       ]
-//     },
-//     {
-//       varType: 'dynamiclist',
-//       nodeType: 'list',
-//       name: 'hobbies',
-//       defaultValue: [],
-//       readonly: false,
-//       children: [
-//         {
-//           varType: 'string',
-//           nodeType: 'leaf',
-//           name: '',
-//           defaultValue: '',
-//           readonly: false
-//         }
-//       ]
-//     }
-//   ]
+//   varType: 'dict',
+//   nodeType: 'dict',
+//   name: 'userProfile',
+//   defaultValue: null,
+//   readonly: false,
+//   config: {},
+//   iconPath: 'path/to/user-profile-icon.svg', // **示例新增**
+//   children: [
+//     {
+//       varType: 'string',
+//       nodeType: 'leaf',
+//       name: 'username',
+//       defaultValue: 'JohnDoe',
+//       readonly: false,
+//       iconPath: 'path/to/username-icon.svg' // **示例新增**
+//     },
+//     {
+//       varType: 'number',
+//       nodeType: 'leaf',
+//       name: 'age',
+//       defaultValue: 30,
+//       readonly: false
+//     },
+//     {
+//       varType: 'dict',
+//       nodeType: 'dict',
+//       name: 'address',
+//       defaultValue: null,
+//       readonly: false,
+//       iconPath: 'path/to/address-icon.svg', // **示例新增**
+//       children: [
+//         {
+//           varType: 'string',
+//           nodeType: 'leaf',
+//           name: 'city',
+//           defaultValue: 'New York',
+//           readonly: false
+//         },
+//         {
+//           varType: 'string',
+//           nodeType: 'leaf',
+//           name: 'country',
+//           defaultValue: 'USA',
+//           readonly: false
+//         }
+//       ]
+//     },
+//     {
+//       varType: 'dynamiclist',
+//       nodeType: 'list',
+//       name: 'hobbies',
+//       defaultValue: [],
+//       readonly: false,
+//       iconPath: 'path/to/hobbies-icon.svg', // **示例新增**
+//       children: [
+//         {
+//           varType: 'string',
+//           nodeType: 'leaf',
+//           name: '',
+//           defaultValue: '',
+//           readonly: false
+//         }
+//       ]
+//     }
+//   ]
 // }
 
 // 快速创建，使用元组创建一个NodeStructure对象
@@ -630,7 +683,8 @@ export function createNodeStructure(
   readonly: boolean = false,
   config: VarNodeConfig = {},
   children: NodeStructure[] = [],
-  nameDisplay:string = ''
+  nameDisplay:string = '',
+  iconPath: string = '' // **新增参数**
 ): NodeStructure {
   return {
     varType,
@@ -640,7 +694,8 @@ export function createNodeStructure(
     readonly,
     config,
     children,
-    nameDisplay
+    nameDisplay,
+    iconPath // **新增：返回对象中包含 iconPath**
   }
 }
 export const cns = createNodeStructure
@@ -657,14 +712,10 @@ export function isNodeStructure(obj: any): obj is NodeStructure {
 }
 // // example:
 // const exampleNode: NodeStructure = 
-// cns('string','leaf','exampleString','Hello, World!',false,{},[
-//     cns('number', 'leaf', 'exampleNumber', 42, false),
-//     cns('dict', 'dict', 'exampleDict', null, false, {}, [
-//       cns('string', 'leaf', 'nestedString', 'Nested Value', false),
-//       cns('date', 'leaf', 'nestedDate', '2023-10-01T00:00:00Z', false, {
-//         minDate: '2023-01-01T00:00:00Z',
-//         maxDate: '2024-01-01T00:00:00Z'
-//       })
-//     ])
-//   ]
+// cns('string','leaf','exampleString','Hello, World!',false,{},[],'', 'path/to/icon.svg' // **示例：新增 iconPath**
 // )
+// // 嵌套结构示例
+// const exampleComplexNode: NodeStructure = cns('dict', 'dict', 'parentDict', null, false, {}, [
+//   cns('string', 'leaf', 'childString', 'Child Value', false, {}, [], '', 'path/to/child-icon.svg'), // **示例：子节点新增 iconPath**
+//   cns('number', 'leaf', 'childNumber', 123, false)
+// ], '', 'path/to/parent-icon.svg'); // **示例：父节点新增 iconPath**

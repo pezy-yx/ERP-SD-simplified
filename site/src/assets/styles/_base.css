@@ -131,6 +131,7 @@ a:hover {
     --theme-color-contrast: #FFFFFF; /* 对比色，通常用于文本或按钮 */
     --theme-font-family: 'Arial, sans-serif'; /* 默认字体 */
     --theme-color-page: #e6e5d8; /* 页面背景色 */
+    --theme-color-text:#e6f0d7;
 
     --theme-color-execute-button: #25484C;
     --theme-color-execute-button-hover: #1e393c;
@@ -145,6 +146,8 @@ a:hover {
     --color-link-default: #007bff;
     --color-link-hover: #e6f0d7;
     --color-link-default:#727471;
+
+    --placeholder: #aab8c2;
 
     /* 你的登录页颜色变量 */
     --login-bg-1: #25484c;

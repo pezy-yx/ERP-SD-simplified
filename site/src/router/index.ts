@@ -21,14 +21,9 @@ const routes = [
     redirect: '/login' // 默认重定向到登录页面
   },
   {
-    path: '/',
+    path: '/home',
     name: 'Home',
     component: Home // 你的系统主页或默认页面
-  },
-  {
-    path: '/maintain-bp',
-    name: 'MaintainBusinessPartner',
-    component: MaintainBusinessPartnerView // 实际的业务伙伴维护页面
   },
   {
     path: '/test/erppage', // 定义一个专门用于测试的路由路径
@@ -53,7 +48,7 @@ const routes = [
         meta: { title: '应用程序目录' }
       },
       {
-        path: 'maintain-bp',
+        path: 'maintain-business-partner',
         name: 'ApplicationMaintainBusinessPartner',
         component: MaintainBusinessPartnerView,
         meta: { title: 'Maintain Business Partner' }
