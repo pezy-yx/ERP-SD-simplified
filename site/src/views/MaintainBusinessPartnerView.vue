@@ -1,24 +1,23 @@
 <template>
- <div class="maintain-business-partner-view">
-   <FilterTabs :tabs="businessPartnerTabs" @tab-selected="handleTabSelected"/>
+  <div class="maintain-business-partner-view">
+    <FilterTabs :tabs="businessPartnerTabs" @tab-selected="handleTabSelected"/>
 
-<div class="page-content">
-  <div v-if="activeContentKey === 'sales_and_dist' || !activeContentKey" class="business-partner-search">
-    <label for="businessPartnerInput">Business Partner:</label>
-    <div class="input-with-icon">
-      <var-input
-        :tree="customerQueryTree"
-        :nodePath="[]"
-        class="bp-input-var-input"
-      />
+    <div class="page-content">
+      <div v-if="activeContentKey === 'sales_and_dist' || !activeContentKey" class="business-partner-search">
+        <label for="businessPartnerInput">Business Partner:</label>
+        <div class="input-with-icon">
+          <var-input
+            :tree="customerQueryTree"
+            :nodePath="[]"
+            class="bp-input-var-input"
+          />
+          </div>
       </div>
+    </div>
+    <div class="bottom-actions">
+      <button class="search-enter-button" @click="performBusinessPartnerSearch">Enter</button>
+    </div>
   </div>
-</div>
-
-  <div class="bottom-actions">
-    <button class="search-enter-button" @click="performBusinessPartnerSearch">Enter</button>
-  </div>
-</div>
 </template>
 
 <script>

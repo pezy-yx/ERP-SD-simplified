@@ -22,9 +22,10 @@
           v-if="showSearchInput"
           type="text"
           v-model="searchQuery"
-          placeholder="搜索内容..."
+          placeholder="Search Apps..."
           class="search-input"
           @keyup.enter="performSearch"
+          @blur="showSearchInput = false"
         />
         <div class="icon-wrapper search-icon" @click="toggleSearchInput">
           <img src="../assets/search.png" alt="Search" class="nav-icon" />
@@ -69,7 +70,7 @@ export default {
         console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
         this.$router.push(homePageUrl);
       } else {
-        const homePageUrl = '/test/erppage'; // 原有路径
+        const homePageUrl = '/home'; // 原有路径
         console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
         this.$router.push(homePageUrl);
       }
@@ -161,6 +162,10 @@ export default {
   transition: width 0.3s ease, opacity 0.3s ease;
   margin-right: 10px;
   outline: none;
+}
+
+.search-input::placeholder {
+  color:var(--placeholder); /* 占位符颜色 */
 }
 
 /* 当搜索输入框显示时 */
