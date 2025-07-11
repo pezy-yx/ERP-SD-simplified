@@ -1,7 +1,6 @@
 import axios, { AxiosError } from 'axios'; // 导入 AxiosError 类型
 
-// 后端 API 的基础 URL - 从环境变量读取
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
 
 // // 定义统一的 API 响应类型
 // interface ApiResponse<T> {
