@@ -113,7 +113,42 @@ async function initializeCreationWithRefference() {
 }
 
 async function handleCancel(currentStage: number, targetStage: number) {
+  if (currentStage === 1) {
+    const confirmValue = confirm('Cancel?')
+    if(confirmValue) {    
+      appContentRef.value.footerMessage = ''
+    }
+    return confirmValue
+  }
   return true
+}
+
+/**
+ * @description 询价单价格查询，向后端发送List的内容，返回Net Value: 和 Expect. Oral Val: 包括值和单位
+ */
+async function priceQuery() {
+  const items = inquiryDataTree.getValue().itemOverview.items
+  const data = await fetch(`${API_BASE_URL}/api/app/inquiry/price-query`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(items)
+  }).then(response => {
+    console.log('正常返回', response)
+    return response.json()
+  }).catch(error => {
+    console.error('价格查询失败:', error)
+    return { success: false }
+  })
+  console.log('返回的数据',data)
+  if (data.success) {
+    inquiryDataTree.findNodeByPath(['basicInfo','netValue'])?.setValue(data.data.netValue)
+    inquiryDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.setValue(data.data.netValueUnit)
+    inquiryDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.setValue(data.data.expectOralVal)
+    inquiryDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.setValue(data.data.expectOralValUnit)
+    appContentRef.value.forceUpdate()
+  }
 }
 
 async function handleExecute(currentStage: number, targetStage: number) {
@@ -125,7 +160,27 @@ async function handleExecute(currentStage: number, targetStage: number) {
   }
 
   if (currentStage === 1) {
+    priceQuery()
     console.log(inquiryDataTree.getValue())
+    // 向后端发送stage 1的所有树，创建inquiry
+    const data = await fetch(`${API_BASE_URL}/api/app/inquiry/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inquiryDataTree.getValue())
+    }).then(response => {
+      console.log('正常返回', response)
+      return response.json()
+    }).catch(error => {
+      console.error('创建询价单失败:', error)
+      return { success: false }
+    })
+    console.log('返回的数据',data)
+    // footer
+    if (data.success){
+      appContentRef.value.footerMessage = data.data.message
+    }
     return false
   }
 

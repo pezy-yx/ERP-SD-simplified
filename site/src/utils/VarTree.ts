@@ -168,6 +168,21 @@ export class VarNode {
   }
 
   /**
+   * 读值
+   */
+  getValue(): VarNodeValue {
+    return this.currentValue
+  }
+
+  /**
+   * 读值
+   * @param {VarNodeValue} newValue
+   */
+  setValue(newValue: VarNodeValue): void {
+    this.currentValue = newValue
+  }
+
+  /**
    * 添加子节点
    * @param {VarNode} child 
    */

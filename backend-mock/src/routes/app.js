@@ -96,5 +96,33 @@ router.post('/inquiry/initialize', (req, res) => {
     // }
   })
 })
+// inquiry/initialize
+router.post('/inquiry/create', (req, res) => {
+  // 直接返回成功
+  console.log('创建询价单:', req.body);
+  const inquiryId = 'INQ-2024-033'
+  res.json({
+    success: true,
+    message: '创建询价单成功',
+    data: {
+      message: `Inquiry ${inquiryId} has been created successfully`
+    }
+  })
+})
+
+// inquiry/price-query
+router.post('/inquiry/price-query', (req, res) => {
+  console.log('询价单价格查询:', req.body);
+  res.json({
+    success: true,
+    message: '询价单价格查询成功',
+    data: {
+      netValue: 15800.50,
+      netValueUnit: 'USD',
+      expectOralVal: '16000.00',
+      expectOralValUnit: 'USD'
+    }
+  })
+})
 
 module.exports = router;

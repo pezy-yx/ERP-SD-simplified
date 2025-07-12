@@ -1,5 +1,5 @@
 <template>
-  <div class="page-content">
+  <div class="page-content" :key="forceUpdateKey">
     <!-- 只显示当前stage -->
     <div
       v-if="currentStage >= 0 && currentStage < stages.length"
@@ -164,8 +164,14 @@ const mergedFooterButtons = computed(() => ({
 
 const hideMagicString = "/hide"
 
+const forceUpdateKey = ref(0)
+const forceUpdate = () => {
+  forceUpdateKey.value++
+}
+
 // 暴露的方法和属性
 defineExpose({
+  forceUpdate,
   footerMessage,
   currentStage,
   goToStage,
