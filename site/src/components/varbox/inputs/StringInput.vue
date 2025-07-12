@@ -94,6 +94,12 @@ function handleEnter() {
   }
 
   emit('enter', inputValue.value);
+  const data = {
+    nodePath: props.nodePath
+  }
+  if (props.node){
+    emit('enter-from-node', props.node, inputValue.value, data);
+  }
   emit('validation-error', '');
 }
 </script>

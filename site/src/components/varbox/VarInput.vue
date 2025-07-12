@@ -53,6 +53,7 @@
                   :tree="varTree"
                   :node="currentNode"
                   :nodePath="nodePath"
+                  v-bind="$attrs"
 
                   @update:modelValue="handleValueChange"
                   @blur="handleBlur"
@@ -122,6 +123,7 @@
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                     @focus="handleFocus"
+                    v-bind="$attrs"
                   >
                     <!-- 透传插槽 -->
                     <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
@@ -143,6 +145,7 @@
                     :showLabel="true"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
+                    v-bind="$attrs"
                   >
                     <!-- 透传插槽 -->
                     <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
@@ -239,6 +242,7 @@
                             :config="getChildConfig(dictChild)"
                             :showLabel="false"
                             @update="handleChildUpdate"
+                            v-bind="$attrs"
                           >
                             <!-- 透传插槽 -->
                             <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
@@ -256,6 +260,7 @@
                           :config="getChildConfig(child)"
                           :showLabel="true"
                           @update="handleChildUpdate"
+                          v-bind="$attrs"
                         >
                             <!-- 透传插槽 -->
                             <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
@@ -293,6 +298,7 @@
                       :showLabel="true"
                       :indentLevel="(indentLevel ?? 0) + 20"
                       @update="handleChildUpdate"
+                      v-bind="$attrs"
                     >
                       <!-- 透传插槽 -->
                       <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
@@ -501,6 +507,10 @@ const mainContentClass = computed(() => {
 
 const extraComponentsClass = computed(() => {
   return `extra ${baseClassPrefix.value}--extra`
+})
+
+const extraTableButtonsClass = computed(() => {
+  return `extra-table-buttons ${baseClassPrefix.value}--extra-table-buttons`
 })
 
 const searchButtonClass = computed(() => {
