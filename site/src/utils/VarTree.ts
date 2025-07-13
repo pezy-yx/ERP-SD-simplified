@@ -94,7 +94,7 @@ export class VarNode {
     defaultValue: VarNodeValue = null,
     readonly: boolean = false,
     children: VarNode[] = [],
-    config: VarNodeValue = {},
+    config: VarNodeConfig | null = null,
     nameDisplay?: string,
     iconPath?: string, // **新增参数**
   ) {
@@ -106,7 +106,7 @@ export class VarNode {
     this.readonly = readonly
     this.children = children || []
     this.index = -1          // 中序遍历位置，由VarTree初始化时设置
-    this.config = config || {} // 自定义配置参数
+    this.config = config ? { ...config } : {} // 创建新的config对象，避免引用共享
     this.iconPath = iconPath; // **新增：设置iconPath**
     // this._currentValue = defaultValue; // 初始化object
     if (this.nodeType === 'leaf') {
@@ -158,7 +158,7 @@ export class VarNode {
 
       for (let i = this.children.length; i < val.length; i++) {
         // 创建新子节点时，传递父节点的 varType, readonly, config, nameDisplay, iconPath
-        const newChild = new VarNode('leaf', this.varType, '', val[i], this.readonly, [], this.config, this.nameDisplay, this.iconPath) // **传递 iconPath**
+        const newChild = new VarNode('leaf', this.varType, '', val[i], this.readonly, [], { ...this.config }, this.nameDisplay, this.iconPath) // **传递 iconPath**
         this.children.push(newChild)
       }
     } else {
@@ -197,6 +197,33 @@ export class VarNode {
     if (index >= 0 && index < this.children.length) {
       this.children.splice(index, 1)
     }
+  }
+
+  /**
+   * @description 拿到选中的child节点
+   */
+  getSelectedChildren(): VarNode[] {
+    return this.children.filter(child => child.config.selected)
+  }
+
+  /**
+   * @description 设置是否被选中
+   * @param value
+   */
+  setSelection(value: boolean): void {
+    this.config.selected = value
+  }
+
+  /**
+   * @description 选择子节点
+   * @param index
+   * @param value
+   */
+  selectChild(index:number, value: boolean): void {
+    if (this.children.length <= index || index<0) {
+      return
+    }
+    this.children[index].setSelection(value)
   }
 
   /**
@@ -250,7 +277,7 @@ export class VarNode {
     const clearedChildren: VarNode[] = this.children.map(child => {
       if (child.isLeaf()) {
         // 创建叶子节点模板时也传递 iconPath
-        return new VarNode(child.nodeType, child.varType, child.name, null, child.readonly, [], child.config, child.nameDisplay, child.iconPath) // **新增：传递 iconPath**
+        return new VarNode(child.nodeType, child.varType, child.name, null, child.readonly, [], { ...child.config }, child.nameDisplay, child.iconPath) // **新增：传递 iconPath**
       } else {
         return child.template() // 递归清空子节点
       }
@@ -561,7 +588,7 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
     nameDisplay = '',
     defaultValue = null,
     readonly = false,
-    config = {},
+    config = null,
     children,
     iconPath = '' // **新增：从 struct 中解构出 iconPath**
   } = struct
@@ -696,7 +723,7 @@ export function createNodeStructure(
   name: string = '',
   defaultValue: VarNodeValue = null,
   readonly: boolean = false,
-  config: VarNodeConfig = {},
+  config: VarNodeConfig | null = null,
   children: NodeStructure[] = [],
   nameDisplay:string = '',
   iconPath: string = '' // **新增参数**
@@ -707,7 +734,7 @@ export function createNodeStructure(
     name,
     defaultValue,
     readonly,
-    config,
+    config: config || {},
     children,
     nameDisplay,
     iconPath // **新增：返回对象中包含 iconPath**
