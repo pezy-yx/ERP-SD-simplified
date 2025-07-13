@@ -108,7 +108,6 @@ export class VarNode {
     this.index = -1          // 中序遍历位置，由VarTree初始化时设置
     this.config = config || {} // 自定义配置参数
     this.iconPath = iconPath; // **新增：设置iconPath**
-    this.currentValue = defaultValue; // 设置初始值
     // this._currentValue = defaultValue; // 初始化object
     if (this.nodeType === 'leaf') {
       this.currentValue = defaultValue; // 设置初始值

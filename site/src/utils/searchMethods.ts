@@ -1,4 +1,4 @@
-import { SearchMethod, SearchResultHandler } from '@/utils/VarTree'
+import { SearchMethod, SearchResultHandler, createTreeFromConfig, cns } from '@/utils/VarTree'
 
 export const bpSearch: SearchMethod[] = [
   {
