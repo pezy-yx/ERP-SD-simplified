@@ -673,7 +673,7 @@ function isChildDisplay(child: VarNode|NodeStructure) {
   if (currentNode.value?.config?.showWhiteList) {
     return child.name && currentNode.value.config.showWhiteList.includes(child.name)
   }
-  return !child.name || !(currentNode.value!.config?.hide || []).includes(child.name)
+  return (!child.name || !(currentNode.value!.config?.hideList || []).includes(child.name)) && !child.config?.hideSelf
 }
 
 function getTableHeaders(): string[] {

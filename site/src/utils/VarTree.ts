@@ -44,8 +44,9 @@ export type VarNodeConfig = {
   customSearchResultHandler?: SearchResultHandler; // 自定义搜索结果处理函数
   selected?: boolean; // 是否为选中状态
   rowProvided?: number; // 动态列表初始行数
-  hide?: string[];
+  hideList?: string[];
   showWhiteList?: string[];
+  hideSelf?: boolean;
   data?: any //
 }
 
