@@ -234,7 +234,7 @@
                       </td>
                       <!-- 如果子项是dict，则每个字段占一列 -->
                       <template v-if="child.nodeType === 'dict'">
-                        <td v-for="(dictChild, dictIndex) in child.children" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
+                        <td v-for="(dictChild, dictIndex) in child.children.filter(child => isChildDisplay(child))" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
                           <VarInput
                             :varTree="varTree"
                             :nodePath="[...nodePath, index.toString(), dictChild.name]"
@@ -520,12 +520,12 @@ const searchButtonClass = computed(() => {
 // 分离叶子节点和复杂节点
 const leafChildren = computed(() => {
   if (!currentNode.value?.children) return []
-  return currentNode.value.children.filter(child => child.nodeType === 'leaf')
+  return currentNode.value.children.filter(child => isChildDisplay(child) && child.nodeType === 'leaf')
 })
 
 const complexChildren = computed(() => {
   if (!currentNode.value?.children) return []
-  return currentNode.value.children.filter(child => child.nodeType === 'dict' || child.nodeType === 'list')
+  return currentNode.value.children.filter(child => isChildDisplay(child) && child.nodeType === 'dict' || child.nodeType === 'list')
 })
 
 const listItems = computed(()=>{
@@ -669,16 +669,25 @@ function getInputClass() {
   }
 }
 
+function isChildDisplay(child: VarNode|NodeStructure) {
+  if (currentNode.value?.config?.showWhiteList) {
+    return child.name && currentNode.value.config.showWhiteList.includes(child.name)
+  }
+  return !child.name || !(currentNode.value!.config?.hide || []).includes(child.name)
+}
+
 function getTableHeaders(): string[] {
   const defaultValue = "值"
   if (props.config?.childTemplate?.children !== undefined && props.config.childTemplate.children.length > 0) {
-    return props.config.childTemplate.children.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
+    const childrenNotHide = props.config.childTemplate.children.filter((child: NodeStructure) => isChildDisplay(child))
+    return childrenNotHide.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
   }
 
   const firstChild = currentNode.value?.children[0]
   if (!firstChild) return [defaultValue]
   if (firstChild.nodeType === 'dict') {
-    return firstChild.children.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
+    const childrenNotHide = firstChild.children.filter((child: NodeStructure) => isChildDisplay(child))
+    return childrenNotHide.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
   }
   return firstChild.nameDisplay ? [firstChild.nameDisplay] : [defaultValue]
 }
@@ -793,9 +802,9 @@ function updateAllSelectedState() {
   // config.selected update
   if (currentNode.value) {
     currentNode.value.children.forEach((child, index) => {
-      child.config.selected = selectedRows.value.has(index)
+      currentNode.value?.selectChild(index, selectedRows.value.has(index))
     })
-  }
+  } 
 }
 
 function removeSelectedItems() {
