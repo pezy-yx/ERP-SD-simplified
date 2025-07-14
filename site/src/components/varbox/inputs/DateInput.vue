@@ -148,6 +148,13 @@ function handleEnter() {
   }
 
   emit('enter', displayValue.value);
+  if (props.node){
+    const stringValue = displayValue.value.toString()
+    const data = {
+      nodePath: props.nodePath
+    }
+    emit('enter-from-node', props.node, stringValue, data);
+  }
   emit('validation-error', '');
 }
 

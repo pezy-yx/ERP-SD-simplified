@@ -43,6 +43,12 @@ export type VarNodeConfig = {
   searchMethods?: SearchMethod[] | null; // 搜索方法配置
   customSearchResultHandler?: SearchResultHandler; // 自定义搜索结果处理函数
   selected?: boolean; // 是否为选中状态
+  rowProvided?: number; // 动态列表初始行数
+  hideList?: string[];
+  showWhiteList?: string[];
+  hideSelf?: boolean;
+  childNameDisplayTranslation?: Record<string, string>;
+  data?: any //
 }
 
 export type NodeStructure = {
@@ -93,7 +99,7 @@ export class VarNode {
     defaultValue: VarNodeValue = null,
     readonly: boolean = false,
     children: VarNode[] = [],
-    config: VarNodeValue = {},
+    config: VarNodeConfig | null = null,
     nameDisplay?: string,
     iconPath?: string, // **新增参数**
   ) {
@@ -105,9 +111,8 @@ export class VarNode {
     this.readonly = readonly
     this.children = children || []
     this.index = -1          // 中序遍历位置，由VarTree初始化时设置
-    this.config = config || {} // 自定义配置参数
+    this.config = config ? { ...config } : {} // 创建新的config对象，避免引用共享
     this.iconPath = iconPath; // **新增：设置iconPath**
-    this.currentValue = defaultValue; // 设置初始值
     // this._currentValue = defaultValue; // 初始化object
     if (this.nodeType === 'leaf') {
       this.currentValue = defaultValue; // 设置初始值
@@ -158,12 +163,27 @@ export class VarNode {
 
       for (let i = this.children.length; i < val.length; i++) {
         // 创建新子节点时，传递父节点的 varType, readonly, config, nameDisplay, iconPath
-        const newChild = new VarNode('leaf', this.varType, '', val[i], this.readonly, [], this.config, this.nameDisplay, this.iconPath) // **传递 iconPath**
+        const newChild = new VarNode('leaf', this.varType, '', val[i], this.readonly, [], { ...this.config }, this.nameDisplay, this.iconPath) // **传递 iconPath**
         this.children.push(newChild)
       }
     } else {
       this._currentValue = val;
     }
+  }
+
+  /**
+   * 读值
+   */
+  getValue(): VarNodeValue {
+    return this.currentValue
+  }
+
+  /**
+   * 读值
+   * @param {VarNodeValue} newValue
+   */
+  setValue(newValue: VarNodeValue): void {
+    this.currentValue = newValue
   }
 
   /**
@@ -182,6 +202,33 @@ export class VarNode {
     if (index >= 0 && index < this.children.length) {
       this.children.splice(index, 1)
     }
+  }
+
+  /**
+   * @description 拿到选中的child节点
+   */
+  getSelectedChildren(): VarNode[] {
+    return this.children.filter(child => child.config.selected)
+  }
+
+  /**
+   * @description 设置是否被选中
+   * @param value
+   */
+  setSelection(value: boolean): void {
+    this.config.selected = value
+  }
+
+  /**
+   * @description 选择子节点
+   * @param index
+   * @param value
+   */
+  selectChild(index:number, value: boolean): void {
+    if (this.children.length <= index || index<0) {
+      return
+    }
+    this.children[index].setSelection(value)
   }
 
   /**
@@ -235,7 +282,7 @@ export class VarNode {
     const clearedChildren: VarNode[] = this.children.map(child => {
       if (child.isLeaf()) {
         // 创建叶子节点模板时也传递 iconPath
-        return new VarNode(child.nodeType, child.varType, child.name, null, child.readonly, [], child.config, child.nameDisplay, child.iconPath) // **新增：传递 iconPath**
+        return new VarNode(child.nodeType, child.varType, child.name, null, child.readonly, [], { ...child.config }, child.nameDisplay, child.iconPath) // **新增：传递 iconPath**
       } else {
         return child.template() // 递归清空子节点
       }
@@ -251,6 +298,39 @@ export class VarNode {
       this.nameDisplay, // 传递 nameDisplay
       this.iconPath // **新增：传递 iconPath**
     )
+  }
+
+  /**
+   * 根据路径查找节点
+   * @param {string[]} path - 节点路径
+   * @returns {VarNode|null}
+   */
+  findNodeByPath(path: string[]): VarNode | null {
+    if (!this || !path || path.length === 0) {
+      return this
+    }
+  
+    let currentNode: VarNode = this
+    
+    for (const pathSegment of path) {
+      if (!currentNode || !currentNode.children) {
+        return null
+      }
+      
+      // 根据节点类型查找子节点
+      if (currentNode.nodeType === 'dict') {
+        currentNode = currentNode.children.find(child => child.name === pathSegment) as VarNode
+      } else if (currentNode.nodeType === 'list') {
+        const index = parseInt(pathSegment)
+        currentNode = currentNode.children[index]
+      }
+      
+      if (!currentNode) {
+        return null
+      }
+    }
+    
+    return currentNode
   }
 }
 
@@ -412,6 +492,99 @@ export class VarTree {
   }
 
   /**
+   * @description 设置节点，引用设置
+   * @param sourceNode - 要替换的源节点
+   * @param targetPath - 目标路径
+   */
+  replaceNodeByPath(sourceNode: VarNode, targetPath: string[]): void {
+    if (!this.root || !targetPath || targetPath.length === 0) {
+      // 如果路径为空，替换根节点
+      this.root = sourceNode
+      this._initializeTree()
+      return
+    }
+
+    // 如果只有一个路径段，说明要替换根节点的直接子节点
+    if (targetPath.length === 1) {
+      if (!this.root.children) {
+        this.root.children = []
+      }
+      
+      const pathSegment = targetPath[0]
+      
+      if (this.root.nodeType === 'dict') {
+        // 查找是否已存在该名称的子节点
+        const existingIndex = this.root.children.findIndex(child => child.name === pathSegment)
+        if (existingIndex !== -1) {
+          // 替换现有节点
+          this.root.children[existingIndex] = sourceNode
+        } else {
+          // 添加新节点
+          sourceNode.name = pathSegment
+          this.root.children.push(sourceNode)
+        }
+      } else if (this.root.nodeType === 'list') {
+        const index = parseInt(pathSegment)
+        if (isNaN(index) || index < 0) {
+          throw new Error(`Invalid list index: ${pathSegment}`)
+        }
+        
+        // 扩展数组到所需长度
+        while (this.root.children.length <= index) {
+          this.root.children.push(new VarNode())
+        }
+        
+        this.root.children[index] = sourceNode
+      }
+      
+      this._initializeTree()
+      return
+    }
+
+    // 多层路径，需要找到父节点
+    const parentPath = targetPath.slice(0, -1)
+    const lastSegment = targetPath[targetPath.length - 1]
+    
+    const parentNode = this.findNodeByPath(parentPath)
+    if (!parentNode) {
+      throw new Error(`Parent node not found at path: ${parentPath.join('/')}`)
+    }
+
+    if (!parentNode.children) {
+      parentNode.children = []
+    }
+
+    if (parentNode.nodeType === 'dict') {
+      // 查找是否已存在该名称的子节点
+      const existingIndex = parentNode.children.findIndex(child => child.name === lastSegment)
+      if (existingIndex !== -1) {
+        // 替换现有节点
+        parentNode.children[existingIndex] = sourceNode
+      } else {
+        // 添加新节点
+        sourceNode.name = lastSegment
+        parentNode.children.push(sourceNode)
+      }
+    } else if (parentNode.nodeType === 'list') {
+      const index = parseInt(lastSegment)
+      if (isNaN(index) || index < 0) {
+        throw new Error(`Invalid list index: ${lastSegment}`)
+      }
+      
+      // 扩展数组到所需长度
+      while (parentNode.children.length <= index) {
+        parentNode.children.push(new VarNode())
+      }
+      
+      parentNode.children[index] = sourceNode
+    } else {
+      throw new Error(`Cannot add child to leaf node at path: ${parentPath.join('/')}`)
+    }
+
+    this._initializeTree()
+  }
+
+  /**
    * 根据路径查找节点
    * @param {string[]} path - 节点路径
    * @returns {VarNode|null}
@@ -546,7 +719,7 @@ export function createNodeFromConfig(struct: NodeStructure): VarNode {
     nameDisplay = '',
     defaultValue = null,
     readonly = false,
-    config = {},
+    config = null,
     children,
     iconPath = '' // **新增：从 struct 中解构出 iconPath**
   } = struct
@@ -681,7 +854,7 @@ export function createNodeStructure(
   name: string = '',
   defaultValue: VarNodeValue = null,
   readonly: boolean = false,
-  config: VarNodeConfig = {},
+  config: VarNodeConfig | null = null,
   children: NodeStructure[] = [],
   nameDisplay:string = '',
   iconPath: string = '' // **新增参数**
@@ -692,7 +865,7 @@ export function createNodeStructure(
     name,
     defaultValue,
     readonly,
-    config,
+    config: config || {},
     children,
     nameDisplay,
     iconPath // **新增：返回对象中包含 iconPath**
