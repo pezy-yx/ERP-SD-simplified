@@ -9,6 +9,7 @@
     :showLabel="true"
     :wrapperStyle="props.wrapperStyle"
     @update="handleUpdate"
+    v-bind="$attrs"
   >
     <!-- 透传插槽 -->
     <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">

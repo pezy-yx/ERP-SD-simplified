@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="search-modal-backdrop" @click="handleBackdropClick">
+  <div v-if="visible" class="search-modal-backdrop" @click="handleBackdropClick" :key="forceUpdateKey">
     <div class="search-modal" @click.stop>
       <!-- 弹窗头部 -->
       <div class="search-modal-header">
@@ -126,6 +126,10 @@ const emit = defineEmits<{
 }>()
 
 // 响应式数据
+const forceUpdateKey = ref(0)
+const forceUpdate = () => {
+  forceUpdateKey.value++
+}
 const stage = ref(0) // 0: 参数输入阶段, 1: 结果展示阶段
 const selectedMethodIndex = ref(0)
 const resultTree: VarTree = createTreeFromConfig(
@@ -215,6 +219,9 @@ async function handleExecute() {
       )
 
       resultTree.setRoot(searchResultTree.root)
+      console.log(response.data)
+      console.log(resultNodes)
+      console.log(searchResultTree.root)
       stage.value = 1
     } else {
       // 处理搜索失败的情况

@@ -47,7 +47,10 @@ export const SimpleInputBoxEmits = {
   },
   'focus': () => {
     return true;
-  }
+  },
+  'enter-from-node': (node: VarNode, value: string, data: any) => {
+    return node instanceof VarNode && typeof value === 'string';
+  },
 };
 
 export const SimpleInputBoxEmitsWithNum = {
@@ -63,6 +66,9 @@ export const SimpleInputBoxEmitsWithNum = {
   'validation-error': (message: string): boolean => {
     return typeof message === 'string' && message.length > 0;
   },
+  'enter-from-node': (node: VarNode, value: string, data: any) => {
+    return node instanceof VarNode && typeof value === 'string';
+  },
 };
 export const SimpleInputBoxEmitsWithBool = {
   'update:modelValue': (value: boolean): boolean => {
@@ -76,5 +82,8 @@ export const SimpleInputBoxEmitsWithBool = {
   },
   'validation-error': (message: string): boolean => {
     return typeof message === 'string' && message.length > 0;
+  },
+  'enter-from-node': (node: VarNode, value: string, data: any) => {
+    return node instanceof VarNode && typeof value === 'string';
   },
 };
