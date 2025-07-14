@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import Application from '@/views/Application.vue';
 import ApplicationDirectory from '@/views/ApplicationDirectory.vue';
 import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue';
-import MaintainBusinessPartnerContent from '@/views/MaintainBusinessPartnerView.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import SearchModalTest from "@/test/SearchModalTest.vue";
 import AppContentTest from "@/test/AppContentTest.vue";
@@ -12,8 +11,10 @@ import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
+import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
 import CreateInquiry from "@/views/inquiry/Create.vue";
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
+import { title } from "process";
 
 const routes = [
   // 保留原有的路径
@@ -90,14 +91,17 @@ const routes = [
         component: Home,
         meta: { title: 'Home' }
       },
-
-
-
       {
         path: 'create-bp-relationship',
         name: 'CreateBPRelationship',
         component: CreateBp,
         meta: { title: 'Create BP Relationship' }
+      },
+      {
+        path: 'manage-sales-orders',
+        name: 'ManageSalesOrders',
+        component: ManageSalesOrders,
+        meta:{ title: 'Manage Sales Orders' }
       },
       {
         path: 'create-inquiry',
