@@ -47,6 +47,7 @@ export type VarNodeConfig = {
   hideList?: string[];
   showWhiteList?: string[];
   hideSelf?: boolean;
+  childNameDisplayTranslation?: Record<string, string>;
   data?: any //
 }
 
@@ -298,6 +299,39 @@ export class VarNode {
       this.iconPath // **新增：传递 iconPath**
     )
   }
+
+  /**
+   * 根据路径查找节点
+   * @param {string[]} path - 节点路径
+   * @returns {VarNode|null}
+   */
+  findNodeByPath(path: string[]): VarNode | null {
+    if (!this || !path || path.length === 0) {
+      return this
+    }
+  
+    let currentNode: VarNode = this
+    
+    for (const pathSegment of path) {
+      if (!currentNode || !currentNode.children) {
+        return null
+      }
+      
+      // 根据节点类型查找子节点
+      if (currentNode.nodeType === 'dict') {
+        currentNode = currentNode.children.find(child => child.name === pathSegment) as VarNode
+      } else if (currentNode.nodeType === 'list') {
+        const index = parseInt(pathSegment)
+        currentNode = currentNode.children[index]
+      }
+      
+      if (!currentNode) {
+        return null
+      }
+    }
+    
+    return currentNode
+  }
 }
 
 /**
@@ -455,6 +489,99 @@ export class VarTree {
         this._preorderTraversal(child, nodes)
       }
     }
+  }
+
+  /**
+   * @description 设置节点，引用设置
+   * @param sourceNode - 要替换的源节点
+   * @param targetPath - 目标路径
+   */
+  replaceNodeByPath(sourceNode: VarNode, targetPath: string[]): void {
+    if (!this.root || !targetPath || targetPath.length === 0) {
+      // 如果路径为空，替换根节点
+      this.root = sourceNode
+      this._initializeTree()
+      return
+    }
+
+    // 如果只有一个路径段，说明要替换根节点的直接子节点
+    if (targetPath.length === 1) {
+      if (!this.root.children) {
+        this.root.children = []
+      }
+      
+      const pathSegment = targetPath[0]
+      
+      if (this.root.nodeType === 'dict') {
+        // 查找是否已存在该名称的子节点
+        const existingIndex = this.root.children.findIndex(child => child.name === pathSegment)
+        if (existingIndex !== -1) {
+          // 替换现有节点
+          this.root.children[existingIndex] = sourceNode
+        } else {
+          // 添加新节点
+          sourceNode.name = pathSegment
+          this.root.children.push(sourceNode)
+        }
+      } else if (this.root.nodeType === 'list') {
+        const index = parseInt(pathSegment)
+        if (isNaN(index) || index < 0) {
+          throw new Error(`Invalid list index: ${pathSegment}`)
+        }
+        
+        // 扩展数组到所需长度
+        while (this.root.children.length <= index) {
+          this.root.children.push(new VarNode())
+        }
+        
+        this.root.children[index] = sourceNode
+      }
+      
+      this._initializeTree()
+      return
+    }
+
+    // 多层路径，需要找到父节点
+    const parentPath = targetPath.slice(0, -1)
+    const lastSegment = targetPath[targetPath.length - 1]
+    
+    const parentNode = this.findNodeByPath(parentPath)
+    if (!parentNode) {
+      throw new Error(`Parent node not found at path: ${parentPath.join('/')}`)
+    }
+
+    if (!parentNode.children) {
+      parentNode.children = []
+    }
+
+    if (parentNode.nodeType === 'dict') {
+      // 查找是否已存在该名称的子节点
+      const existingIndex = parentNode.children.findIndex(child => child.name === lastSegment)
+      if (existingIndex !== -1) {
+        // 替换现有节点
+        parentNode.children[existingIndex] = sourceNode
+      } else {
+        // 添加新节点
+        sourceNode.name = lastSegment
+        parentNode.children.push(sourceNode)
+      }
+    } else if (parentNode.nodeType === 'list') {
+      const index = parseInt(lastSegment)
+      if (isNaN(index) || index < 0) {
+        throw new Error(`Invalid list index: ${lastSegment}`)
+      }
+      
+      // 扩展数组到所需长度
+      while (parentNode.children.length <= index) {
+        parentNode.children.push(new VarNode())
+      }
+      
+      parentNode.children[index] = sourceNode
+    } else {
+      throw new Error(`Cannot add child to leaf node at path: ${parentPath.join('/')}`)
+    }
+
+    this._initializeTree()
   }
 
   /**

@@ -36,7 +36,7 @@ export default {
     },
     // 初始选中的标签值
     initialActiveTab: {
-      type: String,
+      type: [String, Number, Object],
       default: 'sales_and_dist' // 默认选中第一个
     }
   },
@@ -71,8 +71,11 @@ export default {
 <style scoped>
 .filter-tabs-container {
   width: 100%;
-  background-color: #25484c; /* 与导航栏相同的深绿色背景 */
+  background-color: var(--theme-color-darker); /* 与导航栏相同的深绿色背景 */
   padding-bottom: 5px; /* 留出横线和按钮之间的空间 */
+}
+.reverse.filter-tabs-container {
+  background-color: var(--theme-color-page);
 }
 
 .horizontal-line {
@@ -97,9 +100,13 @@ export default {
   flex-wrap: wrap; /* 允许按钮换行，以防内容过多 */
 }
 
+.middle .filter-tabs-row {
+  justify-content: center; /* 按钮居中对齐 */
+}
+
 .tab-button {
   background-color: rgba(255, 255, 255, 0.1); /* 默认按钮的半透明背景 */
-  color: #e6e5d8; /* 按钮文字颜色 */
+  color: var(--theme-color-page); /* 按钮文字颜色 */
   border: none;
   border-radius: 5px; /* 轻微圆角 */
   padding: 8px 15px;
@@ -109,14 +116,31 @@ export default {
   transition: background-color 0.3s ease, color 0.3s ease;
   flex-shrink: 0; /* 防止按钮被压缩 */
 }
+.reverse .tab-button {
+  color: var(--theme-color-dark); /* 按钮文字颜色 */
+}
 
 .tab-button:hover {
   background-color: rgba(255, 255, 255, 0.2); /* 鼠标悬停效果 */
 }
 
 .tab-button.active {
-  background-color: #e6e5d8; /* 选中状态的浅色背景 */
-  color: #3b5952; /* 选中状态的深色文字 */
+  background-color: var(--theme-color-page); /* 选中状态的浅色背景 */
+  color: var(--theme-color-dark); /* 选中状态的深色文字 */
   font-weight: bold;
+}
+
+.reverse .horizontal-line {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.reverse .tab-button.active {
+  background-color: var(--theme-color-lighter-a);
+  color: var(--theme-color-dark);
+}
+
+.hide-top-line .top-line,
+.hide-bottom-line .bottom-line {
+  display: none;
 }
 </style>

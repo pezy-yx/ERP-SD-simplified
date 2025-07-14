@@ -120,6 +120,7 @@
                     :config="getChildConfig(child)"
                     :indentLevel="0"
                     :showLabel="true"
+                    :componentConfig="getChildComponentConfig(child)"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                     @focus="handleFocus"
@@ -143,6 +144,7 @@
                     :config="getChildConfig(child)"
                     :indentLevel="(indentLevel ?? 0) + 20"
                     :showLabel="true"
+                    :componentConfig="getChildComponentConfig(child)"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                     v-bind="$attrs"
@@ -241,6 +243,7 @@
                             :readonly="effectiveReadonly ?? false"
                             :config="getChildConfig(dictChild)"
                             :showLabel="false"
+                            :componentConfig="getChildComponentConfig(child)"
                             @update="handleChildUpdate"
                             v-bind="$attrs"
                           >
@@ -259,6 +262,7 @@
                           :readonly="effectiveReadonly ?? false"
                           :config="getChildConfig(child)"
                           :showLabel="true"
+                          :componentConfig="getChildComponentConfig(child)"
                           @update="handleChildUpdate"
                           v-bind="$attrs"
                         >
@@ -296,6 +300,7 @@
                       :readonly="effectiveReadonly ?? false"
                       :config="getChildConfig(child)"
                       :showLabel="true"
+                      :componentConfig="getChildComponentConfig(child)"
                       :indentLevel="(indentLevel ?? 0) + 20"
                       @update="handleChildUpdate"
                       v-bind="$attrs"
@@ -344,6 +349,7 @@ const props = defineProps<{
   indentLevel?: number
   showLabel?: boolean
   wrapperStyle?: Record<string, any>
+  componentConfig?: any
 }>()
 
 const emit = defineEmits<{
@@ -485,7 +491,7 @@ const inputStyle = computed(() => ({
   // width: '100%'
 }))
 const nameDisplay = computed(() => {
-  return currentNode.value?.getNameDisplay() || '未命名'
+  return  props.componentConfig?.nameDisplay || currentNode.value?.getNameDisplay() || '未命名'
 })
 
 const baseClassPrefix = computed(() => {
@@ -674,6 +680,22 @@ function isChildDisplay(child: VarNode|NodeStructure) {
     return child.name && currentNode.value.config.showWhiteList.includes(child.name)
   }
   return (!child.name || !(currentNode.value!.config?.hideList || []).includes(child.name)) && !child.config?.hideSelf
+}
+
+function getChildNameDisplayTranslation(child: VarNode|NodeStructure) {
+  if (!child.name) {
+    return null
+  }
+  if (currentNode.value?.config?.childNameDisplayTranslation) {
+    return currentNode.value.config.childNameDisplayTranslation[child.name] || null
+  }
+  return null
+}
+
+function getChildComponentConfig(child: VarNode|NodeStructure) {
+  return {
+    nameDisplay: getChildNameDisplayTranslation(child)
+  }
 }
 
 function getTableHeaders(): string[] {
@@ -945,7 +967,7 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(input),
 .leaf-node :deep(select) {
   width: 100%;
-  min-width: 120px; /* 最小宽度 */
+  /*min-width: 120px; /* 最小宽度 */
   padding: 0;
   border: 1px solid var(--theme-color-dark);
   border-radius: 0px; /* 方形直角 */
