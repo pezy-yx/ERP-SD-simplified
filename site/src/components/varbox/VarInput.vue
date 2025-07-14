@@ -53,6 +53,7 @@
                   :tree="varTree"
                   :node="currentNode"
                   :nodePath="nodePath"
+                  v-bind="$attrs"
 
                   @update:modelValue="handleValueChange"
                   @blur="handleBlur"
@@ -119,9 +120,11 @@
                     :config="getChildConfig(child)"
                     :indentLevel="0"
                     :showLabel="true"
+                    :componentConfig="getChildComponentConfig(child)"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
                     @focus="handleFocus"
+                    v-bind="$attrs"
                   >
                     <!-- 透传插槽 -->
                     <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
@@ -141,8 +144,10 @@
                     :config="getChildConfig(child)"
                     :indentLevel="(indentLevel ?? 0) + 20"
                     :showLabel="true"
+                    :componentConfig="getChildComponentConfig(child)"
                     :class="`dict-item dict-item--${child.nodeType} ${baseClassPrefix}--dict-item ${baseClassPrefix}--dict-item--${child.nodeType}`"
                     @update="handleChildUpdate"
+                    v-bind="$attrs"
                   >
                     <!-- 透传插槽 -->
                     <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
@@ -217,7 +222,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(child, index) in currentNode?.children" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
+                    <tr v-for="(child, index) in listItems" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
                       <td :class="`select-cell ${baseClassPrefix}--select-cell`">
                         <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
                           <input
@@ -231,14 +236,16 @@
                       </td>
                       <!-- 如果子项是dict，则每个字段占一列 -->
                       <template v-if="child.nodeType === 'dict'">
-                        <td v-for="(dictChild, dictIndex) in child.children" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
+                        <td v-for="(dictChild, dictIndex) in child.children.filter(child => isChildDisplay(child))" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
                           <VarInput
                             :varTree="varTree"
                             :nodePath="[...nodePath, index.toString(), dictChild.name]"
                             :readonly="effectiveReadonly ?? false"
                             :config="getChildConfig(dictChild)"
                             :showLabel="false"
+                            :componentConfig="getChildComponentConfig(child)"
                             @update="handleChildUpdate"
+                            v-bind="$attrs"
                           >
                             <!-- 透传插槽 -->
                             <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
@@ -255,7 +262,9 @@
                           :readonly="effectiveReadonly ?? false"
                           :config="getChildConfig(child)"
                           :showLabel="true"
+                          :componentConfig="getChildComponentConfig(child)"
                           @update="handleChildUpdate"
+                          v-bind="$attrs"
                         >
                             <!-- 透传插槽 -->
                             <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
@@ -291,8 +300,10 @@
                       :readonly="effectiveReadonly ?? false"
                       :config="getChildConfig(child)"
                       :showLabel="true"
+                      :componentConfig="getChildComponentConfig(child)"
                       :indentLevel="(indentLevel ?? 0) + 20"
                       @update="handleChildUpdate"
+                      v-bind="$attrs"
                     >
                       <!-- 透传插槽 -->
                       <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
@@ -338,6 +349,7 @@ const props = defineProps<{
   indentLevel?: number
   showLabel?: boolean
   wrapperStyle?: Record<string, any>
+  componentConfig?: any
 }>()
 
 const emit = defineEmits<{
@@ -479,7 +491,7 @@ const inputStyle = computed(() => ({
   // width: '100%'
 }))
 const nameDisplay = computed(() => {
-  return currentNode.value?.getNameDisplay() || '未命名'
+  return  props.componentConfig?.nameDisplay || currentNode.value?.getNameDisplay() || '未命名'
 })
 
 const baseClassPrefix = computed(() => {
@@ -503,6 +515,10 @@ const extraComponentsClass = computed(() => {
   return `extra ${baseClassPrefix.value}--extra`
 })
 
+const extraTableButtonsClass = computed(() => {
+  return `extra-table-buttons ${baseClassPrefix.value}--extra-table-buttons`
+})
+
 const searchButtonClass = computed(() => {
   return `search-button ${baseClassPrefix.value}--search-button`
 })
@@ -510,12 +526,29 @@ const searchButtonClass = computed(() => {
 // 分离叶子节点和复杂节点
 const leafChildren = computed(() => {
   if (!currentNode.value?.children) return []
-  return currentNode.value.children.filter(child => child.nodeType === 'leaf')
+  return currentNode.value.children.filter(child => isChildDisplay(child) && child.nodeType === 'leaf')
 })
 
 const complexChildren = computed(() => {
   if (!currentNode.value?.children) return []
-  return currentNode.value.children.filter(child => child.nodeType === 'dict' || child.nodeType === 'list')
+  return currentNode.value.children.filter(child => isChildDisplay(child) && child.nodeType === 'dict' || child.nodeType === 'list')
+})
+
+const listItems = computed(()=>{
+  if(currentNode.value?.varType !== 'dynamiclist'){
+    return []
+  }
+  if(!currentNode.value?.config?.childTemplate) {
+    return currentNode.value.children
+  }
+  const length = currentNode.value.children.length
+  const rowProvided = currentNode.value.config?.rowProvided || 3
+  if (length < rowProvided) {
+    for (let i = length; i < rowProvided; i++) {
+      currentNode.value.addChild(createNewListItem()!)
+    }
+  }
+  return currentNode.value.children
 })
 
 watch(currentNode, () => {
@@ -642,16 +675,41 @@ function getInputClass() {
   }
 }
 
+function isChildDisplay(child: VarNode|NodeStructure) {
+  if (currentNode.value?.config?.showWhiteList) {
+    return child.name && currentNode.value.config.showWhiteList.includes(child.name)
+  }
+  return (!child.name || !(currentNode.value!.config?.hideList || []).includes(child.name)) && !child.config?.hideSelf
+}
+
+function getChildNameDisplayTranslation(child: VarNode|NodeStructure) {
+  if (!child.name) {
+    return null
+  }
+  if (currentNode.value?.config?.childNameDisplayTranslation) {
+    return currentNode.value.config.childNameDisplayTranslation[child.name] || null
+  }
+  return null
+}
+
+function getChildComponentConfig(child: VarNode|NodeStructure) {
+  return {
+    nameDisplay: getChildNameDisplayTranslation(child)
+  }
+}
+
 function getTableHeaders(): string[] {
   const defaultValue = "值"
   if (props.config?.childTemplate?.children !== undefined && props.config.childTemplate.children.length > 0) {
-    return props.config.childTemplate.children.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
+    const childrenNotHide = props.config.childTemplate.children.filter((child: NodeStructure) => isChildDisplay(child))
+    return childrenNotHide.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
   }
 
   const firstChild = currentNode.value?.children[0]
   if (!firstChild) return [defaultValue]
   if (firstChild.nodeType === 'dict') {
-    return firstChild.children.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
+    const childrenNotHide = firstChild.children.filter((child: NodeStructure) => isChildDisplay(child))
+    return childrenNotHide.map((child: NodeStructure) => child.nameDisplay || child.name || defaultValue)
   }
   return firstChild.nameDisplay ? [firstChild.nameDisplay] : [defaultValue]
 }
@@ -766,9 +824,9 @@ function updateAllSelectedState() {
   // config.selected update
   if (currentNode.value) {
     currentNode.value.children.forEach((child, index) => {
-      child.config.selected = selectedRows.value.has(index)
+      currentNode.value?.selectChild(index, selectedRows.value.has(index))
     })
-  }
+  } 
 }
 
 function removeSelectedItems() {
@@ -909,7 +967,7 @@ function createNewListItem(): VarNode | null {
 .leaf-node :deep(input),
 .leaf-node :deep(select) {
   width: 100%;
-  min-width: 120px; /* 最小宽度 */
+  /*min-width: 120px; /* 最小宽度 */
   padding: 0;
   border: 1px solid var(--theme-color-dark);
   border-radius: 0px; /* 方形直角 */

@@ -12,6 +12,7 @@ import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
 import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
+import CreateInquiry from "@/views/inquiry/Create.vue";
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
 
@@ -101,7 +102,13 @@ const routes = [
         name: 'ManageSalesOrders',
         component: ManageSalesOrders,
         meta:{ title: 'Manage Sales Orders' }
-      }
+      },
+      {
+        path: 'create-inquiry',
+        name: 'CreateInquiry',
+        component: CreateInquiry,
+        meta: { title: 'Create Inquiry' }
+      },
     ]
   },
   { 
