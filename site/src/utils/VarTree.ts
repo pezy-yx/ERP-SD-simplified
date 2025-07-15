@@ -198,8 +198,13 @@ export class VarNode {
         if (childValue !== undefined) {
           child.forceSetValue(childValue)
         } else {
-          // 强制设置为默认值或null
-          child.forceSetValue(child.defaultValue)
+          // 对于list类型的子节点，如果没有数据就清空，不设置默认值
+          if (child.nodeType === 'list') {
+            child.children = []
+          } else {
+            // 对于非list类型，设置为默认值
+            child.forceSetValue(child.defaultValue)
+          }
         }
       }
     } else if (this.nodeType === 'list' && Array.isArray(newValue)) {

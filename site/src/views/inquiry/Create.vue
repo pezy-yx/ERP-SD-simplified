@@ -46,8 +46,8 @@ const inquiryDataTree = createTreeFromConfig(
       cns('string','leaf','expectOralValUnit','',true,{hideLabel:true},[],"Expect. Oral Val Unit:"),
       cns('dynamiclist','list','items',null,false,{
         hideLabel:true, 
-        hideList: ['netValue', 'netValueUnit', 'pricingDate', 'orderProbability','reqDelivDate','pricingElements','taxValue','taxValueUnit'],
-        childTemplate:createNodeFromConfig(cns('dict','dict','item',null,false,{},[
+        hideList: ['netValue', 'netValueUnit', 'pricingDate', 'orderProbability','reqDelivDate','taxValue','taxValueUnit','pricingElements'],
+        childTemplate:cns('dict','dict','item',null,false,{},[
           cns('string','leaf','item','',true,{},[],"Item"),
           cns('string','leaf','material','',false,{},[],"Material"),
           cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
@@ -61,7 +61,7 @@ const inquiryDataTree = createTreeFromConfig(
           cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
           cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
           cns('dynamiclist','list','pricingElements',null,true,{
-            childTemplate:createNodeFromConfig(cns('dict','dict','condition',null,false,{},[
+            childTemplate:cns('dict','dict','condition',null,false,{},[
               cns('string','leaf','cnty','',false,{},[],"Cnty"),
               cns('string','leaf','name','',false,{},[],"Name"),
               cns('string','leaf','amount','',false,{},[],"Amount"),
@@ -79,9 +79,9 @@ const inquiryDataTree = createTreeFromConfig(
               cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
               cns('string','leaf','cdCur','',false,{},[],"CdCur"),
               cns('boolean','leaf','stat',false,false,{},[],"Stat"),
-            ])),
+            ]),
           },[],"Pricing Elements"),
-        ])),
+        ]),
       },[],"Items")
     ],'Item Overview')
   ])
@@ -138,7 +138,7 @@ const itemDetailConditionTree = createTreeFromConfig(
     cns('string','leaf','taxValue','',true,{},[]),
     cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[]),
     cns('dynamiclist','list','pricingElements',null,true,{
-      childTemplate:createNodeFromConfig(cns('dict','dict','condition',null,false,{},[
+      childTemplate:cns('dict','dict','condition',null,false,{},[
         cns('string','leaf','cnty','',false,{},[],"Cnty"),
         cns('string','leaf','name','',false,{},[],"Name"),
         cns('string','leaf','amount','',false,{},[],"Amount"),
@@ -156,7 +156,7 @@ const itemDetailConditionTree = createTreeFromConfig(
         cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
         cns('string','leaf','cdCur',false,false,{},[],"CdCur"),
         cns('boolean','leaf','stat',false,false,{},[],"Stat"),
-      ])),
+      ]),
     },[],"Pricing Elements")
   ])
 )
@@ -219,7 +219,7 @@ async function initializeCreationWithRefference() {
 }
 
 async function itemsTabQueryAll() {
-  const items = inquiryDataTree.getValue().itemOverview.items
+  const items = inquiryDataTree.findNodeByPath(['itemOverview','items'])?.children || []
   return await itemsTabQuery(items)
 }
 async function itemsTabQuerySelection() {
@@ -261,6 +261,11 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
     if (data.data.breakdowns && Array.isArray(data.data.breakdowns)) {
       data.data.breakdowns.forEach((breakdown: any, index: number) => {
         if (index < itemNodes.length) {
+          // 调试：打印breakdown数据结构
+          console.log('Breakdown data for item', index, ':', breakdown)
+          if (breakdown.pricingElements) {
+            console.log('PricingElements structure:', breakdown.pricingElements)
+          }
           // 使用forceSetValue确保包括pricingElements在内的所有字段都被正确更新
           itemNodes[index].forceSetValue(breakdown)
         }
@@ -298,12 +303,11 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
 /**
  * 物品的详细信息
  */
-
 const selectedItems = ref<VarNode[]>([])
 const currentItemIndex = ref(0)
-
-
-// 移除了本地的validateFieldWithCallbacks函数，现在使用DataProtectionManager的方法
+const editingNode = {
+  node: createNodeFromConfig(inquiryDataTree.findNodeByPath(['itemOverview','items'])!.config.childTemplate!)
+}
 
 const itemConditionTabBarStage = ref(0)
 function handleItemConditionTabClick(index: number) {
@@ -315,7 +319,7 @@ function handleItemConditionTabClick(index: number) {
  */
 async function handleItemsTableClick() {
   const items = inquiryDataTree.findNodeByPath(['itemOverview','items'])!
-  const selectedChildren = items.getSelectedChildren()
+  const selectedChildren = [...items.getSelectedChildren()]
 
   if (selectedChildren && selectedChildren.length > 0) {
     // 先检查所有选中的item是否有validation状态
@@ -352,6 +356,11 @@ async function handleItemsTableClick() {
 
     // 切换到详情页面
     appContentRef.value.goToStage(2)
+
+    // 成功进入详情页面后，清空items表格的选中状态
+    items.children.forEach(child => {
+      child.setSelection(false)
+    })
   } else {
     console.log('No items selected')
   }
@@ -359,20 +368,24 @@ async function handleItemsTableClick() {
 
 /**
  * 更新详情页面的树结构数据
+ * @description 把editingNode.node设为正在编辑节点的一个拷贝，将itemCondition中的输入框指向这个拷贝中的节点
  */
 function updateItemDetailTrees() {
   if (selectedItems.value.length === 0) return
 
   const currentItem = selectedItems.value[currentItemIndex.value]
+  editingNode.node = currentItem.clone()
+  const node = editingNode.node
 
   // 使用值拷贝而不是引用设置
   const setValueFromItem = (sourcePath: string[], targetPath: string[], targetTree: VarTree) => {
-    const sourceNode = currentItem.findNodeByPath(sourcePath)
+    const sourceNode = node.findNodeByPath(sourcePath)
     if (sourceNode) {
       const targetNode = targetTree.findNodeByPath(targetPath)
       if (targetNode) {
-        // 使用setValue进行值拷贝，而不是replaceNodeByPath的引用设置
-        targetNode.setValue(sourceNode.getValue())
+        // replaceNodeByPath
+        targetTree.replaceNodeByPath(sourceNode, targetPath)
+        // targetNode.forceSetValue(sourceNode.getValue())
       }
     }
   }
@@ -405,12 +418,53 @@ function updateItemDetailTrees() {
   }
 }
 
-// 不再需要辅助函数
+/**
+ * 验证当前itemCondition数据并同步到原始item
+ * @description 把editingNode.node中的数据发送给后端验证，验证成功后更新原始item的数据
+ * @description 统一使用了itemstabquery
+ */
+async function validateCurrentItemConditionData() {
+  // 如果未更改过(config.data.validation is true) 直接返回
+  if (editingNode.node.config.data?.validation) {
+    console.log('数据未更改，无需验证', editingNode.node)
+    return true
+  }
+  const nodeList = [editingNode.node]
+  const isValidate = await itemsTabQuery(nodeList)
+  if (isValidate) {
+    console.log('数据验证成功')
+    // 同步数据
+    const currentNode = selectedItems.value[currentItemIndex.value]
+    currentNode.forceSetValue(editingNode.node.getValue())
+  } else {
+    console.log('数据验证失败')
+  }
+  return isValidate
+}
+
+/**
+ * 处理用户输入事件，立即将维护的节点标记为未验证
+ */
+function handleInputFromNodeItemCondition(_node: VarNode, value: string, data: any) {
+  if (!editingNode.node.config.data) {
+    editingNode.node.config.data = {}
+  }
+  editingNode.node.config.data.validation = false
+}
 
 /**
  * 切换到上一个/下一个选中的item
+ * @description 安全的方法，会先验证当前数据
  */
-function switchToItem(index: number) {
+async function switchToItem(index: number) {
+  const isValid = await validateCurrentItemConditionData()
+  if (isValid) {
+    _switchToItemWhenValidate(index)
+  } else {
+    console.log('数据验证失败，无法切换')
+  }
+}
+function _switchToItemWhenValidate(index: number) {
   if (index >= 0 && index < selectedItems.value.length) {
     currentItemIndex.value = index
     updateItemDetailTrees()
@@ -418,31 +472,19 @@ function switchToItem(index: number) {
 }
 
 /**
- * 切换到上一个item（需要验证当前数据）
+ * 切换到上一个item
+ * @description 包装switchToItem方法
  */
 async function switchToPreviousItem() {
-  if (currentItemIndex.value > 0) {
-    const isValid = await validateCurrentItemConditionData()
-    if (isValid) {
-      switchToItem(currentItemIndex.value - 1)
-    } else {
-      console.log('数据验证失败，无法切换')
-    }
-  }
+  switchToItem(currentItemIndex.value - 1)
 }
 
 /**
- * 切换到下一个item（需要验证当前数据）
+ * 切换到下一个item
+ * @description 包装switchToItem方法
  */
 async function switchToNextItem() {
-  if (currentItemIndex.value < selectedItems.value.length - 1) {
-    const isValid = await validateCurrentItemConditionData()
-    if (isValid) {
-      switchToItem(currentItemIndex.value + 1)
-    } else {
-      console.log('数据验证失败，无法切换')
-    }
-  }
+  switchToItem(currentItemIndex.value + 1)
 }
 
 /**
@@ -465,157 +507,26 @@ async function saveItemConditionData(): Promise<boolean> {
  * 取消itemCondition编辑，返回stage1
  */
 function cancelItemCondition() {
+  // 重置当前选中items的validation状态，避免因为未完成的编辑导致下次无法进入
+  if (selectedItems.value.length > 0) {
+    selectedItems.value.forEach(item => {
+      if (item.config.data?.validation === false) {
+        // 将validation状态重置为undefined，表示需要重新验证
+        item.config.data.validation = undefined
+      }
+    })
+  }
+  selectedItems.value = []
   // 不保存数据，直接返回stage1
   appContentRef.value.goToStage(1)
-  console.log('已取消itemCondition编辑')
-}
-
-// 移除不再需要的singleItemTabQuery函数
-
-/**
- * 验证当前itemCondition数据并同步到原始item
- */
-async function validateCurrentItemConditionData(): Promise<boolean> {
-  // 获取itemDetailConditionTree中的数据
-  const conditionData = itemDetailConditionTree.getValue()
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/app/inquiry/item-tab-query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(conditionData)
-    })
-
-    const result = await response.json()
-
-    if (result.success) {
-      // 验证成功，更新itemDetailConditionTree数据
-      if (result.data) {
-        // 更新itemDetailConditionTree
-        itemDetailConditionTree.forceSetValue(result.data)
-
-        // 设置validation状态
-        const nodes = itemDetailConditionTree.getAllNodes()
-        nodes.forEach(node => {
-          if (!node.config.data) {
-            node.config.data = {}
-          }
-          node.config.data.validation = true
-        })
-
-        // 同步到原始item
-        if (selectedItems.value.length > 0) {
-          const currentItem = selectedItems.value[currentItemIndex.value]
-          currentItem.forceSetValue(result.data)
-        }
-      }
-      return true
-    } else {
-      console.warn('数据验证失败:', result.message)
-      return false
-    }
-  } catch (error) {
-    console.error('验证请求失败:', error)
-    return false
-  }
-}
-
-/**
- * 验证当前原始item数据
- */
-async function validateCurrentItemCondition(): Promise<boolean> {
-  if (selectedItems.value.length === 0) return false
-
-  const currentItem = selectedItems.value[currentItemIndex.value]
-
-  // 如果已经验证过且有效，直接返回true
-  if (currentItem.config.data?.validation === true) {
-    return true
-  }
-
-  try {
-    // 获取当前item的值
-    const itemData = currentItem.getValue()
-
-    const response = await fetch(`${API_BASE_URL}/api/app/inquiry/item-tab-query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(itemData)
-    })
-
-    const result = await response.json()
-
-    if (result.success) {
-      // 验证成功，更新item数据
-      if (result.data) {
-        // 更新数据
-        currentItem.forceSetValue(result.data)
-
-        // 设置validation状态
-        if (!currentItem.config.data) {
-          currentItem.config.data = {}
-        }
-        currentItem.config.data.validation = true
-
-        // 更新UI
-        updateItemDetailTrees()
-      }
-      return true
-    } else {
-      console.warn('数据验证失败:', result.message)
-      return false
-    }
-  } catch (error) {
-    console.error('验证请求失败:', error)
-    return false
-  }
-}
-
-/**
- * 处理用户输入事件，立即标记为未验证
- */
-function handleInputFromNodeItemCondition(_node: VarNode, value: string, data: any) {
-  // 用户输入时，直接更新VarBox中的节点，不更新原始item
-  const nodePath = data.nodePath
-  if (nodePath && nodePath.length > 0) {
-    // 直接更新itemDetailConditionTree中的节点
-    const targetNode = itemDetailConditionTree.findNodeByPath(nodePath)
-    if (targetNode) {
-      // 设置validation为false
-      if (!targetNode.config.data) {
-        targetNode.config.data = {}
-      }
-      targetNode.config.data.validation = false
-
-      // 更新值
-      targetNode.setValue(value)
-    }
-  }
 }
 
 /**
  * 处理itemCondition页面的数据变更事件（回车或失去焦点）
  */
 async function handleEnterFromNodeItemCondition(_node: VarNode, value: string, data: any) {
-  // 更新itemDetailConditionTree中的数据
-  const nodePath = data.nodePath
-  if (nodePath && nodePath.length > 0) {
-    const targetNode = itemDetailConditionTree.findNodeByPath(nodePath)
-    if (targetNode) {
-      targetNode.setValue(value)
-    }
-  }
-
   // 关键操作：回车时验证数据
-  const isValid = await validateCurrentItemConditionData()
-  if (!isValid) {
-    // 验证失败，不做任何操作
-    console.log('验证失败，保持当前状态')
-  }
+  await validateCurrentItemConditionData()
 }
 
 /**
@@ -748,6 +659,8 @@ async function handleExecute(currentStage: number, targetStage: number) {
       <VarBox
         v-if="itemConditionTabBarStage==0"
         :tree="itemDetailSalesTree"
+        @enter-from-node="handleEnterFromNodeItemCondition"
+        @input-from-node="handleInputFromNodeItemCondition"
       ></VarBox>
       <!-- Conditions -->
       <VarBox
