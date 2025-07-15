@@ -61,6 +61,7 @@ const inquiryDataTree = createTreeFromConfig(
           cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
           cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
           cns('dynamiclist','list','pricingElements',null,true,{
+            rowProvided:0,
             childTemplate:cns('dict','dict','condition',null,false,{},[
               cns('string','leaf','cnty','',false,{},[],"Cnty"),
               cns('string','leaf','name','',false,{},[],"Name"),
@@ -138,25 +139,7 @@ const itemDetailConditionTree = createTreeFromConfig(
     cns('string','leaf','taxValue','',true,{},[]),
     cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[]),
     cns('dynamiclist','list','pricingElements',null,true,{
-      childTemplate:cns('dict','dict','condition',null,false,{},[
-        cns('string','leaf','cnty','',false,{},[],"Cnty"),
-        cns('string','leaf','name','',false,{},[],"Name"),
-        cns('string','leaf','amount','',false,{},[],"Amount"),
-        cns('string','leaf','city','',false,{},[],"City"),
-        cns('string','leaf','per','',false,{},[],"per"),
-        cns('string','leaf','uom','',false,{},[],"UoM"),
-        cns('string','leaf','conditionValue','',false,{},[],"Condition Value"),
-        cns('string','leaf','curr','',false,{},[],"Curr."),
-        cns('string','leaf','status','',false,{},[],"Status"),
-        cns('string','leaf','numC','',false,{},[],"NumC"),
-        cns('string','leaf','atoMtsComponent','',false,{},[],"ATO/MTS Component"),
-        cns('string','leaf','oun','',false,{},[],"OUn"),
-        cns('string','leaf','cconDe','',false,{},[],"CConDe"),
-        cns('string','leaf','un','',false,{},[],"Un"),
-        cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
-        cns('string','leaf','cdCur',false,false,{},[],"CdCur"),
-        cns('boolean','leaf','stat',false,false,{},[],"Stat"),
-      ]),
+      // never mind because it had to be replaced with some item in inquiryData.itemOverview.items[x]
     },[],"Pricing Elements")
   ])
 )
@@ -228,6 +211,8 @@ async function itemsTabQuerySelection() {
 }
 /**
  * @description 询价单批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
+ * @description 该方法会更新入参VarNode[]中的数据
+ * @param {Array<VarNode>} itemNodes 
  * 同时根据返回的badRecordIndices设置每个VarNode的config.data.validation
  */
 async function itemsTabQuery(itemNodes: VarNode[]) {
@@ -417,6 +402,30 @@ function updateItemDetailTrees() {
     appContentRef.value.forceUpdate()
   }
 }
+
+/**
+ * @description Pricing Element Rules
+ * @description Deletion: 删除后传入后端，进行验证并返回规范化的数据/破坏的值则把validation设为false
+ */
+async function handlePricingElementsDeletion() {
+  const pricingElementsNode = itemDetailConditionTree.findNodeByPath(['pricingElements'])!
+  const deletionNodes = pricingElementsNode.getSelectedChildren()
+  pricingElementsNode.children = pricingElementsNode.children.filter(child => !deletionNodes.includes(child))
+  await validateCurrentItemConditionData()
+  appContentRef.value.forceUpdate()
+}
+/**
+ * @description 调用handlePricingElementsDeletion删除选中的记录并验证
+ */
+async function handlePricingElementsRemoveButtonClick() {
+  await handlePricingElementsDeletion()
+}
+
+/**
+ * @description Pricing Element Rules
+ * @description Addition: 直接传入后端进行验证并返回规范化的数据/破坏的值则把validation设为false
+ * @description 无需编写，直接跟着handleEnterFromNodeItemCondition走验证逻辑即可
+ */
 
 /**
  * 验证当前itemCondition数据并同步到原始item
@@ -615,7 +624,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
       >
         <template #[`inquiryData-itemOverview-items--extra-buttons`]>
           <button
-            class = "execute-button item-condition-button"
+            class = "execute-button table-extra-button"
             @click="handleItemsTableClick"
           >
             ...
@@ -668,7 +677,17 @@ async function handleExecute(currentStage: number, targetStage: number) {
         :tree="itemDetailConditionTree"
         @enter-from-node="handleEnterFromNodeItemCondition"
         @input-from-node="handleInputFromNodeItemCondition"
-      ></VarBox>
+      >
+        <template #[`itemDetailConditions-pricingElements--extra-buttons`]>
+          <button
+            class = "execute-button table-extra-button"
+            @click="handlePricingElementsRemoveButtonClick"
+            :disabled="itemDetailConditionTree.findNodeByPath(['pricingElements'])?.getSelectedChildren().length == 0"
+          >
+            Delete
+          </button>
+        </template>
+      </VarBox>
     </template>
 
     <template #[`footer-content-right`]>
@@ -803,9 +822,17 @@ async function handleExecute(currentStage: number, targetStage: number) {
   padding-left: 10px;
   gap: 8px;
 }
-.item-condition-button {
-  width: 24px;
+
+.table-extra-button {
+  width: inherit;
+  padding: 0 6px;
+  min-width: 20px;
   height: 24px;
+  cursor: pointer;
+}
+
+.table-extra-button:disabled {
+  cursor: not-allowed;
 }
 
 /* 定价条件表格样式 */
