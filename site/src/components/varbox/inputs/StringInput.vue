@@ -4,23 +4,36 @@
       :name="`${pathString}--simple`"
       v-bind="slotScopeData"
     >
-      <input
-        type="text"
-        v-model="inputValue"
-        :readonly="readonly"
-        :placeholder="placeholder"
-        :class="inputClass"
-        @blur="handleBlur"
-        @focus="handleFocus"
-        @keyup.enter="handleEnter"
-      >
+      <div class="input-wrapper" :class="{'has-dropdown': props.node?.varType === 'selection'}">
+        <input
+          type="text"
+          v-model="inputValue"
+          :readonly="readonly"
+          :placeholder="placeholder"
+          :class="inputClass"
+          @blur="handleBlur"
+          @focus="handleFocus"
+          @keyup.enter="handleEnter"
+          @click.stop="handleInputClick"
+        >
+        <div v-if="showDropdownComputed" class="dropdown-options" @click.stop>
+          <div
+            v-for="option in selectionOptions"
+            :key="option"
+            class="dropdown-option"
+            @click.stop="selectOption(option)"
+          >
+            {{ option }}
+          </div>
+        </div>
+      </div>
       
     </slot>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { SimpleInputBoxProps, SimpleInputBoxEmits } from './InputProps';
 import {getPathString} from '../utils'
 
@@ -44,9 +57,20 @@ const inputValue = ref<string>(
     : ''
 )
 
+const showDropdown = ref<boolean>(false)
+
+const showDropdownComputed = computed(() => {
+  return showDropdown.value && props.node?.varType === 'selection'
+})
+
+const selectionOptions = computed(() => {
+  return props.node?.config?.options || []
+})
+
 const inputClass = computed(()=>({
         'string-input': true,
-        'readonly': props.readonly
+        'readonly': props.readonly,
+        'selection-style': props.node?.varType === 'selection'
       }))
 
 // 监听 inputValue 的变化，并 emit 给父组件
@@ -102,6 +126,43 @@ function handleEnter() {
   }
   emit('validation-error', '');
 }
+
+function toggleShowDropdown() {
+  showDropdown.value = !showDropdown.value;
+}
+function setShowDropdown(v: boolean) {
+  showDropdown.value = v;
+}
+// 处理输入框点击事件
+function handleInputClick() {
+  if (props.node?.varType === 'selection' && !props.readonly) {
+    toggleShowDropdown()
+  }
+}
+
+// 选择下拉选项
+function selectOption(option: string) {
+  inputValue.value = option;
+  setShowDropdown(false)
+  handleEnter();
+}
+
+// 点击外部关闭下拉框
+function closeDropdown() {
+  if (showDropdown.value) {
+    setShowDropdown(false)
+  }
+}
+
+// 添加全局点击事件监听器
+onMounted(() => {
+  document.addEventListener('click', closeDropdown);
+});
+
+// 组件卸载时移除事件监听器
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdown);
+});
 </script>
 
 <style scoped>
@@ -123,4 +184,57 @@ function handleEnter() {
   background-color: #F5F7FA;
   cursor: not-allowed;
 } */
+
+/* 当varType为selection时，添加下拉箭头样式 */
+.string-input.selection-style {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23666' d='m2 0-2 2h4zm0 5 2-2h-4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.string-input.selection-style.readonly {
+  cursor: not-allowed;
+}
+
+/* 输入框包装器 */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* 确保所有输入框都有相同的box-sizing */
+.string-input {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* 下拉选项容器 */
+.dropdown-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--theme-color-page);
+  border: 1px solid #DCDFE6;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  margin-top: 4px;
+}
+
+/* 下拉选项 */
+.dropdown-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-option:hover {
+  background-color: var(--theme-color-light-a);
+}
 </style>
