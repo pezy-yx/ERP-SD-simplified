@@ -187,6 +187,44 @@ export class VarNode {
   }
 
   /**
+   * 强制设置值，会覆盖所有字段包括缺省字段
+   * @param {VarNodeValue} newValue
+   */
+  forceSetValue(newValue: VarNodeValue): void {
+    if (this.nodeType === 'dict' && typeof newValue === 'object' && newValue !== null) {
+      // 对于字典类型，强制设置所有子节点
+      for (const child of this.children) {
+        const childValue = (newValue as any)[child.name]
+        if (childValue !== undefined) {
+          child.forceSetValue(childValue)
+        } else {
+          // 强制设置为默认值或null
+          child.forceSetValue(child.defaultValue)
+        }
+      }
+    } else if (this.nodeType === 'list' && Array.isArray(newValue)) {
+      // 对于列表类型，清空现有子节点并重新创建
+      this.children = []
+      for (let i = 0; i < newValue.length; i++) {
+        if (this.config?.childTemplate) {
+          const newChild = createNodeFromConfig(this.config.childTemplate).clone()
+          if (newChild) {
+            newChild.forceSetValue(newValue[i])
+            this.addChild(newChild)
+          }
+        } else {
+          const newChild = new VarNode('leaf', this.varType, '', null, this.readonly, [], { ...this.config }, '', this.iconPath)
+          newChild.forceSetValue(newValue[i])
+          this.addChild(newChild)
+        }
+      }
+    } else {
+      // 对于叶子节点，直接设置值
+      this.currentValue = newValue
+    }
+  }
+
+  /**
    * 添加子节点
    * @param {VarNode} child 
    */
@@ -376,6 +414,17 @@ export class VarTree {
   }
 
   /**
+   * 强制设置值，会覆盖所有字段包括缺省字段
+   * @param {VarNodeValue} newValue
+   */
+  forceSetValue(newValue: VarNodeValue): void {
+    if(!this.root) {
+      return
+    }
+    this.root.forceSetValue(newValue)
+  }
+
+  /**
    * 设置根节点
    * @param {VarNode} rootNode 
    */
@@ -488,6 +537,54 @@ export class VarTree {
       for (const child of node.children) {
         this._preorderTraversal(child, nodes)
       }
+    }
+  }
+
+  /**
+   * @description 通过json设置值，缺省的节点不覆盖为空，和setValue有区别
+   * @param {VarNodeValue} newValue
+   */
+  setValueByJson(newValue: VarNodeValue): void {
+    if(!this.root) {
+      return
+    }
+    this._setValueByJson(this.root, newValue)
+  }
+
+  /**
+   * @description 通过json设置值，缺省的节点不覆盖为空，和setValue有区别
+   * @param {VarNode} node 
+   * @param {VarNodeValue} newValue
+   * @private
+   */
+  _setValueByJson(node: VarNode, newValue: VarNodeValue): void {
+    if (node.nodeType === 'dict' && typeof newValue === 'object' && newValue !== null) {
+      for (const key in newValue) {
+        const child = node.children.find(child => child.name === key)
+        if (child) {
+          this._setValueByJson(child, newValue[key as keyof typeof newValue])
+        }
+      }
+    } else if (node.nodeType === 'list' && Array.isArray(newValue)) {
+      for (let i = 0; i < newValue.length; i++) {
+        if (node.children[i]) {
+          this._setValueByJson(node.children[i], newValue[i])
+        } else {
+          if (!node.config?.childTemplate) {
+            const newChild = new VarNode('leaf', node.varType, '', null, node.readonly, [], { ...node.config }, '', node.iconPath)
+            newChild.setValue(newValue[i])
+            node.addChild(newChild)
+          }else {
+            const newChild = createNodeFromConfig(node.config.childTemplate).clone()
+            if (newChild) {
+              newChild.setValue(newValue[i])
+              node.addChild(newChild)
+            }
+          }
+        }
+      }
+    } else if (node.nodeType === 'leaf') {
+      node.currentValue = newValue
     }
   }
 
