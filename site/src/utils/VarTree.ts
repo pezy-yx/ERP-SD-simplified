@@ -30,24 +30,133 @@ export type SearchResultHandler = (data: {
   firstSelectedResult: any
 }, currentNode: VarNode) => void
 
+export type SelectableDependingOn = (
+  node?: VarNode,
+  parent?: VarNode,
+  tree?: VarTree
+) => boolean
+
 export type VarNodeConfig = {
-  childTemplate?: NodeStructure; // 子节点模板，用于动态列表
-  maxLength?: number; // 最大长度，用于动态列表
+  /**
+   * @description 自定义组件钩子
+   */
+  customComponent?: Component;
+
+  /**
+   * @description 验证钩子
+   * @example [{creteria: (v) => typeof v === 'string' && v.length > 0, message: '不能为空'}]
+   */
   validators?: VarNodeValueValidators; // 内容检查函数集合
-  customComponent?: Component; // 自定义组件钩子
-  minDate?: string; // 最小日期（ISO格式）
-  maxDate?: string; // 最大日期（ISO格式）
-  options?: string[]; // 选择项列表（用于selection类型）
-  classPrefix?: string; // CSS类名前缀，用于自定义布局样式
-  hideLabel?: boolean; // 是否隐藏当前的Label
-  searchMethods?: SearchMethod[] | null; // 搜索方法配置
+
+  // 值相关参数
+  /**
+   * @description 最小日期（ISO格式）
+   * @example "2024-01-01"
+   */
+  minDate?: string; // 
+  /**
+   * @description 最大日期（ISO格式）
+   * @example "2024-01-01"
+   */
+  maxDate?: string;
+  /**
+   * @description 选项列表（用于selection类型）
+   * @example ["选项1", "选项2", "选项3"]
+   */
+  options?: string[];
+
+  // 搜索相关参数
+  /**
+   * @description 搜索方法配置
+   * @description 如果有配置，将显示搜索按钮
+   * @example [{name: "搜索方法1", paramTree: null, serviceUrl: "/api/search/1"}, {name: "搜索方法2", paramTree: null, serviceUrl: "/api/search/2"}]
+   */
+  searchMethods?: SearchMethod[] | null;
+  /**
+   * @description 自定义搜索结果处理函数
+   * @description 如果有配置，将覆盖默认的搜索结果处理逻辑
+   * @param {SearchResult} data - 搜索结果数据
+   * @param {VarNode} currentNode - 当前节点
+   * @example (data, currentNode) => {console.log(data, currentNode)}
+   */
   customSearchResultHandler?: SearchResultHandler; // 自定义搜索结果处理函数
-  selected?: boolean; // 是否为选中状态
-  rowProvided?: number; // 动态列表初始行数
+
+  // 显示相关参数
+  // parent
+  /**
+   * @description 隐藏列表，用于父节点，决定哪些子节点不显示，优先级低于showWhiteList
+   * @example ["需要隐藏的子节点name1", "需要隐藏的子节点name2"]
+   */
   hideList?: string[];
+  /**
+   * @description 显示白名单，用于父节点，决定只有哪些子节点显示，优先级高于hideList
+   * @example ["只需要显示的子节点name1", "只需要显示的子节点name2"]
+   */
   showWhiteList?: string[];
-  hideSelf?: boolean;
+  /**
+   * @description 子节点名称显示翻译，用于父节点，决定子节点名称的显示
+   * @example {name1: "显示名称1", name2: "显示名称2"}
+   */
   childNameDisplayTranslation?: Record<string, string>;
+  // child
+  /**
+   * @description CSS类名前缀，用于自定义布局样式
+   * @example "custom-class-prefix"
+   */
+  classPrefix?: string; // CSS类名前缀，用于自定义布局样式
+  /**
+   * @description 是否隐藏当前的Label
+   */
+  hideLabel?: boolean; // 是否隐藏当前的Label
+  /**
+   * @description 是否在父节点下隐藏当前节点
+   */
+  hideSelf?: boolean;
+
+  // 动态列表-表格形式 相关参数
+  // parent
+  /**
+   * @description 动态列表，用于父节点，决定动态列表子节点的模板
+   * @description 动态列表必填参数
+   * @example {varType: 'dict', children: [{varType: 'string', name: 'name'}, {varType: 'string', name: 'age'}]}
+   */
+  childTemplate?: NodeStructure; // 子节点模板，用于动态列表
+  /**
+   * @description 动态列表，用于父节点，决定动态列表最大行数，缺省为Infinity
+   */
+  maxLength?: number; // 最大长度，用于动态列表
+  /**
+   * @description 动态列表，用于父节点，决定动态列表初始行数，缺省为3
+   */
+  rowProvided?: number;
+  /**
+   * @description 动态列表，用于父节点，决定选择列是否可用的函数
+   * @description 如果返回false，选择列将不可用
+   * @param {VarNode} [node] 当前节点 可选
+   * @param {VarNode} [parent] 父节点
+   * @param {VarTree} [tree] 整个树
+   * @returns {boolean} true为可用，false为不可用
+   * @example (node, parent, tree) => {return true}
+   * @example (node, parent, tree) => {return node.getValue().columnA == 'magic value'}
+   */
+  selectableDependingOn?: SelectableDependingOn;
+  // child
+  /**
+   * @description 动态列表，用于子节点，记录是否被选中
+   * @description 高频读写
+   */
+  selected?: boolean; // 是否为选中状态
+
+  /**
+   * @description 用于读写任意数据，适用于较为独特的场景
+   * 
+   * ### 推荐使用场景
+   * - 需要将一些状态与VarNode绑定，但又不想污染VarNode的值
+   * - 需要将一些状态与VarNode绑定，但不限制于boolean/string/number类型
+   * - 需要将一些状态与VarNode绑定，但又不想使用Vue的响应式系统
+   * 
+   * 高频场景建议在VarNodeConfig中添加一个字段，写清说明
+   */
   data?: any //
 }
 
