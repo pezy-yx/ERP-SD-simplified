@@ -29,6 +29,7 @@ function appToState(newState: State) {
   writableTrees.forEach(tree => {
     tree.root!.readonly = readonly
   })
+  appContentRef.value.forceUpdate()
 }
 
 const initializeStageNextButtonLabel = computed(() => {
@@ -277,9 +278,8 @@ async function initializeByCreation() {
   initializeResult.value = data.success
   if(!data.success) return false
   // inquiryData-itemOverview-reqDelivDate
-  if(data.data.defaultValue?.itemOverview?.reqDelivDate) {
-    // inquiryDataTree.findNodeByPath(['itemOverview','reqDelivDate'])?.setValue(data.data.defaultValue.itemOverview.reqDelivDate)
-    inquiryDataTree.forceSetValue(data.data.defaultValue)
+  if(data.data.content) {
+    inquiryDataTree.forceSetValue(data.data.content)
   }
   if (initializeResult.value) {
     return true
@@ -306,10 +306,10 @@ async function initializeByGet() {
   })
   console.log('返回的数据',data)
   if(!data.success) return false
-  if(!data.data.inquiryData) {
+  if(!data.data.content) {
     return false
   }
-  const inquiryData: VarNodeValue = data.data.inquiryData
+  const inquiryData: VarNodeValue = data.data.content
   inquiryDataTree.forceSetValue(inquiryData)
   return true
 }
@@ -390,7 +390,8 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
       })
     }
 
-    appContentRef.value.forceUpdate()
+    writableTrees.map(tree => tree.forceUpdate())
+    itemDetailHeaderTree.forceUpdate()
     return data.data.result.allDataLegal === 1
   }
 
@@ -524,7 +525,18 @@ async function handlePricingElementsDeletion() {
   const deletionNodes = pricingElementsNode.getSelectedChildren()
   pricingElementsNode.children = pricingElementsNode.children.filter(child => !deletionNodes.includes(child))
   await validateCurrentItemConditionData()
-  appContentRef.value.forceUpdate()
+  itemDetailConditionTree.forceUpdate()
+}
+
+/**
+ * @description 尝试添加一个新行 
+ */
+async function handlePricingElementsAdditionButtonClick() {
+  const pricingElementsNode = itemDetailConditionTree.findNodeByPath(['pricingElements'])!
+  const newItem = createNodeFromConfig(pricingElementsNode.config.childTemplate!)
+  newItem.readonly = false
+  pricingElementsNode.addChild(newItem)
+  itemDetailConditionTree.forceUpdate()
 }
 /**
  * @description 调用handlePricingElementsDeletion删除选中的记录并验证
@@ -724,6 +736,9 @@ async function handleExecute(currentStage: number, targetStage: number) {
       // footer
       if (data.success){
         appContentRef.value.footerMessage = data.data.message
+        if (data.data.content?.id) {
+          inquiryDataTree.findNodeByPath(['meta','id'])!.setValue(data.data.content?.id)
+        }
         appToState('display')
       }
     }
@@ -821,7 +836,14 @@ async function handleExecute(currentStage: number, targetStage: number) {
       >
         <template #[`itemDetailConditions-pricingElements--extra-buttons`]>
           <button
-            class = "execute-button table-extra-button"
+            class = "execute-button table-extra-button item-condition-button"
+            @click="handlePricingElementsAdditionButtonClick"
+            :disabled="onDisplayState"
+          >
+            New
+          </button>
+          <button
+            class = "execute-button table-extra-button item-condition-button"
             @click="handlePricingElementsRemoveButtonClick"
             :disabled="itemDetailConditionTree.findNodeByPath(['pricingElements'])?.getSelectedChildren().length == 0"
           >
@@ -974,6 +996,10 @@ async function handleExecute(currentStage: number, targetStage: number) {
 
 .table-extra-button:disabled {
   cursor: not-allowed;
+}
+
+.item-condition-button {
+  margin-right: 4px;
 }
 
 /* 定价条件表格样式 */
