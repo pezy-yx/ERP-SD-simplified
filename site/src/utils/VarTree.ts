@@ -517,7 +517,7 @@ export class VarTree {
   }
 
   /**
-   * 读值
+   * 写值
    * @param {VarNodeValue} newValue
    */
   setValue(newValue: VarNodeValue): void {
