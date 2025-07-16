@@ -88,7 +88,7 @@ const itemDetailStageExecuteButtonVisible = computed(() => {
 })
 
 defineExpose({
-  state
+  appToState,
 })
 
 /**
