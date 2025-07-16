@@ -55,7 +55,8 @@ const appTree = createTreeFromConfig({
                 name: 'Maintain Business Partner',
                 readonly: true,
                 iconPath: '@/assets/icons/maintain-BP.svg', 
-            },{
+            },
+            {
                 varType: 'string',
                 nodeType: "leaf",
                 name: 'Create BP Relationship',
@@ -72,13 +73,29 @@ const appTree = createTreeFromConfig({
                 name: 'Create Inquiry',
                 readonly: true,
                 iconPath: '@/assets/icons/create-inquiry.svg',
-            },{
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Display Inquiry',
+                readonly: true,
+                iconPath: '@/assets/icons/create-inquiry.svg',
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Change Inquiry',
+                readonly: true,
+                iconPath: '@/assets/icons/create-inquiry.svg',
+            },
+            {
                 varType: 'string',
                 nodeType: "leaf",
                 name: 'Manage Sales Quotations',
                 readonly: true,
                 iconPath: '@/assets/icons/manage-sales-quotations.svg',
-            },{
+            },
+            {
                 varType: 'string',
                 nodeType: "leaf",
                 name: 'Manage Sales Orders',
@@ -95,7 +112,8 @@ const appTree = createTreeFromConfig({
                 name: 'Create Outbound Deliveries',
                 readonly: true,
                 iconPath: '@/assets/icons/create-outbound-deliveries.svg',
-            },{
+            },
+            {
                 varType: 'string',
                 nodeType: "leaf",
                 name: 'Manage Outbound Deliveries',
@@ -112,13 +130,15 @@ const appTree = createTreeFromConfig({
                 name: 'Create Billing Documents',
                 readonly: true,
                 iconPath: '@/assets/icons/create-billing-documents.svg',
-            },{
+            },
+            {
                 varType: 'string',
                 nodeType: "leaf",
                 name: 'Posting Incoming Payments',
                 readonly: true,
                 iconPath: '@/assets/icons/posting-incoming-payments.svg',
-            },{
+            },
+            {
                 varType: 'string',
                 nodeType: "leaf",
                 name: 'Material Documents Overview',

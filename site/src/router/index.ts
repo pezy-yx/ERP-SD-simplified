@@ -12,7 +12,12 @@ import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
 import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
+
+// 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
+import ChangeInquiry from "@/views/inquiry/Change.vue";
+import DisplayInquiry from "@/views/inquiry/Display.vue";
+
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
 import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
@@ -109,12 +114,28 @@ const routes = [
         name: 'CreateInquiry',
         component: CreateInquiry,
         meta: { title: 'Create Inquiry' }
+<<<<<<< HEAD
       },{
         path: 'manage-sales-quotations',
         name: 'ManageSalesQuotations',
         component: ManageSalesQuotations,
         meta: { title: 'Manage Sales Quotations' }
       }
+=======
+      },
+      {
+        path: 'display-inquiry',
+        name: 'DisplayInquiry',
+        component: DisplayInquiry,
+        meta: { title: 'Display Inquiry' }
+      },
+      {
+        path: 'change-inquiry',
+        name: 'ChangeInquiry',
+        component: ChangeInquiry,
+        meta: { title: 'Change Inquiry' }
+      },
+>>>>>>> origin/test/fake-main
     ]
   },
   { 

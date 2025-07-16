@@ -30,24 +30,133 @@ export type SearchResultHandler = (data: {
   firstSelectedResult: any
 }, currentNode: VarNode) => void
 
+export type SelectableDependingOn = (
+  node?: VarNode,
+  parent?: VarNode,
+  tree?: VarTree
+) => boolean
+
 export type VarNodeConfig = {
-  childTemplate?: NodeStructure; // 子节点模板，用于动态列表
-  maxLength?: number; // 最大长度，用于动态列表
+  /**
+   * @description 自定义组件钩子
+   */
+  customComponent?: Component;
+
+  /**
+   * @description 验证钩子
+   * @example [{creteria: (v) => typeof v === 'string' && v.length > 0, message: '不能为空'}]
+   */
   validators?: VarNodeValueValidators; // 内容检查函数集合
-  customComponent?: Component; // 自定义组件钩子
-  minDate?: string; // 最小日期（ISO格式）
-  maxDate?: string; // 最大日期（ISO格式）
-  options?: string[]; // 选择项列表（用于selection类型）
-  classPrefix?: string; // CSS类名前缀，用于自定义布局样式
-  hideLabel?: boolean; // 是否隐藏当前的Label
-  searchMethods?: SearchMethod[] | null; // 搜索方法配置
+
+  // 值相关参数
+  /**
+   * @description 最小日期（ISO格式）
+   * @example "2024-01-01"
+   */
+  minDate?: string; // 
+  /**
+   * @description 最大日期（ISO格式）
+   * @example "2024-01-01"
+   */
+  maxDate?: string;
+  /**
+   * @description 选项列表（用于selection类型）
+   * @example ["选项1", "选项2", "选项3"]
+   */
+  options?: string[];
+
+  // 搜索相关参数
+  /**
+   * @description 搜索方法配置
+   * @description 如果有配置，将显示搜索按钮
+   * @example [{name: "搜索方法1", paramTree: null, serviceUrl: "/api/search/1"}, {name: "搜索方法2", paramTree: null, serviceUrl: "/api/search/2"}]
+   */
+  searchMethods?: SearchMethod[] | null;
+  /**
+   * @description 自定义搜索结果处理函数
+   * @description 如果有配置，将覆盖默认的搜索结果处理逻辑
+   * @param {SearchResult} data - 搜索结果数据
+   * @param {VarNode} currentNode - 当前节点
+   * @example (data, currentNode) => {console.log(data, currentNode)}
+   */
   customSearchResultHandler?: SearchResultHandler; // 自定义搜索结果处理函数
-  selected?: boolean; // 是否为选中状态
-  rowProvided?: number; // 动态列表初始行数
+
+  // 显示相关参数
+  // parent
+  /**
+   * @description 隐藏列表，用于父节点，决定哪些子节点不显示，优先级低于showWhiteList
+   * @example ["需要隐藏的子节点name1", "需要隐藏的子节点name2"]
+   */
   hideList?: string[];
+  /**
+   * @description 显示白名单，用于父节点，决定只有哪些子节点显示，优先级高于hideList
+   * @example ["只需要显示的子节点name1", "只需要显示的子节点name2"]
+   */
   showWhiteList?: string[];
-  hideSelf?: boolean;
+  /**
+   * @description 子节点名称显示翻译，用于父节点，决定子节点名称的显示
+   * @example {name1: "显示名称1", name2: "显示名称2"}
+   */
   childNameDisplayTranslation?: Record<string, string>;
+  // child
+  /**
+   * @description CSS类名前缀，用于自定义布局样式
+   * @example "custom-class-prefix"
+   */
+  classPrefix?: string; // CSS类名前缀，用于自定义布局样式
+  /**
+   * @description 是否隐藏当前的Label
+   */
+  hideLabel?: boolean; // 是否隐藏当前的Label
+  /**
+   * @description 是否在父节点下隐藏当前节点
+   */
+  hideSelf?: boolean;
+
+  // 动态列表-表格形式 相关参数
+  // parent
+  /**
+   * @description 动态列表，用于父节点，决定动态列表子节点的模板
+   * @description 动态列表必填参数
+   * @example {varType: 'dict', children: [{varType: 'string', name: 'name'}, {varType: 'string', name: 'age'}]}
+   */
+  childTemplate?: NodeStructure; // 子节点模板，用于动态列表
+  /**
+   * @description 动态列表，用于父节点，决定动态列表最大行数，缺省为Infinity
+   */
+  maxLength?: number; // 最大长度，用于动态列表
+  /**
+   * @description 动态列表，用于父节点，决定动态列表初始行数，缺省为3
+   */
+  rowProvided?: number;
+  /**
+   * @description 动态列表，用于父节点，决定选择列是否可用的函数
+   * @description 如果返回false，选择列将不可用
+   * @param {VarNode} [node] 当前节点 可选
+   * @param {VarNode} [parent] 父节点
+   * @param {VarTree} [tree] 整个树
+   * @returns {boolean} true为可用，false为不可用
+   * @example (node, parent, tree) => {return true}
+   * @example (node, parent, tree) => {return node.getValue().columnA == 'magic value'}
+   */
+  selectableDependingOn?: SelectableDependingOn;
+  // child
+  /**
+   * @description 动态列表，用于子节点，记录是否被选中
+   * @description 高频读写
+   */
+  selected?: boolean; // 是否为选中状态
+
+  /**
+   * @description 用于读写任意数据，适用于较为独特的场景
+   * 
+   * ### 推荐使用场景
+   * - 需要将一些状态与VarNode绑定，但又不想污染VarNode的值
+   * - 需要将一些状态与VarNode绑定，但不限制于boolean/string/number类型
+   * - 需要将一些状态与VarNode绑定，但又不想使用Vue的响应式系统
+   * 
+   * 高频场景建议在VarNodeConfig中添加一个字段，写清说明
+   */
   data?: any //
 }
 
@@ -184,6 +293,49 @@ export class VarNode {
    */
   setValue(newValue: VarNodeValue): void {
     this.currentValue = newValue
+  }
+
+  /**
+   * 强制设置值，会覆盖所有字段包括缺省字段
+   * @param {VarNodeValue} newValue
+   */
+  forceSetValue(newValue: VarNodeValue): void {
+    if (this.nodeType === 'dict' && typeof newValue === 'object' && newValue !== null) {
+      // 对于字典类型，强制设置所有子节点
+      for (const child of this.children) {
+        const childValue = (newValue as any)[child.name]
+        if (childValue !== undefined) {
+          child.forceSetValue(childValue)
+        } else {
+          // 对于list类型的子节点，如果没有数据就清空，不设置默认值
+          if (child.nodeType === 'list') {
+            child.children = []
+          } else {
+            // 对于非list类型，设置为默认值
+            child.forceSetValue(child.defaultValue)
+          }
+        }
+      }
+    } else if (this.nodeType === 'list' && Array.isArray(newValue)) {
+      // 对于列表类型，清空现有子节点并重新创建
+      this.children = []
+      for (let i = 0; i < newValue.length; i++) {
+        if (this.config?.childTemplate) {
+          const newChild = createNodeFromConfig(this.config.childTemplate).clone()
+          if (newChild) {
+            newChild.forceSetValue(newValue[i])
+            this.addChild(newChild)
+          }
+        } else {
+          const newChild = new VarNode('leaf', this.varType, '', null, this.readonly, [], { ...this.config }, '', this.iconPath)
+          newChild.forceSetValue(newValue[i])
+          this.addChild(newChild)
+        }
+      }
+    } else {
+      // 对于叶子节点，直接设置值
+      this.currentValue = newValue
+    }
   }
 
   /**
@@ -376,6 +528,17 @@ export class VarTree {
   }
 
   /**
+   * 强制设置值，会覆盖所有字段包括缺省字段
+   * @param {VarNodeValue} newValue
+   */
+  forceSetValue(newValue: VarNodeValue): void {
+    if(!this.root) {
+      return
+    }
+    this.root.forceSetValue(newValue)
+  }
+
+  /**
    * 设置根节点
    * @param {VarNode} rootNode 
    */
@@ -488,6 +651,54 @@ export class VarTree {
       for (const child of node.children) {
         this._preorderTraversal(child, nodes)
       }
+    }
+  }
+
+  /**
+   * @description 通过json设置值，缺省的节点不覆盖为空，和setValue有区别
+   * @param {VarNodeValue} newValue
+   */
+  setValueByJson(newValue: VarNodeValue): void {
+    if(!this.root) {
+      return
+    }
+    this._setValueByJson(this.root, newValue)
+  }
+
+  /**
+   * @description 通过json设置值，缺省的节点不覆盖为空，和setValue有区别
+   * @param {VarNode} node 
+   * @param {VarNodeValue} newValue
+   * @private
+   */
+  _setValueByJson(node: VarNode, newValue: VarNodeValue): void {
+    if (node.nodeType === 'dict' && typeof newValue === 'object' && newValue !== null) {
+      for (const key in newValue) {
+        const child = node.children.find(child => child.name === key)
+        if (child) {
+          this._setValueByJson(child, newValue[key as keyof typeof newValue])
+        }
+      }
+    } else if (node.nodeType === 'list' && Array.isArray(newValue)) {
+      for (let i = 0; i < newValue.length; i++) {
+        if (node.children[i]) {
+          this._setValueByJson(node.children[i], newValue[i])
+        } else {
+          if (!node.config?.childTemplate) {
+            const newChild = new VarNode('leaf', node.varType, '', null, node.readonly, [], { ...node.config }, '', node.iconPath)
+            newChild.setValue(newValue[i])
+            node.addChild(newChild)
+          }else {
+            const newChild = createNodeFromConfig(node.config.childTemplate).clone()
+            if (newChild) {
+              newChild.setValue(newValue[i])
+              node.addChild(newChild)
+            }
+          }
+        }
+      }
+    } else if (node.nodeType === 'leaf') {
+      node.currentValue = newValue
     }
   }
 

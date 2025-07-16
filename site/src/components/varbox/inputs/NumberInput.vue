@@ -57,6 +57,12 @@ watch(() => props.modelValue, (newValue) => {
 
 function handleInput() {
   emit('update:modelValue', inputValue.value)
+  const data = {
+    nodePath: props.nodePath
+  }
+  if (props.node){
+    emit('input-from-node', props.node, inputValue.value.toString(), data);
+  }
 }
 
 function handleBlur() {
