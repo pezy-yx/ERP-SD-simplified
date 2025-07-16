@@ -15,6 +15,7 @@
           @focus="handleFocus"
           @keyup.enter="handleEnter"
           @click.stop="handleInputClick"
+          @input="handleInput"
         >
         <div v-if="showDropdownComputed" class="dropdown-options" @click.stop>
           <div
@@ -125,6 +126,15 @@ function handleEnter() {
     emit('enter-from-node', props.node, inputValue.value, data);
   }
   emit('validation-error', '');
+}
+
+function handleInput() {
+  const data = {
+    nodePath: props.nodePath
+  }
+  if (props.node){
+    emit('input-from-node', props.node, inputValue.value, data);
+  }
 }
 
 function toggleShowDropdown() {

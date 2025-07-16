@@ -165,8 +165,9 @@
               </div>
               <div :class="`list-header-actions ${baseClassPrefix}--list-header-actions`">
                 <!-- 动态列表的添加/删除按钮 -->
-                <div v-if="isDynamicList && !effectiveReadonly" :class="`list-controls ${baseClassPrefix}--list-controls`">
+                <div v-if="isDynamicList" :class="`list-controls ${baseClassPrefix}--list-controls`">
                   <button
+                    v-if="!effectiveReadonly"
                     @click="addListItem"
                     :disabled="!!reachedMaxLength"
                     :class="`btn-add ${baseClassPrefix}--btn-add`"
@@ -174,6 +175,7 @@
                     +
                   </button>
                   <button
+                    v-if="!effectiveReadonly"
                     @click="removeSelectedItems"
                     :disabled="selectedRows.size === 0"
                     :class="`btn-remove-selected ${baseClassPrefix}--btn-remove-selected`"
@@ -542,7 +544,7 @@ const listItems = computed(()=>{
     return currentNode.value.children
   }
   const length = currentNode.value.children.length
-  const rowProvided = currentNode.value.config?.rowProvided || 3
+  const rowProvided = currentNode.value.config?.rowProvided ?? 3
   if (length < rowProvided) {
     for (let i = length; i < rowProvided; i++) {
       currentNode.value.addChild(createNewListItem()!)
