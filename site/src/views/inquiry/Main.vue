@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {ref, Ref, computed} from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue';
 import FilterTabs from '@/components/FilterTabs.vue';
 import AppContent from '@/components/applicationContent/AppContent.vue'
@@ -8,13 +8,93 @@ import {
   inquiryTypeSearch,
   salesOrgSearch,
   distributionChannelSearch,
-  divisionSearch
+  divisionSearch,
+  inquiryIdSearch,
 } from '@/utils/searchMethods'
 
 const API_BASE_URL = window.API_BASE_URL || ''
 const appContentRef = ref(null) as any
 
-const initialTree = createTreeFromConfig(
+type State = 'create' | 'change' | 'display'
+/**
+ * @description 应用模式-创建/修改/查看
+ */
+const state: Ref<State> = ref('create')
+const onCreateState = computed(() => state.value === 'create')
+const onChangeState = computed(() => state.value === 'change')
+const onDisplayState = computed(() => state.value === 'display')
+function appToState(newState: State) {
+  state.value = newState
+  let readonly = newState === 'display'
+  writableTrees.forEach(tree => {
+    tree.root!.readonly = readonly
+  })
+}
+
+const initializeStageNextButtonLabel = computed(() => {
+  if (onCreateState.value) {
+    return 'Continue'
+  }
+  if (onChangeState.value) {
+    return 'Execute'
+  }
+  if (onDisplayState.value) {
+    return 'Execute'
+  }
+  return '/hide'
+})
+
+const informationStagePrevButtonLabel = computed(() => {
+  if (onCreateState.value) {
+    return 'Cancel'
+  }
+  if (onChangeState.value) {
+    return 'Cancel'
+  }
+  if (onDisplayState.value) {
+    return 'Cancel'
+  }
+  return '/hide'
+})
+
+const informationStageNextButtonLabel = computed(() => {
+  if (onCreateState.value) {
+    return 'Create'
+  }
+  if (onChangeState.value) {
+    return 'Save'
+  }
+  if (onDisplayState.value) {
+    return 'Switch to Change'
+  }
+  return '/hide'
+})
+
+const itemDetailStageCancelButtonLabel = computed(() => {
+  if (onCreateState.value) {
+    return 'Cancel'
+  }
+  if (onChangeState.value) {
+    return 'Cancel'
+  }
+  if (onDisplayState.value) {
+    return 'Back'
+  }
+  return 'Back'
+})
+
+const itemDetailStageExecuteButtonVisible = computed(() => {
+  return onCreateState.value || onChangeState.value
+})
+
+defineExpose({
+  state
+})
+
+/**
+ * @description 初始阶段-创建-初始化询价单
+ */
+const initialCreationTree = createTreeFromConfig(
   cns('dict','dict','initialScreen',{},false,{hideLabel:true},[
     cns('dict','dict','inquiryType',{},false,{hideLabel:true},[
       cns('string','leaf','inquiryType','',false,{searchMethods:inquiryTypeSearch},[],"Inquiry Type:"),
@@ -27,8 +107,23 @@ const initialTree = createTreeFromConfig(
   ])
 )
 
+/**
+ * @description 初始阶段-查询/修改-搜索询价单
+ */
+const initialSearchTree = createTreeFromConfig(
+  cns('dict','dict','initialScreen',{},false,{hideLabel:true},[
+    cns('string','leaf','inquiryId','',false,{searchMethods:inquiryIdSearch},[],"Inquiry Id:"),
+  ])
+)
+
+/**
+ * @description 主信息-询价单信息主树
+ */
 const inquiryDataTree = createTreeFromConfig(
   cns('dict','dict','inquiryData',{},false,{hideLabel:true},[
+    cns('dict','dict','meta',{},false,{hideSelf:true},[
+      cns('string','leaf','id','',false,{},[]),
+    ]),
     cns('dict','dict','basicInfo',{},false,{hideLabel:true},[
       cns('string','leaf','inquiry','',false,{},[],"Inquiry:"),
       cns('string','leaf','soldToParty','',false,{},[],"Sold-To Party:"),
@@ -88,6 +183,9 @@ const inquiryDataTree = createTreeFromConfig(
   ])
 )
 
+/**
+ * @description 询价单物品详细信息-头部
+ */
 const itemDetailHeaderTree = createTreeFromConfig(
   cns('dict','dict','itemDetailHeader',{},true,{
     childNameDisplayTranslation: {
@@ -100,6 +198,9 @@ const itemDetailHeaderTree = createTreeFromConfig(
   ])
 )
 
+/**
+ * @description 询价单物品详细信息-Sales
+ */
 const itemDetailSalesTree = createTreeFromConfig(
   cns('dict','dict','itemDetailSales',{},false,{hideLabel:true},[
     cns('dict','dict','orderQuantityAndDeliveryDate',{},false,{
@@ -126,6 +227,9 @@ const itemDetailSalesTree = createTreeFromConfig(
   ])
 )
 
+/**
+ * @description 询价单物品详细信息-Conditions
+ */
 const itemDetailConditionTree = createTreeFromConfig(
   cns('dict','dict','itemDetailConditions',{},false,{
     childNameDisplayTranslation: {
@@ -144,14 +248,24 @@ const itemDetailConditionTree = createTreeFromConfig(
   ])
 )
 
+/**
+ * @description 询价单物品的可写树，即stage1 stage2，用于显示状态和编辑状态的切换
+ * @description 特别说明，不包括inquiryDetailHeader
+ * @returns {VarTree[]} 
+ */
+const writableTrees = [inquiryDataTree, itemDetailSalesTree, itemDetailConditionTree]
+
 const initializeResult = ref(false)
-async function initializeCreation() {
+/**
+ * @description 创建-初始化
+ */
+async function initializeByCreation() {
   const data = await fetch(`${API_BASE_URL}/api/app/inquiry/initialize`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(initialTree.getValue())
+    body: JSON.stringify(initialCreationTree.getValue())
   }).then(response => {
     console.log('正常返回', response)
     return response.json()
@@ -161,26 +275,28 @@ async function initializeCreation() {
   })
   console.log('返回的数据',data)
   initializeResult.value = data.success
-  if(!data.success) return
+  if(!data.success) return false
   // inquiryData-itemOverview-reqDelivDate
   if(data.data.defaultValue?.itemOverview?.reqDelivDate) {
     // inquiryDataTree.findNodeByPath(['itemOverview','reqDelivDate'])?.setValue(data.data.defaultValue.itemOverview.reqDelivDate)
-    inquiryDataTree.setValueByJson(data.data.defaultValue)
+    inquiryDataTree.forceSetValue(data.data.defaultValue)
   }
   if (initializeResult.value) {
-    handleExecute(0,1)
+    return true
   }
+  return false
 }
+
 /**
- * 该功能过于复杂，我们先不做
+ * @description 查询/修改-初始化
  */
-async function initializeCreationWithRefference() {
-  const data = await fetch(`${API_BASE_URL}/api/app/inquiry/initialize`, {
+async function initializeByGet() {
+  const data = await fetch(`${API_BASE_URL}/api/app/inquiry/get`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(initialTree.getValue())
+    body: JSON.stringify(initialSearchTree.getValue())
   }).then(response => {
     console.log('正常返回', response)
     return response.json()
@@ -189,25 +305,21 @@ async function initializeCreationWithRefference() {
     return { success: false }
   })
   console.log('返回的数据',data)
-  initializeResult.value = data.success
-  if(!data.success) return
+  if(!data.success) return false
   if(!data.data.inquiryData) {
-    initializeResult.value = false
+    return false
   }
   const inquiryData: VarNodeValue = data.data.inquiryData
-  inquiryDataTree.setValue(inquiryData)
-  if (initializeResult.value) {
-    handleExecute(0,1)
-  }
+  inquiryDataTree.forceSetValue(inquiryData)
+  return true
 }
 
+/**
+ * @description 封装itemsTabQuery-查询所有
+ */
 async function itemsTabQueryAll() {
   const items = inquiryDataTree.findNodeByPath(['itemOverview','items'])?.children || []
   return await itemsTabQuery(items)
-}
-async function itemsTabQuerySelection() {
-  if (selectedItems.value.length === 0) return false
-  return await itemsTabQuery(selectedItems.value as VarNode[])
 }
 /**
  * @description 询价单批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
@@ -551,6 +663,11 @@ async function handleEnterFromNodeInquiryTree(node: VarNode, value: string, data
   }
 }
 
+/**
+ * @description 状态管理的before-prev钩子
+ * @param currentStage 
+ * @param targetStage 
+ */
 async function handleCancel(currentStage: number, targetStage: number) {
   if (currentStage === 1) {
     const confirmValue = confirm('Cancel?')
@@ -562,34 +679,53 @@ async function handleCancel(currentStage: number, targetStage: number) {
   return true
 }
 
+/**
+ * @description 状态管理的before-next钩子
+ * @param currentStage 
+ * @param targetStage 
+ */
 async function handleExecute(currentStage: number, targetStage: number) {
   console.log('try: stage change:',currentStage,'->',targetStage)
   if (currentStage === 0) {
-    if (!initializeResult.value) return false
-    appContentRef.value.goToStage(1)
+    if (onCreateState.value) {
+      return await initializeByCreation()
+    }
+    if (onChangeState.value || onDisplayState.value) {
+      const r = await initializeByGet()
+      console.log('初始化结果',r)
+      return r
+    }
     return false
   }
 
   if (currentStage === 1) {
-    console.log(inquiryDataTree.getValue())
-    // 向后端发送stage 1的所有树，创建inquiry
-    const data = await fetch(`${API_BASE_URL}/api/app/inquiry/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(inquiryDataTree.getValue())
-    }).then(response => {
-      console.log('正常返回', response)
-      return response.json()
-    }).catch(error => {
-      console.error('创建询价单失败:', error)
-      return { success: false }
-    })
-    console.log('返回的数据',data)
-    // footer
-    if (data.success){
-      appContentRef.value.footerMessage = data.data.message
+    if (onDisplayState.value) {
+      console.log('切换到修改状态')
+      appToState('change')
+      return false
+    }
+    if (onCreateState.value || onChangeState.value) {
+      console.log(inquiryDataTree.getValue())
+      // 向后端发送stage 1的所有树，创建inquiry
+      const data = await fetch(`${API_BASE_URL}/api/app/inquiry/edit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(inquiryDataTree.getValue())
+      }).then(response => {
+        console.log('正常返回', response)
+        return response.json()
+      }).catch(error => {
+        console.error('创建询价单失败:', error)
+        return { success: false }
+      })
+      console.log('返回的数据',data)
+      // footer
+      if (data.success){
+        appContentRef.value.footerMessage = data.data.message
+        appToState('display')
+      }
     }
     return false
   }
@@ -606,15 +742,20 @@ async function handleExecute(currentStage: number, targetStage: number) {
     :before-next="handleExecute"
     :before-prev="handleCancel"
     :footer-config="[
-      { nextText:'/hide' }, // 使用插槽自定义第一步的按钮
-      { prevText:'Cancel' },
+      { nextText:initializeStageNextButtonLabel }, // 使用插槽自定义第一步的按钮
+      { prevText:informationStagePrevButtonLabel, nextText:informationStageNextButtonLabel },
       { prevText:'/hide', nextText:'/hide'}
     ]"
     ref="appContentRef"
   >
     <template #[`stage-initialScreen`]>
       <VarBox
-        :tree="initialTree"
+        :tree="initialCreationTree"
+        v-if="onCreateState"
+      ></VarBox>
+      <VarBox
+        :tree="initialSearchTree"
+        v-if="onDisplayState || onChangeState"
       ></VarBox>
     </template>
     <template #[`stage-information`]>
@@ -692,16 +833,16 @@ async function handleExecute(currentStage: number, targetStage: number) {
 
     <template #[`footer-content-right`]>
       {{ appContentRef?.getCurrentStageName() }}
-      <button
+      <!-- <button
         v-if="appContentRef?.currentStage == 0"
         class="nav-button next-button"
         @click = "initializeCreation"
       >
         Continue
-      </button>
+      </button> -->
       <template v-if="appContentRef?.currentStage == 2">
-        <button class="cancel-button" @click="cancelItemCondition">Cancel</button>
-        <button class="save-button" @click="saveItemConditionData">Save</button>
+        <button class="cancel-button" @click="cancelItemCondition">{{itemDetailStageCancelButtonLabel}}</button>
+        <button class="save-button" @click="saveItemConditionData" v-if="itemDetailStageExecuteButtonVisible">Save</button>
       </template>
       <!-- <button
         v-if="appContentRef?.currentStage == 0"

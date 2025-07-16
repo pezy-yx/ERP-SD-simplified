@@ -53,3 +53,11 @@ export const divisionSearch: SearchMethod[] = [
     serviceUrl: '/api/search/division'
   }
 ]
+
+export const inquiryIdSearch: SearchMethod[] = [
+  {
+    name: '询价单搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/inquiry-id'
+  }
+]
