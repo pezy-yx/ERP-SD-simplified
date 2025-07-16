@@ -87,7 +87,7 @@ const mockSalesOrders = [
 // 销售订单搜索 - Mock API
 router.post('/search', (req, res) => {
   try {
-    const { salesOrder, overallStatus, soldToParty, customerReference } = req.body;
+    const { so_id, status, customer_no, customer_reference } = req.body;
     
     console.log('Sales Order Search Params:', req.body);
     
@@ -95,34 +95,34 @@ router.post('/search', (req, res) => {
     let results = [...mockSalesOrders]; // 每次请求都从完整的模拟数据开始
 
     // Filter by Sales Order ID (so_id)
-    if (salesOrder && salesOrder.trim()) {
-      const searchSoId = salesOrder.toLowerCase();
+    if (so_id && so_id.trim()) {
+      const searchSoId = so_id.toLowerCase();
       results = results.filter(order => 
-        order.so_id.toLowerCase().includes(searchSoId)
+        order.so_id.toLowerCase() === searchSoId
       );
     }
     
     // Filter by Overall Status (status)
-    if (overallStatus && overallStatus.trim()) {
-      const searchStatus = overallStatus.toLowerCase();
+    if (status && status.trim()) {
+      const searchStatus = status.toLowerCase();
       results = results.filter(order => 
         order.status.toLowerCase() === searchStatus // 这里使用 === 进行精确匹配
       );
     }
     
     // Filter by Sold-To Party (customer_no)
-    if (soldToParty && soldToParty.trim()) {
-      const searchCustomerNo = soldToParty.toLowerCase();
+    if (customer_no && customer_no.trim()) {
+      const searchCustomerNo = customer_no.toLowerCase();
       results = results.filter(order => 
-        String(order.customer_no).includes(searchCustomerNo)
+        String(order.customer_no) === searchCustomerNo
       );
     }
     
     // Filter by Customer Reference (customer_reference)
-    if (customerReference && customerReference.trim()) {
-      const searchCustomerRef = customerReference.toLowerCase();
+    if (customer_reference && customer_reference.trim()) {
+      const searchCustomerRef = customer_reference.toLowerCase();
       results = results.filter(order => 
-        order.customer_reference.toLowerCase().includes(searchCustomerRef)
+        order.customer_reference.toLowerCase() === searchCustomerRef
       );
     }
     
