@@ -6,17 +6,22 @@ import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import SearchModalTest from "@/test/SearchModalTest.vue";
 import AppContentTest from "@/test/AppContentTest.vue";
+import BPRelationshipTest from "@/test/BPRelationshipTest.vue";
 import ExampleApplication from '@/views/example/ExampleApplication.vue';
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
-import CreateBp from '@/views/BPRelationship/Create.vue';
 import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
 
 // 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
 import ChangeInquiry from "@/views/inquiry/Change.vue";
 import DisplayInquiry from "@/views/inquiry/Display.vue";
+
+// BP关系
+import CreateBPRelationship from '@/views/BPRelationship/Create.vue';
+import DisplayBPRelationship from "@/views/BPRelationship/Display.vue";
+import ChangeBPRelationship from "@/views/BPRelationship/Change.vue";
 
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
@@ -40,7 +45,7 @@ const routes = [
   {
     path: '/test/erppage/vake',
     name: 'Test-Page-Vake',
-    component: CreateBp
+    component: CreateBPRelationship
   },
   
   // 新增的Application父路由，包含导航栏和背景
@@ -63,7 +68,7 @@ const routes = [
       {
         path: 'test/erppage/vake',
         name: 'ApplicationTest-Page-Vake',
-        component: CreateBp,
+        component: CreateBPRelationship,
         meta: { title: 'Create BP Relationship' }
       },
       {
@@ -85,6 +90,12 @@ const routes = [
         meta: { title: 'AppContent Component Test' }
       },
       {
+        path: 'test/bp-relationship',
+        name: 'ApplicationBPRelationshipTest',
+        component: BPRelationshipTest,
+        meta: { title: 'BP Relationship Test' }
+      },
+      {
         path: 'example',
         name: 'ApplicationExample',
         component: ExampleApplication,
@@ -99,7 +110,7 @@ const routes = [
       {
         path: 'create-bp-relationship',
         name: 'CreateBPRelationship',
-        component: CreateBp,
+        component: CreateBPRelationship,
         meta: { title: 'Create BP Relationship' }
       },
       {
@@ -125,6 +136,18 @@ const routes = [
         name: 'ChangeInquiry',
         component: ChangeInquiry,
         meta: { title: 'Change Inquiry' }
+      },
+      {
+        path: 'display-bp-relationship',
+        name: 'DisplayBPRelationship',
+        component: DisplayBPRelationship,
+        meta: { title: 'Display BP Relationship' }
+      },
+      {
+        path: 'change-bp-relationship',
+        name: 'ChangeBPRelationship',
+        component: ChangeBPRelationship,
+        meta: { title: 'Change BP Relationship' }
       },
     ]
   },
