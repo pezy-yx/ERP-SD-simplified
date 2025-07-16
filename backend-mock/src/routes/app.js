@@ -33,16 +33,102 @@ router.post('/bp-relationship/register', (req, res) => {
   })
 })
 
-// bp-relation/create
-router.post('/bp-relationship/create', (req, res) => {
-  // 直接返回成功
-  console.log('创建BP关系:', req.body);
-  const relationId = "33"
+// bp-relationship/get
+router.post('/bp-relationship/get', (req, res) => {
+  console.log('查询BP关系:', req.body);
+  const relationshipId = req.body.relationshipId
+
+  if (!relationshipId) {
+    res.json({
+      success: false,
+      message: 'Relationship ID is required'
+    })
+    return
+  }
+
+  // 模拟返回BP关系数据
+  const mockBPRelationshipData = {
+    meta: {
+      id: relationshipId
+    },
+    basicInfo: {
+      relation: {
+        relationShipCategory: 'test'
+      },
+      default: {
+        businessPartner1: 'BP001',
+        businessPartner2: 'BP002',
+        validFrom: '2024-01-01',
+        validTo: '2024-12-31'
+      }
+    }
+  }
+
+  const mockGeneralData = {
+    testField: 'Sample test data'
+  }
+
+  
+  let formStruct = {
+
+  }
+  if(1 || relationCategoty === 'test') {
+    formStruct = {
+      nodeType: 'dict',
+      varType: 'dict',
+      name: 'generalData',
+      nameDisplay: 'General Data',
+      children:[
+        {
+          nodeType: 'leaf',
+          varType: 'string',
+          name: 'testField',
+          nameDisplay: 'Test Field: '
+        }
+      ]
+    }
+  }
+
+  res.json({
+    success: true,
+    message: '查询BP关系成功',
+    data: {
+      content: {
+        basicInfo: mockBPRelationshipData,
+        generalData: mockGeneralData,
+      },
+      formStruct: formStruct
+    }
+  })
+})
+
+// bp-relationship/edit
+router.post('/bp-relationship/edit', (req, res) => {
+  console.log('编辑BP关系:', req.body);
+  const bpRelationshipData = req.body.bpRelationshipData
+
+  // 如果有ID，则是修改，否则是创建
+  if(bpRelationshipData && bpRelationshipData.meta && bpRelationshipData.meta.id) {
+    res.json({
+      success: true,
+      message: '修改BP关系成功',
+      data: {
+        message: `BP relationship ${bpRelationshipData.meta.id} has been updated successfully`
+      }
+    })
+    return
+  }
+
+  // 创建新的BP关系
+  const relationId = "REL-2024-001"
   res.json({
     success: true,
     message: '创建BP关系成功',
     data: {
-      message: `BP realtion ${relationId} has been created successfully`
+      message: `BP relationship ${relationId} has been created successfully`,
+      content: {
+        id: relationId
+      }
     }
   })
 })

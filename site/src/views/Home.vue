@@ -62,7 +62,21 @@ const appTree = createTreeFromConfig({
                 name: 'Create BP Relationship',
                 readonly: true,
                 iconPath: '@/assets/icons/create-BP-relationship.svg',
-            }
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Display BP Relationship',
+                readonly: true,
+                iconPath: '@/assets/icons/create-BP-relationship.svg',
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Change BP Relationship',
+                readonly: true,
+                iconPath: '@/assets/icons/create-BP-relationship.svg',
+            },
         ], 'Customer Management'),
         
         //订单管理
