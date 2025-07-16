@@ -119,6 +119,12 @@ function formatDisplayDate(dateStr: string) {
 
 function handleTextInput() {
   emit('update:modelValue', displayValue.value)
+  const data = {
+    nodePath: props.nodePath
+  }
+  if (props.node){
+    emit('input-from-node', props.node, displayValue.value, data);
+  }
 }
 
 function handleDateChange() {

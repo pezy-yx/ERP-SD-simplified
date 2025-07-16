@@ -32,6 +32,15 @@ export const SimpleInputBoxProps = {
   }
 };
 
+const popEvents = {
+  'enter-from-node': (node: VarNode, value: string, data: any) => {
+    return node instanceof VarNode && typeof value === 'string';
+  },
+  'input-from-node': (node: VarNode, value: string, data: any) => {
+    return node instanceof VarNode && typeof value === 'string';
+  },
+}
+
 export const SimpleInputBoxEmits = {
   'update:modelValue': (value: string) => {
     return typeof value === 'string';
@@ -48,9 +57,7 @@ export const SimpleInputBoxEmits = {
   'focus': () => {
     return true;
   },
-  'enter-from-node': (node: VarNode, value: string, data: any) => {
-    return node instanceof VarNode && typeof value === 'string';
-  },
+  ...popEvents,
 };
 
 export const SimpleInputBoxEmitsWithNum = {
@@ -66,9 +73,7 @@ export const SimpleInputBoxEmitsWithNum = {
   'validation-error': (message: string): boolean => {
     return typeof message === 'string' && message.length > 0;
   },
-  'enter-from-node': (node: VarNode, value: string, data: any) => {
-    return node instanceof VarNode && typeof value === 'string';
-  },
+  ...popEvents,
 };
 export const SimpleInputBoxEmitsWithBool = {
   'update:modelValue': (value: boolean): boolean => {
@@ -83,7 +88,5 @@ export const SimpleInputBoxEmitsWithBool = {
   'validation-error': (message: string): boolean => {
     return typeof message === 'string' && message.length > 0;
   },
-  'enter-from-node': (node: VarNode, value: string, data: any) => {
-    return node instanceof VarNode && typeof value === 'string';
-  },
+  ...popEvents,
 };
