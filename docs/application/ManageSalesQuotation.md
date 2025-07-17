@@ -41,9 +41,6 @@
   * **请求体 (Request Body):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中对 `req.body` 的解构 (`{ salesQuotation, overallStatus, soldToParty, customerReference }`) 和前端 `code.txt` 中 `initialSearchTree` 的结构推断。
-
-    <!-- end list -->
 
     ```json
     {
@@ -58,9 +55,6 @@
   * **成功响应 (Success Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 后端 `后端.txt` 中的 `fakeQuotationData` 定义了一个 `NodeStructure` 风格的对象，实际的报价单列表位于 `data.quotationStruct.currentValue` 数组中。
-
-    <!-- end list -->
 
     ```json
     {
@@ -85,7 +79,7 @@
                         "overallStatus": "New",
                         "latestExpiration": "2025-07-20"
                     }
-                    // ... 更多 QuotationData 对象 (根据后端 mock 数据推断)
+                    // ... 更多 QuotationData 对象
                 ],
                 "config": {},
                 "isEditable": false,
@@ -132,9 +126,6 @@
   * **错误响应 (Error Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 的 `catch` 块 推断。
-
-    <!-- end list -->
 
     ```json
     {
@@ -155,9 +146,6 @@
   * **请求体 (Request Body):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 后端 `后端.txt` 中的 `console.log('初始化quotation:', req.body);` 表明其接收一个 JSON 对象，通常包含标识符。
-
-    <!-- end list -->
 
     ```json
     {
@@ -168,9 +156,6 @@
   * **成功响应 (Success Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中的 `mockQuotationData` 定义。
-
-    <!-- end list -->
 
     ```json
     {
@@ -221,9 +206,6 @@
   * **错误响应 (Error Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 后端代码只返回了成功，此处为通用错误结构示例。
-
-    <!-- end list -->
 
     ```json
     {
@@ -243,9 +225,6 @@
   * **请求体 (Request Body):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中的 `console.log('要更新啦', req.body);` 推断，应包含完整的报价单数据。
-
-    <!-- end list -->
 
     ```json
     {
@@ -268,14 +247,11 @@
   * **成功响应 (Success Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中的响应。
-
-    <!-- end list -->
 
     ```json
     {
         "success": true,
-        "message": "创建新的quotation成功", // 注意：此处的 message 可能不准确，应为"更新成功"
+        "message": "更新成功",
         "data": {
             "quotationData": { // 回显更新后的报价单数据
                 "meta": {
@@ -321,14 +297,11 @@
   * **错误响应 (Error Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 后端代码只返回了成功，此处为通用错误结构示例。
-
-    <!-- end list -->
 
     ```json
     {
         "success": false,
-        "message": "保存失败！" // 或其他错误信息
+        "message": "更新失败！" // 或其他错误信息
     }
     ```
 
@@ -343,9 +316,6 @@
   * **请求体 (Request Body):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中的 `console.log('创建新的quotation', req.body);` 推断，应包含新报价单的初始数据。
-
-    <!-- end list -->
 
     ```json
     {
@@ -366,16 +336,12 @@
   * **成功响应 (Success Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中的响应。
-
-    <!-- end list -->
-
     ```json
     {
         "success": true,
         "message": "创建新的quotation成功",
         "data": {
-            "quotationData": { // 回显新创建的报价单数据，应包含后端生成的 ID (推断)
+            "quotationData": { // 回显新创建的报价单数据，应包含后端生成的 ID
                 "meta": {
                     "id": "NEW-QUO-2024-XXX" // string, 后端生成的 ID (示例值)
                 },
@@ -394,9 +360,6 @@
   * **错误响应 (Error Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 后端代码只返回了成功，此处为通用错误结构示例。
-
-    <!-- end list -->
 
     ```json
     {
@@ -411,14 +374,11 @@
 
   * **方法:** `POST`
 
-  * **用途:** 询价单批量查询，用于获取或验证一组物品的净值、预期口头值以及详细的定价元素。
+  * **用途:** 批量查询，用于获取或验证一组物品的净值、预期口头值以及详细的定价元素。
 
   * **请求体 (Request Body):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 一个数组，每个元素代表一个物品的详细信息。根据后端 `后端.txt` 对 `req.body` 的处理 和前端 `code.txt` 中 `quotationDataTree` 内 `items` 的 `childTemplate` 结构推断。
-
-    <!-- end list -->
 
     ```json
     [
@@ -467,9 +427,6 @@
   * **成功响应 (Success Response):**
 
       * `Content-Type`: `application/json`
-      * **说明:** 根据后端 `后端.txt` 中的响应结构。
-
-    <!-- end list -->
 
     ```json
     {
