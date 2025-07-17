@@ -23,6 +23,11 @@ import CreateBPRelationship from '@/views/BPRelationship/Create.vue';
 import DisplayBPRelationship from "@/views/BPRelationship/Display.vue";
 import ChangeBPRelationship from "@/views/BPRelationship/Change.vue";
 
+// 出库交货单
+import CreateOutboundDelivery from '@/views/outboundDeliveries/Create.vue';
+import PickOutboundDelivery from '@/views/outboundDeliveries/Pick.vue';
+import ManageOutboundDeliveries from '@/views/outboundDeliveries/Manage.vue';
+
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
 
@@ -148,6 +153,24 @@ const routes = [
         name: 'ChangeBPRelationship',
         component: ChangeBPRelationship,
         meta: { title: 'Change BP Relationship' }
+      },
+      {
+        path: 'create-outbound-delivery',
+        name: 'CreateOutboundDelivery',
+        component: CreateOutboundDelivery,
+        meta: { title: 'Create Outbound Delivery' }
+      },
+      {
+        path: 'manage-outbound-deliveries',
+        name: 'ManageOutboundDeliveries',
+        component: ManageOutboundDeliveries,
+        meta: { title: 'Manage Outbound Deliveries' }
+      },
+      {
+        path: 'pick-outbound-delivery',
+        name: 'PickOutboundDelivery',
+        component: PickOutboundDelivery,
+        meta: { title: 'Pick Outbound Delivery' }
       },
     ]
   },

@@ -61,3 +61,43 @@ export const inquiryIdSearch: SearchMethod[] = [
     serviceUrl: '/api/search/inquiry-id'
   }
 ]
+
+export const deliveryIdSearch: SearchMethod[] = [
+  {
+    name: '交货单搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/delivery-id'
+  }
+]
+
+export const customerSearch: SearchMethod[] = [
+  {
+    name: '客户搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/customer'
+  }
+]
+
+export const materialSearch: SearchMethod[] = [
+  {
+    name: '物料搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/material'
+  }
+]
+
+export const plantSearch: SearchMethod[] = [
+  {
+    name: '工厂搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/plant'
+  }
+]
+
+export const storageLocationSearch: SearchMethod[] = [
+  {
+    name: '存储位置搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/storage-location'
+  }
+]
