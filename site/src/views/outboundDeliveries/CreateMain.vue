@@ -32,6 +32,7 @@ const salesOrdersTree = createTreeFromConfig(
       hideLabel:true,
       rowProvided: 1,
       childTemplate:cns('dict','dict','order',null,false,{},[
+        cns('string','leaf','id','',true,{hideSelf:true},[],"Sales Order"),
         cns('date','leaf','plannedCreationDate','',true,{},[],"Planned Creation Date"),
         cns('date','leaf','plannedGIDate','',true,{},[],"Planned GI Date"),
         cns('string','leaf','shippingPoint','',true,{},[],"Shipping Point"),

@@ -427,6 +427,7 @@ router.post('/outbound-delivery/get-sales-orders', (req, res) => {
   // 模拟销售订单数据
   const mockSalesOrders = [
     {
+      id: '1',
       plannedCreationDate: '2024-01-15',
       plannedGIDate: '2024-01-20',
       shippingPoint: '1000',
@@ -434,6 +435,7 @@ router.post('/outbound-delivery/get-sales-orders', (req, res) => {
       grossWeight: '125.5 KG'
     },
     {
+      id: '2',
       plannedCreationDate: '2024-01-16',
       plannedGIDate: '2024-01-21',
       shippingPoint: '1000',
@@ -441,6 +443,7 @@ router.post('/outbound-delivery/get-sales-orders', (req, res) => {
       grossWeight: '89.2 KG'
     },
     {
+      id: '3',
       plannedCreationDate: '2024-01-17',
       plannedGIDate: '2024-01-22',
       shippingPoint: '2000',
