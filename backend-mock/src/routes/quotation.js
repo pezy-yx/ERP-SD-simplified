@@ -148,55 +148,156 @@ router.post('/search', (req, res) => {
 });
 
 router.post('/update', (req, res) => {
-    console.log('Received update data:', req.body);
-    const responseData = {
-        success: true,
-        message: 'Quotation updated successfully.'
-    };
-    res.json(responseData);
-});
-
-// 销售报价单详情页 - 新的 Mock API
-router.get('/details/:id', (req, res) => {
-    try {
-        const quotationId = parseInt(req.params.id, 10);
-        console.log(`Received request for quotation details with ID: ${quotationId}`);
-
-        // 从伪数据中查找匹配的报价单
-        const foundQuotation = fakeQuotationData.currentValue.find(q => q.salesQuotation === quotationId);
-
-        if (foundQuotation) {
-            // 找到后，构建一个完整的 NodeStructure 对象返回
-            const responseData = {
-                varType: 'dict',
-                nodeType: 'dict',
-                name: 'quotation',
-                isEditable: true, // 详情页通常是可编辑的
-                currentValue: foundQuotation,
-                children: fakeQuotationData.children // 沿用之前定义的结构
-            };
-
-            res.json({
-                success: true,
-                data: {
-                    quotationStruct: responseData
-                }
-            });
-        } else {
-            // 如果未找到，返回失败信息
-            res.status(404).json({
-                success: false,
-                message: `Quotation with ID ${quotationId} not found.`
-            });
+    console.log('要更新啦', req.body);
+    const mockData = {
+        meta: {
+        id: 'QUO-2024-001'
+        },
+        basicInfo: {
+        quotation: '114514',
+        soldToParty: 'CUST-12345',
+        shipToParty: 'SHIP-67890',
+        customerReference: 'REF-ABC123',
+        netValue: 15800.50,
+        netValueUnit: 'USD',
+        customerReferenceDate: '2024-01-15'
+        },
+        itemOverview: {
+        validFrom: '2024-01-01',
+        validTo: '2024-12-31',
+        reqDelivDate: '2024-02-15',
+        expectOralVal: '16000.00',
+        expectOralValUnit: 'USD',
+        items: [
+            {
+            material: 'MAT-001',
+            orderQuantity: '100',
+            su: 10,
+            altItm: 1,
+            description: '高品质电子元件'
+            },
+            {
+            material: 'MAT-002',
+            orderQuantity: '50',
+            su: 5,
+            altItm: 2,
+            description: '精密传感器模块'
+            }
+        ]
         }
-    } catch (error) {
-        console.error('Quotation details API error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to retrieve quotation details.',
-            error: error.message
-        });
     }
+
+    res.json({
+        success:true,
+        message:"创建新的quotation成功",
+        data:{
+            quotationData:mockData
+        }
+    })
 });
+
+router.post('/create',(req,res) =>{
+    console.log('创建新的quotation',req.body);
+
+    const mockData = {
+        meta: {
+        id: 'QUO-2024-001'
+        },
+        basicInfo: {
+        quotation: 'QUO-2024-001',
+        soldToParty: 'CUST-12345',
+        shipToParty: 'SHIP-67890',
+        customerReference: 'REF-ABC123',
+        netValue: 15800.50,
+        netValueUnit: 'USD',
+        customerReferenceDate: '2024-01-15'
+        },
+        itemOverview: {
+        validFrom: '2024-01-01',
+        validTo: '2024-12-31',
+        reqDelivDate: '2024-02-15',
+        expectOralVal: '16000.00',
+        expectOralValUnit: 'USD',
+        items: [
+            {
+            material: 'MAT-001',
+            orderQuantity: '100',
+            su: 10,
+            altItm: 1,
+            description: '高品质电子元件'
+            },
+            {
+            material: 'MAT-002',
+            orderQuantity: '50',
+            su: 5,
+            altItm: 2,
+            description: '精密传感器模块'
+            }
+        ]
+        }
+    }
+
+    res.json({
+        success:true,
+        message:"创建新的quotation成功",
+        data:{
+            quotationData:mockData
+        }
+    })
+})
+
+router.post('/details', (req, res) => {
+    // 直接返回成功
+    console.log('初始化quotation:', req.body);
+    
+    const mockQuotationData = {
+        meta: {
+        id: 'QUO-2024-001'
+        },
+        basicInfo: {
+        quotation: 'QUO-2024-001',
+        soldToParty: 'CUST-12345',
+        shipToParty: 'SHIP-67890',
+        customerReference: 'REF-ABC123',
+        netValue: 15800.50,
+        netValueUnit: 'USD',
+        customerReferenceDate: '2024-01-15'
+        },
+        itemOverview: {
+        validFrom: '2024-01-01',
+        validTo: '2024-12-31',
+        reqDelivDate: '2024-02-15',
+        expectOralVal: '16000.00',
+        expectOralValUnit: 'USD',
+        items: [
+            {
+            material: 'MAT-001',
+            orderQuantity: '100',
+            su: 10,
+            altItm: 1,
+            description: '高品质电子元件'
+            },
+            {
+            material: 'MAT-002',
+            orderQuantity: '50',
+            su: 5,
+            altItm: 2,
+            description: '精密传感器模块'
+            }
+        ]
+        }
+    };
+        
+    const response = {
+            success: true,
+            message: '初始quotation成功',
+            data : {
+            quotationData: mockQuotationData
+                }
+        };
+
+    console.log(`返回quotation成功`);
+    res.json(response);
+})
 
 module.exports = router;

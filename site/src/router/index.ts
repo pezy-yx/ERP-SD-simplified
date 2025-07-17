@@ -114,14 +114,12 @@ const routes = [
         name: 'CreateInquiry',
         component: CreateInquiry,
         meta: { title: 'Create Inquiry' }
-<<<<<<< HEAD
-      },{
+      },
+      {
         path: 'manage-sales-quotations',
         name: 'ManageSalesQuotations',
         component: ManageSalesQuotations,
         meta: { title: 'Manage Sales Quotations' }
-      }
-=======
       },
       {
         path: 'display-inquiry',
@@ -135,7 +133,6 @@ const routes = [
         component: ChangeInquiry,
         meta: { title: 'Change Inquiry' }
       },
->>>>>>> origin/test/fake-main
     ]
   },
   { 
