@@ -1,546 +1,548 @@
-# 报价单管理 API 文档
+# 前后端接口文档
 
-本API文档描述了用于管理销售报价单的接口，包括查询、获取详情、创建、更新报价单以及查询项目明细。
+## 概述
 
-## 基础URL
+本文档旨在详细描述前端与后端交互的 API 接口。所有接口均采用 `POST` 方法，请求和响应的数据格式均为 `application/json`。
 
-`[API_BASE_URL]`
+## 通用响应结构
 
------
-
-## 1\. 报价单搜索 (Search Quotations)
-
-URL: `/api/quotation/search`
-
-方法: `POST`
-用途: 根据提供的查询条件搜索报价单列表。
-
-### 请求体 (Request Body)
-
-Content-Type: `application/json`
-说明: 包含用于过滤报价单的条件。
+所有接口的成功响应都包含 `success` 字段指示操作结果，以及一个 `data` 字段承载具体业务数据。错误响应则包含 `success: false` 和 `message` 字段。
 
 ```json
-{
-    "salesQuotation": 12345, // number (可选), 销售报价单号
-    "soldToParty": "string", // string (可选), 售达方
-    "customerReference": "string", // string (可选), 客户参考
-    "overallStatus": "string", // string (可选), 整体状态 (例如: 'New', 'Open', 'In Process', 'Completed')
-    "latestExpiration": "2025-07-20" // string (可选), 最新过期日期 (日期字符串，建议ISO 8601)
-}
-```
-
-### 成功响应 (Success Response)
-
-Content-Type: `application/json`
-说明: 后端将搜索到的报价单数据封装在一个 `NodeStructure` 类型的 `quotationStruct` 对象中返回。实际的报价单列表位于 `quotationStruct.currentValue` 数组中。
-
-```json
+// 成功响应示例
 {
     "success": true,
-    "message": "查询成功",
+    "message": "操作成功信息", // 可选
     "data": {
-        "quotationStruct": { // NodeStructure 类型
-            "varType": "dict", // 固定为 'dict'
-            "nodeType": "dict", // 固定为 'dict'
-            "name": "quotation", // 固定为 'quotation'
-            "currentValue": [ // 实际的报价单数据列表
-                {
-                    "salesQuotation": 987654321, // number
-                    "soldToParty": "Global Corp Inc.", // string
-                    "customerReference": "PO-XYZ-789", // string
-                    "overallStatus": "In Process", // string
-                    "latestExpiration": "2025-12-31" // string (日期字符串)
+        // 具体业务数据
+    }
+}
+
+// 错误响应示例
+{
+    "success": false,
+    "message": "错误信息"
+}
+
+```
+
+-----
+
+## 接口详情
+
+### 1\. 报价单搜索 (Search Quotations)
+
+  * **URL:** `/search`
+
+  * **方法:** `POST`
+
+  * **用途:** 根据提供的查询条件搜索报价单列表。
+
+  * **请求体 (Request Body):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中对 `req.body` 的解构 (`{ salesQuotation, overallStatus, soldToParty, customerReference }`) 和前端 `code.txt` 中 `initialSearchTree` 的结构推断。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "salesQuotation": 12345, // number (可选), 销售报价单号
+        "soldToParty": "string", // string (可选), 售达方
+        "customerReference": "string", // string (可选), 客户参考
+        "overallStatus": "string", // string (可选), 整体状态 (例如: 'New', 'Open', 'In Process', 'Completed')
+        "latestExpiration": "date" // string (可选), 最新过期日期 (从前端搜索树结构推断)
+    }
+    ```
+
+  * **成功响应 (Success Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 后端 `后端.txt` 中的 `fakeQuotationData` 定义了一个 `NodeStructure` 风格的对象，实际的报价单列表位于 `data.quotationStruct.currentValue` 数组中。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": true,
+        "data": {
+            "quotationStruct": { // NodeStructure 类型
+                "varType": "dict",
+                "nodeType": "dict",
+                "name": "quotation",
+                "currentValue": [ // 实际的报价单数据列表
+                    {
+                        "salesQuotation": 987654321, // number
+                        "soldToParty": "Global Corp Inc.", // string
+                        "customerReference": "PO-XYZ-789", // string
+                        "overallStatus": "In Process", // string
+                        "latestExpiration": "2025-12-31" // string (日期字符串)
+                    },
+                    {
+                        "salesQuotation": 100000001,
+                        "soldToParty": "ACME Ltd.",
+                        "customerReference": "REF-ACME-001",
+                        "overallStatus": "New",
+                        "latestExpiration": "2025-07-20"
+                    }
+                    // ... 更多 QuotationData 对象 (根据后端 mock 数据推断)
+                ],
+                "config": {},
+                "isEditable": false,
+                "children": [ // 定义了每个字段的类型和属性
+                    {
+                        "varType": "number",
+                        "nodeType": "leaf",
+                        "name": "salesQuotation",
+                        "isEditable": false
+                    },
+                    {
+                        "varType": "string",
+                        "nodeType": "leaf",
+                        "name": "soldToParty",
+                        "isEditable": true
+                    },
+                    {
+                        "varType": "string",
+                        "nodeType": "leaf",
+                        "name": "customerReference",
+                        "isEditable": false
+                    },
+                    {
+                        "varType": "selection",
+                        "nodeType": "leaf",
+                        "name": "overallStatus",
+                        "isEditable": true,
+                        "config": {
+                            "options": ["New", "Open", "In Process", "Completed"]
+                        }
+                    },
+                    {
+                        "varType": "date",
+                        "nodeType": "leaf",
+                        "name": "latestExpiration",
+                        "isEditable": false
+                    }
+                ]
+            }
+        }
+    }
+    ```
+
+  * **错误响应 (Error Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 的 `catch` 块 推断。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": false,
+        "message": "Quotation search failed, please try again later.",
+        "error": "错误信息" // 后端返回的具体错误信息
+    }
+    ```
+
+### 2\. 获取报价单详情 (Get Quotation Details)
+
+  * **URL:** `/details`
+
+  * **方法:** `POST`
+
+  * **用途:** 根据销售报价单ID获取单个报价单的详细信息。
+
+  * **请求体 (Request Body):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 后端 `后端.txt` 中的 `console.log('初始化quotation:', req.body);` 表明其接收一个 JSON 对象，通常包含标识符。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "salesQuotationId": 12345 // number, 销售报价单号 (推断)
+    }
+    ```
+
+  * **成功响应 (Success Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中的 `mockQuotationData` 定义。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": true,
+        "message": "初始quotation成功",
+        "data": {
+            "quotationData": { // 包含报价单的完整数据结构
+                "meta": {
+                    "id": "QUO-2024-001"
                 },
+                "basicInfo": {
+                    "quotation": "QUO-2024-001",
+                    "soldToParty": "CUST-12345",
+                    "shipToParty": "SHIP-67890",
+                    "customerReference": "REF-ABC123",
+                    "netValue": 15800.50,
+                    "netValueUnit": "USD",
+                    "customerReferenceDate": "2024-01-15"
+                },
+                "itemOverview": {
+                    "validFrom": "2024-01-01",
+                    "validTo": "2024-12-31",
+                    "reqDelivDate": "2024-02-15",
+                    "expectOralVal": "16000.00",
+                    "expectOralValUnit": "USD",
+                    "items": [ // 报价单项目列表
+                        {
+                            "material": "MAT-001",
+                            "orderQuantity": "100",
+                            "su": 10,
+                            "altItm": 1,
+                            "description": "高品质电子元件"
+                        },
+                        {
+                            "material": "MAT-002",
+                            "orderQuantity": "50",
+                            "su": 5,
+                            "altItm": 2,
+                            "description": "精密传感器模块"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    ```
+
+  * **错误响应 (Error Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 后端代码只返回了成功，此处为通用错误结构示例。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": false,
+        "message": "获取详情失败!" // 或其他错误信息
+    }
+    ```
+
+### 3\. 更新报价单 (Update Quotation)
+
+  * **URL:** `/update`
+
+  * **方法:** `POST`
+
+  * **用途:** 更新现有报价单的信息。
+
+  * **请求体 (Request Body):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中的 `console.log('要更新啦', req.body);` 推断，应包含完整的报价单数据。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "quotation": { // 完整报价单数据结构，与 '获取报价单详情' 响应中的 quotationData 结构相似
+            "meta": {
+                "id": "QUO-2024-001" // string, 必须，用于标识要更新的报价单 (推断)
+            },
+            "basicInfo": {
+                "quotation": "114514", // string (后端 mock 数据中的示例值)
+                "soldToParty": "CUST-12345",
+                // ... 其他基本信息
+            },
+            "itemOverview": {
+                // ... 项目总览和项目详情
+            }
+        }
+    }
+    ```
+
+  * **成功响应 (Success Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中的响应。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": true,
+        "message": "创建新的quotation成功", // 注意：此处的 message 可能不准确，应为"更新成功"
+        "data": {
+            "quotationData": { // 回显更新后的报价单数据
+                "meta": {
+                    "id": "QUO-2024-001"
+                },
+                "basicInfo": {
+                    "quotation": "114514",
+                    "soldToParty": "CUST-12345",
+                    "shipToParty": "SHIP-67890",
+                    "customerReference": "REF-ABC123",
+                    "netValue": 15800.50,
+                    "netValueUnit": "USD",
+                    "customerReferenceDate": "2024-01-15"
+                },
+                "itemOverview": {
+                    "validFrom": "2024-01-01",
+                    "validTo": "2024-12-31",
+                    "reqDelivDate": "2024-02-15",
+                    "expectOralVal": "16000.00",
+                    "expectOralValUnit": "USD",
+                    "items": [
+                        {
+                            "material": "MAT-001",
+                            "orderQuantity": "100",
+                            "su": 10,
+                            "altItm": 1,
+                            "description": "高品质电子元件"
+                        },
+                        {
+                            "material": "MAT-002",
+                            "orderQuantity": "50",
+                            "su": 5,
+                            "altItm": 2,
+                            "description": "精密传感器模块"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    ```
+
+  * **错误响应 (Error Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 后端代码只返回了成功，此处为通用错误结构示例。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": false,
+        "message": "保存失败！" // 或其他错误信息
+    }
+    ```
+
+### 4\. 创建报价单 (Create Quotation)
+
+  * **URL:** `/create`
+
+  * **方法:** `POST`
+
+  * **用途:** 创建新的报价单。
+
+  * **请求体 (Request Body):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中的 `console.log('创建新的quotation', req.body);` 推断，应包含新报价单的初始数据。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "quotation": { // 新报价单的初始数据结构
+            // "meta": { "id": "" }, // 可选，预留或为空
+            "basicInfo": {
+                "quotation": "QUO-2024-001",
+                "soldToParty": "NEW_CUSTOMER",
+                // ... 其他基本信息
+            },
+            "itemOverview": {
+                // ... 初始项目信息
+            }
+        }
+    }
+    ```
+
+  * **成功响应 (Success Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中的响应。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": true,
+        "message": "创建新的quotation成功",
+        "data": {
+            "quotationData": { // 回显新创建的报价单数据，应包含后端生成的 ID (推断)
+                "meta": {
+                    "id": "NEW-QUO-2024-XXX" // string, 后端生成的 ID (示例值)
+                },
+                "basicInfo": {
+                    "quotation": "NEW-QUO-2024-XXX", // string, 后端生成的报价单号 (示例值)
+                    // ... 其他数据
+                },
+                "itemOverview": {
+                    // ...
+                }
+            }
+        }
+    }
+    ```
+
+  * **错误响应 (Error Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 后端代码只返回了成功，此处为通用错误结构示例。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": false,
+        "message": "创建失败！" // 或其他错误信息
+    }
+    ```
+
+### 5\. 物品条件批量查询/验证 (Items Tab Query)
+
+  * **URL:** `quotation/items-tab-query`
+
+  * **方法:** `POST`
+
+  * **用途:** 询价单批量查询，用于获取或验证一组物品的净值、预期口头值以及详细的定价元素。
+
+  * **请求体 (Request Body):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 一个数组，每个元素代表一个物品的详细信息。根据后端 `后端.txt` 对 `req.body` 的处理 和前端 `code.txt` 中 `quotationDataTree` 内 `items` 的 `childTemplate` 结构推断。
+
+    <!-- end list -->
+
+    ```json
+    [
+        {
+            "item": "10", // string, 项目号 (从请求体或后端生成)
+            "material": "MAT-001", // string, 物料 (从请求体或后端生成)
+            "orderQuantity": "10", // string, 订单数量 (从请求体或后端生成)
+            "orderQuantityUnit": "EA", // string, 订单数量单位 (前端 SU 对应)
+            "description": "物料描述 A", // string, 描述 (从请求体或后端生成)
+            "reqDelivDate": "2024-07-20", // string, 请求交货日期 (从请求体或后端生成)
+            "netValue": "100", // string, 初始净值 (前端传入，后端用于计算)
+            "netValueUnit": "USD", // string, 初始净值单位 (推断)
+            "taxValue": "0", // string, 初始税值 (推断)
+            "taxValueUnit": "USD", // string, 初始税值单位 (推断)
+            "pricingDate": "2024-07-15", // string, 定价日期 (从请求体或后端生成)
+            "orderProbability": "100", // string, 订单概率 (从请求体或后端生成)
+            "pricingElements": [ // 可选，如果前端有初始的定价元素
                 {
-                    "salesQuotation": 100000001,
-                    "soldToParty": "ACME Ltd.",
-                    "customerReference": "REF-ACME-001",
-                    "overallStatus": "New",
-                    "latestExpiration": "2025-07-20"
+                    "cnty": "US",
+                    "name": "Base Price",
+                    "amount": "100",
+                    "curr": "USD"
+                    // ... 其他定价元素字段 (推断)
                 }
             ]
-        }
-    }
-}
-```
-
-### 错误响应 (Error Response)
-
-Content-Type: `application/json`
-
-```json
-{
-    "success": false,
-    "message": "未找到报价单信息!" // 或其他错误信息
-}
-```
-
------
-
-## 2\. 获取报价单详情 (Get Quotation Details)
-
-URL: `/api/quotation/details`
-
-方法: `POST`
-用途: 根据销售报价单ID获取单个报价单的详细信息。
-
-### 请求体 (Request Body)
-
-Content-Type: `application/json`
-说明: 包含要查询的报价单ID。
-
-```json
-{
-  "salesQuotationId": 987654321 // number, 销售报价单号
-}
-```
-
-### 成功响应 (Success Response)
-
-Content-Type: `application/json`
-说明: 返回指定报价单的详细数据。
-
-```json
-{
-  "success": true,
-  "message": "获取报价单详情成功",
-  "data": {
-    "quotationData": {
-      "meta": {
-        "id": "123456789" // string, 元数据ID
-      },
-      "basicInfo": {
-        "quotation": "987654321", // string, 报价单ID
-        "soldToParty": "Global Corp Inc.", // string, 售达方
-        "shipToParty": "Global Corp Inc. - Warehouse A", // string, 收货方
-        "customerReference": "PO-XYZ-789", // string, 客户参考
-        "netValue": 150000.00, // number, 净值
-        "netValueUnit": "USD", // string, 净值单位
-        "customerReferenceDate": "2024-01-10" // string (日期字符串), 客户参考日期
-      },
-      "itemOverview": {
-        "validFrom": "2024-01-15", // string (日期字符串), 有效期从
-        "validTo": "2025-12-31", // string (日期字符串), 有效期到
-        "reqDelivDate": "2024-02-01", // string (日期字符串), 要求交货日期
-        "expectOralVal": "150000", // string, 预期口头值
-        "expectOralValUnit": "USD", // string, 预期口头值单位
-        "items": [ // array, 报价单项目列表
-          {
-            "item": "10", // string, 项目
-            "material": "PROD-A", // string, 物料
-            "orderQuantity": "100", // string, 订单数量
-            "orderQuantityUnit": "EA", // string, 订单数量单位
-            "description": "产品A", // string, 描述
-            "netValue": 100000.00, // number, 净值
-            "netValueUnit": "USD", // string, 净值单位
-            "taxValue": 15000.00, // number, 税值
-            "taxValueUnit": "USD", // string, 税值单位
-            "pricingDate": "2024-01-15", // string (日期字符串), 定价日期
-            "orderProbability": "100", // string, 订单概率
-            "pricingElements": [ // array, 定价元素列表
-              {
-                "cnty": "US", // string, 国家/地区
-                "name": "BASE PRICE", // string, 名称
-                "amount": "1000.00", // string, 金额
-                "city": "NY", // string, 城市
-                "per": "1", // string, 每
-                "uom": "EA", // string, 计量单位
-                "conditionValue": "100000.00", // string, 条件值
-                "curr": "USD", // string, 货币
-                "status": "Active", // string, 状态
-                "numC": "1", // string, NumC
-                "atoMtsComponent": "", // string, ATO/MTS 组件
-                "oun": "", // string, OUn
-                "cconDe": "", // string, CConDe
-                "un": "", // string, Un
-                "conditionValue2": "0.00", // string, 条件值2
-                "cdCur": "USD", // string, CdCur
-                "stat": false // boolean, 统计
-              }
-            ]
-          }
-        ]
-      }
-    }
-  }
-}
-```
-
-### 错误响应 (Error Response)
-
-Content-Type: `application/json`
-
-```json
-{
-    "success": false,
-    "message": "报价单未找到!" // 或其他错误信息
-}
-```
-
------
-
-## 3\. 更新报价单 (Update Quotation)
-
-URL: `/api/quotation/update`
-
-方法: `POST`
-用途: 更新现有报价单的信息。
-
-### 请求体 (Request Body)
-
-Content-Type: `application/json`
-说明: 包含完整的报价单数据对象，其中包含要更新的字段。
-
-```json
-{
-  "quotation": {
-    "meta": {
-      "id": "123456789" // string, 元数据ID
-    },
-    "basicInfo": {
-      "quotation": "987654321", // string, 报价单ID
-      "soldToParty": "Global Corp Inc. (Updated)", // string, 售达方
-      "shipToParty": "Global Corp Inc. - Warehouse A", // string, 收货方
-      "customerReference": "PO-XYZ-789-V2", // string, 客户参考
-      "netValue": 150000.00, // number, 净值
-      "netValueUnit": "USD", // string, 净值单位
-      "customerReferenceDate": "2024-01-10" // string (日期字符串), 客户参考日期
-    },
-    "itemOverview": {
-      "validFrom": "2024-01-15", // string (日期字符串), 有效期从
-      "validTo": "2025-12-31", // string (日期字符串), 有效期到
-      "reqDelivDate": "2024-02-01", // string (日期字符串), 要求交货日期
-      "expectOralVal": "150000", // string, 预期口头值
-      "expectOralValUnit": "USD", // string, 预期口头值单位
-      "items": [ // array, 报价单项目列表
+        },
         {
-          "item": "10", // string, 项目
-          "material": "PROD-A", // string, 物料
-          "orderQuantity": "100", // string, 订单数量
-          "orderQuantityUnit": "EA", // string, 订单数量单位
-          "description": "产品A (Updated)", // string, 描述
-          "pricingElements": [ // array, 定价元素列表
-            {
-              "cnty": "US", // string, 国家/地区
-              "name": "BASE PRICE", // string, 名称
-              "amount": "1000.00", // string, 金额
-              "city": "NY", // string, 城市
-              "per": "1", // string, 每
-              "uom": "EA", // string, 计量单位
-              "conditionValue": "100000.00", // string, 条件值
-              "curr": "USD", // string, 货币
-              "status": "Active", // string, 状态
-              "numC": "1", // string, NumC
-              "atoMtsComponent": "", // string, ATO/MTS 组件
-              "oun": "", // string, OUn
-              "cconDe": "", // string, CConDe
-              "un": "", // string, Un
-              "conditionValue2": "0.00", // string, 条件值2
-              "cdCur": "USD", // string, CdCur
-              "stat": false // boolean, 统计
-            }
-          ]
-        }
-      ]
-    }
-  }
-}
-```
-
-### 成功响应 (Success Response)
-
-Content-Type: `application/json`
-说明: 返回更新后的报价单数据。
-
-```json
-{
-  "success": true,
-  "message": "更新成功",
-  "data": {
-    "quotationData": {
-      "meta": {
-        "id": "123456789"
-      },
-      "basicInfo": {
-        "quotation": "987654321",
-        "soldToParty": "Global Corp Inc. (Updated)",
-        "shipToParty": "Global Corp Inc. - Warehouse A",
-        "customerReference": "PO-XYZ-789-V2",
-        "netValue": 150000.00,
-        "netValueUnit": "USD",
-        "customerReferenceDate": "2024-01-10"
-      },
-      "itemOverview": {
-        "validFrom": "2024-01-15",
-        "validTo": "2025-12-31",
-        "reqDelivDate": "2024-02-01",
-        "expectOralVal": "150000",
-        "expectOralValUnit": "USD",
-        "items": [
-          {
-            "item": "10",
-            "material": "PROD-A",
-            "orderQuantity": "100",
-            "orderQuantityUnit": "EA",
-            "description": "产品A (Updated)",
-            "pricingElements": [
-              {
-                "cnty": "US",
-                "name": "BASE PRICE",
-                "amount": "1000.00",
-                "city": "NY",
-                "per": "1",
-                "uom": "EA",
-                "conditionValue": "100000.00",
-                "curr": "USD",
-                "status": "Active",
-                "numC": "1",
-                "atoMtsComponent": "",
-                "oun": "",
-                "cconDe": "",
-                "un": "",
-                "conditionValue2": "0.00",
-                "cdCur": "USD",
-                "stat": false
-              }
-            ]
-          }
-        ]
-      }
-    }
-  }
-}
-```
-
-### 错误响应 (Error Response)
-
-Content-Type: `application/json`
-
-```json
-{
-    "success": false,
-    "message": "更新失败!" // 或其他错误信息
-}
-```
-
------
-
-## 4\. 创建报价单 (Create Quotation)
-
-URL: `/api/quotation/create`
-
-方法: `POST`
-用途: 创建一个新的报价单。
-
-### 请求体 (Request Body)
-
-Content-Type: `application/json`
-说明: 包含要创建的报价单的初始数据。
-
-```json
-{
-  "quotation": {
-    "meta": {
-      "id": "NEW_QUOTATION_ID" // string (占位符), 新报价单的元数据ID
-    },
-    "basicInfo": {
-      "quotation": "NEW_QUOTATION_NUM", // string (占位符), 新报价单的编号
-      "soldToParty": "New Customer Corp.", // string, 售达方
-      "shipToParty": "New Customer Corp. - HQ", // string, 收货方
-      "customerReference": "NEW-REF-001", // string, 客户参考
-      "netValue": 75000.00, // number, 净值
-      "netValueUnit": "USD", // string, 净值单位
-      "customerReferenceDate": "2025-01-01" // string (日期字符串), 客户参考日期
-    },
-    "itemOverview": {
-      "validFrom": "2025-01-01", // string (日期字符串), 有效期从
-      "validTo": "2025-12-31", // string (日期字符串), 有效期到
-      "reqDelivDate": "2025-01-15", // string (日期字符串), 要求交货日期
-      "expectOralVal": "75000", // string, 预期口头值
-      "expectOralValUnit": "USD", // string, 预期口头值单位
-      "items": [ // array, 报价单项目列表
-        {
-          "item": "10", // string, 项目
-          "material": "NEW-PROD-X", // string, 物料
-          "orderQuantity": "50", // string, 订单数量
-          "orderQuantityUnit": "EA", // string, 订单数量单位
-          "description": "新产品X", // string, 描述
-          "pricingElements": [] // array, 定价元素列表
-        }
-      ]
-    }
-  }
-}
-```
-
-### 成功响应 (Success Response)
-
-Content-Type: `application/json`
-说明: 返回新创建的报价单数据，通常包含后端生成的ID和编号。
-
-```json
-{
-  "success": true,
-  "message": "创建成功",
-  "data": {
-    "quotationData": {
-      "meta": {
-        "id": "GENERATED_ID_12345" // string, 后端生成的ID
-      },
-      "basicInfo": {
-        "quotation": "GENERATED_NUM_98765", // string, 后端生成的报价单编号
-        "soldToParty": "New Customer Corp.",
-        "shipToParty": "New Customer Corp. - HQ",
-        "customerReference": "NEW-REF-001",
-        "netValue": 75000.00,
-        "netValueUnit": "USD",
-        "customerReferenceDate": "2025-01-01"
-      },
-      "itemOverview": {
-        "validFrom": "2025-01-01",
-        "validTo": "2025-12-31",
-        "reqDelivDate": "2025-01-15",
-        "expectOralVal": "75000",
-        "expectOralValUnit": "USD",
-        "items": [
-          {
-            "item": "10",
-            "material": "NEW-PROD-X",
-            "orderQuantity": "50",
-            "orderQuantityUnit": "EA",
-            "description": "新产品X",
-            "pricingElements": [],
-            "netValue": 65000,
+            "item": "20",
+            "material": "MAT-002",
+            "orderQuantity": "5",
+            "orderQuantityUnit": "PC",
+            "description": "物料描述 B",
+            "reqDelivDate": "2024-07-25",
+            "netValue": "50",
             "netValueUnit": "USD",
-            "taxValue": 9750,
+            "taxValue": "0",
             "taxValueUnit": "USD",
-            "pricingDate": "2025-01-01",
-            "orderProbability": "100"
-          }
-        ]
-      }
-    }
-  }
-}
-```
-
-### 错误响应 (Error Response)
-
-Content-Type: `application/json`
-
-```json
-{
-    "success": false,
-    "message": "创建失败!" // 或其他错误信息
-}
-```
-
------
-
-## 5\. 查询项目明细 (Query Item Details)
-
-URL: `/api/quotation/items-tab-query`
-
-方法: `POST`
-用途: 查询报价单中项目的详细信息，包括定价元素等。
-
-### 请求体 (Request Body)
-
-Content-Type: `application/json`
-说明: 包含要查询的报价单ID和需要计算明细的项目列表。
-
-```json
-{
-  "quotationId": "987654321", // string, 报价单ID
-  "itemOverview": {
-    "items": [ // array, 项目列表 (可包含部分或全部字段)
-      {
-        "item": "10", // string (可选), 项目
-        "material": "PROD-A", // string (可选), 物料
-        "orderQuantity": "100", // string (可选), 订单数量
-        "orderQuantityUnit": "EA", // string (可选), 订单数量单位
-        "description": "产品A", // string (可选), 描述
-        "reqDelivDate": "2024-02-15", // string (日期字符串，可选), 要求交货日期
-        "pricingDate": "2024-01-15", // string (日期字符串，可选), 定价日期
-        "orderProbability": "100" // string (可选), 订单概率
-      },
-      {
-        "item": "20",
-        "material": "PROD-B",
-        "orderQuantity": "50",
-        "orderQuantityUnit": "EA",
-        "description": "产品B",
-        "reqDelivDate": "2024-02-15",
-        "pricingDate": "2024-01-15",
-        "orderProbability": "100"
-      }
-    ]
-  }
-}
-```
-
-### 成功响应 (Success Response)
-
-Content-Type: `application/json`
-说明: 返回包含每个项目计算后的详细信息和定价明细。
-
-```json
-{
-  "success": true,
-  "message": "价格查询成功",
-  "data": {
-    "result": {
-      "allDataLegal": 1, // number (1表示所有数据合法，0表示部分不合法)
-      "breakdowns": [ // array, 处理后的项目明细列表
-        {
-          "item": "10", // string, 项目
-          "material": "PROD-A", // string, 物料
-          "orderQuantity": "100", // string, 订单数量
-          "orderQuantityUnit": "EA", // string, 订单数量单位
-          "description": "产品A", // string, 描述
-          "reqDelivDate": "2024-02-15", // string (日期字符串), 要求交货日期
-          "netValue": 100000, // number, 净值
-          "netValueUnit": "USD", // string, 净值单位
-          "taxValue": 15000, // number, 税值
-          "taxValueUnit": "USD", // string, 税值单位
-          "pricingDate": "2024-01-15", // string (日期字符串), 定价日期
-          "orderProbability": "100", // string, 订单概率
-          "pricingElements": [ // array, 定价元素列表
-            {
-              "cnty": "US", // string, 国家/地区
-              "name": "BASE PRICE", // string, 名称
-              "amount": "1000.00", // string, 金额
-              "city": "NY", // string, 城市
-              "per": "1", // string, 每
-              "uom": "EA", // string, 计量单位
-              "conditionValue": "100000.00", // string, 条件值
-              "curr": "USD", // string, 货币
-              "status": "Active", // string, 状态
-              "numC": "1", // string, NumC
-              "atoMtsComponent": "", // string, ATO/MTS 组件
-              "oun": "", // string, OUn
-              "cconDe": "", // string, CConDe
-              "un": "", // string, Un
-              "conditionValue2": "15000.00", // string, 条件值2
-              "cdCur": "USD", // string, CdCur
-              "stat": true // boolean, 统计
-            }
-          ]
+            "pricingDate": "2024-07-15",
+            "orderProbability": "80",
+            "pricingElements": []
         }
-      ]
+        // ... 更多物品对象
+    ]
+    ```
+
+  * **成功响应 (Success Response):**
+
+      * `Content-Type`: `application/json`
+      * **说明:** 根据后端 `后端.txt` 中的响应结构。
+
+    <!-- end list -->
+
+    ```json
+    {
+        "success": true,
+        "message": "价格查询成功",
+        "data": {
+            "result": {
+                "allDataLegal": 1, // number (1表示所有数据合法，0表示存在不合法数据)
+                "badRecordIndices": [] // number[], 存在不合法数据的物品索引列表 (从0开始，如果 allDataLegal 为 0 则有值)
+            },
+            "generalData": { // 整体数据概览
+                "netValue": "150.00", // string, 总净值 (后端计算 `totalNetValue.toFixed(2)`)
+                "netValueUnit": "USD", // string, 总净值单位
+                "expectOralVal": "165.00", // string, 总预期口头值 (后端计算 `totalExpectOralVal.toFixed(2)`)
+                "expectOralValUnit": "USD" // string, 总预期口头值单位
+            },
+            "breakdowns": [ // 每个物品的详细信息，包含计算后的值
+                {
+                    "item": "10", // string, 项目号 (从请求体或后端生成)
+                    "material": "MAT-001", // string, 物料 (从请求体或后端生成)
+                    "orderQuantity": "10", // string, 订单数量 (从请求体或后端生成)
+                    "orderQuantityUnit": "EA", // string, 订单数量单位 (从请求体或后端生成)
+                    "description": "物料描述 A", // string, 描述 (从请求体或后端生成)
+                    "reqDelivDate": "2024-07-20", // string, 请求交货日期 (从请求体或后端生成)
+                    "netValue": 100, // number, 计算后的净值 (后端计算 `parseFloat(item.netValue) || 0`)
+                    "netValueUnit": "USD", // string, 计算后的净值单位
+                    "taxValue": 15, // number, 计算后的税值 (后端计算 `itemNetValue * 0.15`)
+                    "taxValueUnit": "USD", // string, 计算后的税值单位
+                    "pricingDate": "2024-07-15", // string, 定价日期 (从请求体或后端生成)
+                    "orderProbability": "100", // string, 订单概率 (从请求体或后端生成)
+                    "pricingElements": [ // 计算后的定价元素列表
+                        {
+                            "cnty": "US",
+                            "name": "Base Price",
+                            "amount": "100.00",
+                            "city": "USD",
+                            "per": "1",
+                            "uom": "EA",
+                            "conditionValue": "100.00",
+                            "curr": "USD",
+                            "status": "Active",
+                            "numC": "1",
+                            "atoMtsComponent": "",
+                            "oun": "",
+                            "cconDe": "",
+                            "un": "",
+                            "conditionValue2": "100.00",
+                            "cdCur": "USD",
+                            "stat": true
+                        },
+                        {
+                            "cnty": "US",
+                            "name": "Tax",
+                            "amount": "15.00",
+                            "city": "USD",
+                            "per": "1",
+                            "uom": "EA",
+                            "conditionValue": "15.00",
+                            "curr": "USD",
+                            "status": "Active",
+                            "numC": "2",
+                            "atoMtsComponent": "",
+                            "oun": "",
+                            "cconDe": "",
+                            "un": "",
+                            "conditionValue2": "15.00",
+                            "cdCur": "USD",
+                            "stat": true
+                        }
+                    ]
+                }
+                // ... 更多物品的详细信息
+            ]
+        }
     }
-  }
-}
-```
-
-### 错误响应 (Error Response)
-
-Content-Type: `application/json`
-
-```json
-{
-    "success": false,
-    "message": "项目明细查询失败!" // 或其他错误信息
-}
-```
+    ```
