@@ -791,7 +791,7 @@ const itemDetailSalesTree = createTreeFromConfig(
 )
 
 /**
- * @description 询价单物品详细信息-Conditions
+ * @description Quotation物品详细信息-Conditions
  */
 const itemDetailConditionTree = createTreeFromConfig(
     cns('dict','dict','itemDetailConditions',{},false,
@@ -844,7 +844,7 @@ async function validateCurrentItemConditionData(): Promise<boolean> {
 }
 
 /**
- * @description 询价单批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
+ * @description quotation批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
  * @description 该方法会更新入参VarNode[]中的数据
  * @param {Array<VarNode>} itemNodes 
  * 同时根据返回的badRecordIndices设置每个VarNode的config.data.validation
@@ -853,7 +853,7 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
     // 提取每个VarNode的值
     const itemValues = itemNodes.map(node => node.getValue())
 
-    const data = await fetch(`${API_BASE_URL}/api/app/inquiry/items-tab-query`, {
+    const data = await fetch(`${API_BASE_URL}/api/quotation/items-tab-query`, {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',

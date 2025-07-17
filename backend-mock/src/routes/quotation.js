@@ -291,13 +291,105 @@ router.post('/details', (req, res) => {
     const response = {
             success: true,
             message: '初始quotation成功',
-            data : {
-            quotationData: mockQuotationData
-                }
+            data : 
+            {
+                quotationData: mockQuotationData    
+            }
         };
 
     console.log(`返回quotation成功`);
     res.json(response);
+})
+
+router.post('quotation/items-tab-query',(req,res) =>{
+    console.log('批量物品查询:', req.body);
+
+    const items = req.body;
+    let totalNetValue = 0;
+    let totalExpectOralVal = 0;
+    const breakdowns = [];
+
+    items.forEach((item, index) => {
+        const itemNetValue = parseFloat(item.netValue) || 0;
+        totalNetValue += itemNetValue;
+        totalExpectOralVal += itemNetValue * 1.1; // 期望值比净值高10%
+
+        // 生成模拟的pricingElements
+        const pricingElements = [
+        {
+            cnty: 'US',
+            name: 'Base Price',
+            amount: itemNetValue.toFixed(2),
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: itemNetValue.toFixed(2),
+            curr: 'USD',
+            status: 'Active',
+            numC: '1',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: itemNetValue.toFixed(2),
+            cdCur: 'USD',
+            stat: true
+        },
+        {
+            cnty: 'US',
+            name: 'Tax',
+            amount: (itemNetValue * 0.15).toFixed(2),
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: (itemNetValue * 0.15).toFixed(2),
+            curr: 'USD',
+            status: 'Active',
+            numC: '2',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: (itemNetValue * 0.15).toFixed(2),
+            cdCur: 'USD',
+            stat: true
+        }
+        ];
+
+        breakdowns.push({
+        item: item.item || (index + 1).toString(),
+        material: item.material || `MAT-${String(index + 1).padStart(3, '0')}`,
+        orderQuantity: item.orderQuantity || '1',
+        orderQuantityUnit: item.orderQuantityUnit || 'EA',
+        description: item.description || `物料描述 ${index + 1}`,
+        reqDelivDate: item.reqDelivDate || '2024-02-15',
+        netValue: itemNetValue,
+        netValueUnit: 'USD',
+        taxValue: itemNetValue * 0.15, // 15%税率
+        taxValueUnit: 'USD',
+        pricingDate: item.pricingDate || '2024-01-15',
+        orderProbability: item.orderProbability || '100',
+        pricingElements: pricingElements
+        });
+    });
+
+    res.json({
+        success: true,
+        message: '价格查询成功',
+        data: {
+        result: {
+            allDataLegal: 1, // 1表示所有数据合法，0表示有不合法数据
+            badRecordIndices: []
+        },
+        generalData: {
+            netValue: totalNetValue.toFixed(2),
+            netValueUnit: 'USD',
+            expectOralVal: totalExpectOralVal.toFixed(2),
+            expectOralValUnit: 'USD',
+        },
+        breakdowns: breakdowns
+        }
+    });
 })
 
 module.exports = router;
