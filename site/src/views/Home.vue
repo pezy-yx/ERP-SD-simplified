@@ -201,7 +201,6 @@ watch(() => route.path, () => {
 .app-dashboard-container {
   padding-top: 20px; /* 与上方横线和页面标题的间距 */
   flex-grow: 1; /* 让仪表盘容器占据剩余空间 */
-  height: 100%;
   background-color: var(--theme-color-page);
   border-radius: 10px;
 }

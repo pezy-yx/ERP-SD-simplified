@@ -20,6 +20,7 @@ import DisplayInquiry from "@/views/inquiry/Display.vue";
 
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
+import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
 
 const routes = [
   // 保留原有的路径
@@ -113,6 +114,12 @@ const routes = [
         name: 'CreateInquiry',
         component: CreateInquiry,
         meta: { title: 'Create Inquiry' }
+      },
+      {
+        path: 'manage-sales-quotations',
+        name: 'ManageSalesQuotations',
+        component: ManageSalesQuotations,
+        meta: { title: 'Manage Sales Quotations' }
       },
       {
         path: 'display-inquiry',

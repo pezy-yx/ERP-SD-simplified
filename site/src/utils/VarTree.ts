@@ -1094,12 +1094,3 @@ export function isNodeStructure(obj: any): obj is NodeStructure {
   }
   return obj && typeof obj === 'object' && 'varType' in obj && 'nodeType' in obj
 }
-// // example:
-// const exampleNode: NodeStructure = 
-// cns('string','leaf','exampleString','Hello, World!',false,{},[],'', 'path/to/icon.svg' // **示例：新增 iconPath**
-// )
-// // 嵌套结构示例
-// const exampleComplexNode: NodeStructure = cns('dict', 'dict', 'parentDict', null, false, {}, [
-//   cns('string', 'leaf', 'childString', 'Child Value', false, {}, [], '', 'path/to/child-icon.svg'), // **示例：子节点新增 iconPath**
-//   cns('number', 'leaf', 'childNumber', 123, false)
-// ], '', 'path/to/parent-icon.svg'); // **示例：父节点新增 iconPath**
