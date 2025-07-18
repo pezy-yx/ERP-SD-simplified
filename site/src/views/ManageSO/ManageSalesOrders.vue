@@ -168,7 +168,7 @@ import VarBox from '@/components/varbox/VarBox.vue';
 import FilterTabs from '@/components/FilterTabs.vue'; // Import FilterTabs
 import { ref, Ref, computed, nextTick } from 'vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
-import { bpSearch } from '@/utils/searchMethods';
+import { bpSearch, quotationIdSearch, salesOrderIdSearch } from '@/utils/searchMethods';
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || '';
 
 import AppContent from '@/components/applicationContent/AppContent.vue';
@@ -212,10 +212,10 @@ interface SalesOrderResult {
 const salesOrderQueryStructure = cns(
   "dict", "dict", "salesOrderQuery", null, false, { hideLabel: true },
   [
-    cns("string", "leaf", "so_id", '', false, { searchMethods: bpSearch }, [], "Sales Order:"),
+    cns("string", "leaf", "so_id", '', false, { searchMethods: salesOrderIdSearch }, [], "Sales Order:"),
     cns("selection", "leaf", "status", '', false, {options:['New','Open','In progress','Completed']}, [], "Overall Status:"),
     cns("string", "leaf", "customer_no", '', false, { searchMethods: bpSearch }, [], "Sold-To Party:"),
-    cns("string", "leaf", "customer_reference", '', false, {searchMethods: bpSearch}, [], "Customer Reference:"),
+    cns("string", "leaf", "customer_reference", '', false, {}, [], "Customer Reference:"),
   ]
 );
 
@@ -225,7 +225,7 @@ const salesOrderDataTree = createTreeFromConfig(
        cns('string','leaf','id','',false,{},[]),
      ]),
      cns('dict','dict','basicInfo',{},false,{hideLabel:true},[
-       cns('string','leaf','quotation_id','',true,{},[],"Quotation:"),
+       cns('string','leaf','quotation_id','',false,{searchMethods: quotationIdSearch},[],"Quotation:"),
        cns('string','leaf','so_id','',true,{},[],"Sales Order:"),
        cns('string','leaf','soldToParty','',false,{},[],"Sold-To Party:"),
        cns('string','leaf','shipToParty','',false,{},[],"Ship-To Party:"),

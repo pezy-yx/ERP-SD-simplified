@@ -61,3 +61,19 @@ export const inquiryIdSearch: SearchMethod[] = [
     serviceUrl: '/api/search/inquiry-id'
   }
 ]
+
+export const quotationIdSearch: SearchMethod[] = [
+  {
+    name: '报价单搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/quotation-id'
+  }
+]
+
+export const salesOrderIdSearch: SearchMethod[] = [
+  {
+    name: '销售订单搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/salesOrder-id'
+  }
+]
