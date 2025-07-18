@@ -128,6 +128,19 @@
                 </template>
             </template>
         </AppContent>
+
+        <div v-if="showInquiryModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="input-group">
+                    <label for="inquiryIdInput">请输入 Inquiry ID:</label>
+                    <input type="text" id="inquiryIdInput" v-model="inquiryIdInput" placeholder="例如: INQ-2024-001" />
+                </div>
+                <div class="modal-actions">
+                    <button @click="createQuotationFromInquiry" class="btn-primary">确认创建</button>
+                    <button @click="cancelInquiryCreation" class="btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -148,6 +161,65 @@ import {
 } from '@/utils/VarTree';
 import { toRaw } from 'vue'; // 用于获取非响应式原始数据
 import FilterTabs from '@/components/FilterTabs.vue';
+
+const cancelInquiryCreation = () => {
+    showInquiryModal.value = false;
+    inquiryIdInput.value = ''; // 清空输入
+    appToState('search');
+};
+
+const createQuotationFromInquiry = async () => {
+    if (!inquiryIdInput.value.trim()) {
+        alert('请输入 Inquiry ID！');
+        return;
+    }
+
+    try {
+        // 调用后端接口创建报价单
+        // 注意：API_BASE_URL 需要您在项目中定义
+        const API_BASE_URL = 'http://localhost:3000'; // 替换为您的后端地址
+
+        // 请确保这里的URL与您后端新增的接口路径完全一致
+        const response = await fetch(`${API_BASE_URL}/api/quotation/create-quotation-from-inquiry`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ inquiryId: inquiryIdInput.value })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(`报价单创建成功！新报价单 ID: ${result.data.quotationData.basicInfo.quotation || '未知'}`);
+            showInquiryModal.value = false;
+            inquiryIdInput.value = ''; // 清空输入
+
+            // 成功后跳转到新的报价单详情页，或者刷新列表
+            // 假设后端返回了新报价单的完整数据或ID
+            if (result.data && result.data.quotationData && result.data.quotationData.basicInfo) {
+                // 如果后端返回了新报价单的完整数据
+                quotationDataTree.forceSetValue(result.data.quotationData);
+                
+                appContentRef.value.goToStage(1); // 切换到详情页 (阶段 1)
+                appToState('create'); // 设置应用状态为“创建”模式 (可编辑)
+            } else {
+                appToState('search');
+                alert('可以尝试刷新一下')
+            }
+
+        } else {
+            alert(`创建报价单失败: ${result.message || '未知错误'}`);
+        }
+    } catch (error) {
+        console.error('创建报价单请求失败:', error);
+        alert('创建报价单时发生网络错误或服务器异常。');
+    }
+};
+
+// --- 新增的模态窗口相关状态和方法 ---
+const showInquiryModal = ref(false);
+const inquiryIdInput = ref(''); // 用于存储用户输入的 inquiry ID
 
 // ====================================================================
 // 1. 应用状态定义
@@ -546,12 +618,7 @@ async function handleSearch() {
  * @description 处理“创建新报价单”的初始化逻辑，切换到创建模式并准备空表单。
  */
 async function initializeCreation() {
-    // 使用 initialCreationTree 的根节点配置，重新设置 quotationDataTree 的根节点，从而清空并初始化表单
-    quotationDataTree.setRoot(createNodeFromConfig(initialCreationTree.root!));
-    
-    appContentRef.value.goToStage(1); // 切换到详情页 (阶段 1)
-    appToState('create'); // 设置应用状态为“创建”模式 (可编辑)
-    alert('已进入创建新报价单模式。');
+    showInquiryModal.value = true;
     return false; // 返回 false 阻止 AppContent 自动前进到下一个阶段（因为已手动处理）
 }
 
@@ -1236,8 +1303,6 @@ defineExpose({
     box-shadow: 0 0 0 0.2rem var(--btn-focus-shadow); /* 焦点光晕 */
 }
 
-/* 添加到你的 <style scoped> 中 */
-
 /* 包裹表格的容器，增加一些空间和阴影 */
 .search-results-table-container {
     margin-top: 20px;
@@ -1440,5 +1505,103 @@ td .status-badge {
     display: grid;
     grid-template-columns: 50% 35%;
     grid-template-rows: auto auto;
+}
+/* 模态窗口样式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* 确保在最上层 */
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 25px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.input-group input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.modal-actions .btn-primary {
+    margin-left: auto;
+    padding: 5px 10px;
+    border: 2px solid transparent; /* 初始透明边框 */
+    border-radius: 5px;
+    background-color: transparent; 
+    color:var(--btn-default-text);
+    font-size: 16px;
+    text-align: center;
+    cursor:default;
+    transition: all 0.3s ease; /* 平滑过渡所有属性 */
+}
+
+.modal-actions .btn-primary:hover {
+    background-color: var(--btn-hover-bg); /* 悬停时改变背景色 */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* 悬停时加深阴影 */
+    transform: translateY(-2px); /* 轻微上浮 */
+    color: var(--btn-hover-text); /* 悬停时改变文字颜色 */
+}
+
+.modal-actions .btn-secondary {
+    margin-left: auto;
+    padding: 5px 10px;
+    border: 2px solid transparent; /* 初始透明边框 */
+    border-radius: 5px;
+    background-color: transparent; 
+    color:var(--btn-default-text);
+    font-size: 16px;
+    text-align: center;
+    cursor:default;
+    transition: all 0.3s ease; /* 平滑过渡所有属性 */
+}
+.modal-actions .btn-secondary:hover {
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* 悬停时加深阴影 */
+    transform: translateY(-2px); /* 轻微上浮 */
+    background-color: #5a6268;
+    color: var(--btn-hover-text); /* 悬停时改变文字颜色 */
 }
 </style>
