@@ -17,6 +17,7 @@ const customerIdParamSearchStructure = cns('dict','dict','Search',null,false,{},
     cns('number','leaf','less than',null,false,{},[]),
     cns('number','leaf','greater than',null,false,{},[]),
   ]),
+])
 const customerIdParamSearchTree = createTreeFromConfig(customerIdParamSearchStructure);
 
 export const customerSearch:SearchMethod[] = [
