@@ -33,16 +33,102 @@ router.post('/bp-relationship/register', (req, res) => {
   })
 })
 
-// bp-relation/create
-router.post('/bp-relationship/create', (req, res) => {
-  // 直接返回成功
-  console.log('创建BP关系:', req.body);
-  const relationId = "33"
+// bp-relationship/get
+router.post('/bp-relationship/get', (req, res) => {
+  console.log('查询BP关系:', req.body);
+  const relationshipId = req.body.relationshipId
+
+  if (!relationshipId) {
+    res.json({
+      success: false,
+      message: 'Relationship ID is required'
+    })
+    return
+  }
+
+  // 模拟返回BP关系数据
+  const mockBPRelationshipData = {
+    meta: {
+      id: relationshipId
+    },
+    basicInfo: {
+      relation: {
+        relationShipCategory: 'test'
+      },
+      default: {
+        businessPartner1: 'BP001',
+        businessPartner2: 'BP002',
+        validFrom: '2024-01-01',
+        validTo: '2024-12-31'
+      }
+    }
+  }
+
+  const mockGeneralData = {
+    testField: 'Sample test data'
+  }
+
+  
+  let formStruct = {
+
+  }
+  if(1 || relationCategoty === 'test') {
+    formStruct = {
+      nodeType: 'dict',
+      varType: 'dict',
+      name: 'generalData',
+      nameDisplay: 'General Data',
+      children:[
+        {
+          nodeType: 'leaf',
+          varType: 'string',
+          name: 'testField',
+          nameDisplay: 'Test Field: '
+        }
+      ]
+    }
+  }
+
+  res.json({
+    success: true,
+    message: '查询BP关系成功',
+    data: {
+      content: {
+        basicInfo: mockBPRelationshipData,
+        generalData: mockGeneralData,
+      },
+      formStruct: formStruct
+    }
+  })
+})
+
+// bp-relationship/edit
+router.post('/bp-relationship/edit', (req, res) => {
+  console.log('编辑BP关系:', req.body);
+  const bpRelationshipData = req.body.bpRelationshipData
+
+  // 如果有ID，则是修改，否则是创建
+  if(bpRelationshipData && bpRelationshipData.meta && bpRelationshipData.meta.id) {
+    res.json({
+      success: true,
+      message: '修改BP关系成功',
+      data: {
+        message: `BP relationship ${bpRelationshipData.meta.id} has been updated successfully`
+      }
+    })
+    return
+  }
+
+  // 创建新的BP关系
+  const relationId = "REL-2024-001"
   res.json({
     success: true,
     message: '创建BP关系成功',
     data: {
-      message: `BP realtion ${relationId} has been created successfully`
+      message: `BP relationship ${relationId} has been created successfully`,
+      content: {
+        id: relationId
+      }
     }
   })
 })
@@ -61,7 +147,7 @@ router.post('/inquiry/initialize', (req, res) => {
     success: true,
     message: '初始化询价单成功',
     data : {
-      defaultValue
+      content: defaultValue
     }
   })
 })
@@ -93,18 +179,112 @@ router.post('/inquiry/get', (req, res) => {
       expectOralValUnit: 'USD',
       items: [
         {
+          item: '1',
           material: 'MAT-001',
           orderQuantity: '100',
-          su: 10,
-          altItm: 1,
-          description: '高品质电子元件'
+          orderQuantityUnit: 'EA',
+          description: '高品质电子元件',
+          reqDelivDate: '2024-02-15',
+          netValue: '1500.00',
+          netValueUnit: 'USD',
+          taxValue: '225.00',
+          taxValueUnit: 'USD',
+          pricingDate: '2024-01-15',
+          orderProbability: '95',
+          pricingElements: [
+            {
+              cnty: 'US',
+              name: 'Base Price',
+              amount: '1500.00',
+              city: 'USD',
+              per: '1',
+              uom: 'EA',
+              conditionValue: '1500.00',
+              curr: 'USD',
+              status: 'Active',
+              numC: '1',
+              atoMtsComponent: '',
+              oun: '',
+              cconDe: '',
+              un: '',
+              conditionValue2: '1500.00',
+              cdCur: 'USD',
+              stat: true
+            },
+            {
+              cnty: 'US',
+              name: 'Tax',
+              amount: '225.00',
+              city: 'USD',
+              per: '1',
+              uom: 'EA',
+              conditionValue: '225.00',
+              curr: 'USD',
+              status: 'Active',
+              numC: '2',
+              atoMtsComponent: '',
+              oun: '',
+              cconDe: '',
+              un: '',
+              conditionValue2: '225.00',
+              cdCur: 'USD',
+              stat: true
+            }
+          ]
         },
         {
+          item: '2',
           material: 'MAT-002',
           orderQuantity: '50',
-          su: 5,
-          altItm: 2,
-          description: '精密传感器模块'
+          orderQuantityUnit: 'EA',
+          description: '精密传感器模块',
+          reqDelivDate: '2024-02-20',
+          netValue: '2800.00',
+          netValueUnit: 'USD',
+          taxValue: '420.00',
+          taxValueUnit: 'USD',
+          pricingDate: '2024-01-15',
+          orderProbability: '90',
+          pricingElements: [
+            {
+              cnty: 'US',
+              name: 'Base Price',
+              amount: '2800.00',
+              city: 'USD',
+              per: '1',
+              uom: 'EA',
+              conditionValue: '2800.00',
+              curr: 'USD',
+              status: 'Active',
+              numC: '1',
+              atoMtsComponent: '',
+              oun: '',
+              cconDe: '',
+              un: '',
+              conditionValue2: '2800.00',
+              cdCur: 'USD',
+              stat: true
+            },
+            {
+              cnty: 'US',
+              name: 'Tax',
+              amount: '420.00',
+              city: 'USD',
+              per: '1',
+              uom: 'EA',
+              conditionValue: '420.00',
+              curr: 'USD',
+              status: 'Active',
+              numC: '2',
+              atoMtsComponent: '',
+              oun: '',
+              cconDe: '',
+              un: '',
+              conditionValue2: '420.00',
+              cdCur: 'USD',
+              stat: true
+            }
+          ]
         }
       ]
     }
@@ -114,11 +294,10 @@ router.post('/inquiry/get', (req, res) => {
     success: true,
     message: '初始化询价单成功',
     data : {
-      inquiryData: mockInquiryData
+      content: mockInquiryData
     }
   })
 })
-
 
 // inquiry/edit
 router.post('/inquiry/edit', (req, res) => {
@@ -141,129 +320,13 @@ router.post('/inquiry/edit', (req, res) => {
     success: true,
     message: '创建询价单成功',
     data: {
-      message: `Inquiry ${inquiryId} has been created successfully`
+      message: `Inquiry ${inquiryId} has been created successfully`,
+      content: {
+        id: inquiryId
+      }
     }
   })
 })
-
-// inquiry/item-tab-query - 单个item的信息补全和验证
-router.post('/inquiry/item-tab-query', (req, res) => {
-  console.log('单个物品信息补全:', req.body);
-
-  const inputItem = req.body;
-
-  // 模拟验证逻辑 - 检查必要字段
-  if (!inputItem.material || !inputItem.orderQuantity) {
-    return res.json({
-      success: false,
-      message: '物品信息不完整，缺少必要字段',
-      error: 'Missing required fields: material or orderQuantity'
-    });
-  }
-
-  // 模拟根据material查找完整信息
-  const materialDatabase = {
-    'MAT-001': {
-      description: '高品质电子元件',
-      netValue: '10000.50',
-      netValueUnit: 'USD',
-      taxValue: '1500.08',
-      taxValueUnit: 'USD',
-      pricingElements: [
-        {
-          cnty: 'US',
-          name: 'Base Price',
-          amount: '100.00',
-          city: 'USD',
-          per: '1',
-          uom: 'EA',
-          conditionValue: '10000.50',
-          curr: 'USD',
-          status: 'Active',
-          numC: '1',
-          atoMtsComponent: '',
-          oun: '',
-          cconDe: '',
-          un: '',
-          conditionValue2: '10000.50',
-          cdCur: 'USD',
-          stat: true
-        },
-        {
-          cnty: 'US',
-          name: 'Tax',
-          amount: '15.00',
-          city: 'USD',
-          per: '1',
-          uom: 'EA',
-          conditionValue: '1500.08',
-          curr: 'USD',
-          status: 'Active',
-          numC: '2',
-          atoMtsComponent: '',
-          oun: '',
-          cconDe: '',
-          un: '',
-          conditionValue2: '1500.08',
-          cdCur: 'USD',
-          stat: true
-        }
-      ]
-    },
-    'MAT-002': {
-      description: '精密传感器模块',
-      netValue: '5800.50',
-      netValueUnit: 'USD',
-      taxValue: '870.08',
-      taxValueUnit: 'USD',
-      pricingElements: [
-        {
-          cnty: 'US',
-          name: 'Base Price',
-          amount: '116.01',
-          city: 'USD',
-          per: '1',
-          uom: 'EA',
-          conditionValue: '5800.50',
-          curr: 'USD',
-          status: 'Active',
-          numC: '1',
-          atoMtsComponent: '',
-          oun: '',
-          cconDe: '',
-          un: '',
-          conditionValue2: '5800.50',
-          cdCur: 'USD',
-          stat: true
-        }
-      ]
-    }
-  };
-
-  const materialInfo = materialDatabase[inputItem.material];
-
-  if (!materialInfo) {
-    return res.json({
-      success: false,
-      message: '未找到该物料信息',
-      error: `Material ${inputItem.material} not found in database`
-    });
-  }
-
-  // 返回补全的信息
-  const completedItem = {
-    ...inputItem,
-    ...materialInfo,
-    pricingDate: inputItem.pricingDate || '2024-01-15',
-    orderProbability: inputItem.orderProbability || '100'
-  };
-
-  res.json({
-    success: true,
-    message: '物品信息补全成功',
-    data: completedItem
-  });
-});
 
 // inquiry/items-tab-query - 批量查询
 router.post('/inquiry/items-tab-query', (req, res) => {

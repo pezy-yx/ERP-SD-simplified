@@ -1,4 +1,4 @@
-import { DefineComponent } from "vue";
+import { DefineComponent, Ref, ref } from "vue";
 import type { Component } from 'vue'
 /**
  * VarNode类：变量节点
@@ -493,6 +493,7 @@ export class VarNode {
 export class VarTree {
   public root: VarNode | null;
   public nodeIndex: number;
+  public forceUpdateKey: Ref<number>;
   
   /**
    * 构造函数
@@ -501,11 +502,20 @@ export class VarTree {
   constructor(rootNode: VarNode | null = null) {
     this.root = rootNode
     this.nodeIndex = 0 // 用于生成默认变量名和索引
+    this.forceUpdateKey = ref(0)
     
     // 如果有根节点，立即初始化索引和名称
     if (this.root) {
       this._initializeTree()
     }
+  }
+
+  /**
+   * @description 强制刷新树结构
+   * @description 用于在数据更新后强制刷新界面
+   */
+  forceUpdate() {
+    this.forceUpdateKey.value++
   }
 
   /**
@@ -517,7 +527,7 @@ export class VarTree {
   }
 
   /**
-   * 读值
+   * 写值
    * @param {VarNodeValue} newValue
    */
   setValue(newValue: VarNodeValue): void {
