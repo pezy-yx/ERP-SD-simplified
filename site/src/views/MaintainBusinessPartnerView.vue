@@ -287,7 +287,6 @@ background-color: #d1d0c4;
 
 /* 其他占位内容的样式 */
 .page-content > div {
-margin: 20px;
 padding: 20px;
 background-color: #e6e5d8;
 border-radius: 4px;
