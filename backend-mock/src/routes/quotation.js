@@ -301,7 +301,84 @@ router.post('/details', (req, res) => {
     res.json(response);
 })
 
-router.post('quotation/items-tab-query',(req,res) =>{
+router.post('/create-quotation-from-inquiry', (req, res) => {
+    console.log('接收到根据 Inquiry 创建报价单的请求:', req.body);
+    const { inquiryId } = req.body;
+
+    if (!inquiryId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Inquiry ID 是必需的。'
+        });
+    }
+
+    // --- 模拟根据 Inquiry ID 获取数据并创建报价单的逻辑 ---
+    // 在真实场景中，这里会涉及到：
+    // 1. 调用其他服务或数据库查询 inquiryId 对应的询价单详情
+    // 2. 将询价单数据（例如物料、数量、客户信息等）映射到报价单数据结构
+    // 3. 生成新的报价单ID
+    // 4. 将新生成的报价单保存到数据库
+
+    // 假设的询价单数据，通常会从数据库中根据 inquiryId 查询得到
+    const mockInquiryData = {
+        inquiryId: inquiryId,
+        customerName: 'Sample Customer for ' + inquiryId,
+        materialRequests: [
+            { material: 'MAT-A01', quantity: '50', unit: 'EA', description: 'Inquiry Item A' },
+            { material: 'MAT-B02', quantity: '20', unit: 'PC', description: 'Inquiry Item B' }
+        ]
+    };
+
+    // 模拟生成一个新的报价单ID
+    const newQuotationId = `QUO-INQ-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 100)}`;
+    const newCustomerReference = `INQ-REF-${inquiryId}`;
+
+    // 模拟创建报价单的完整数据结构
+    const newQuotationData = {
+        meta: {
+            id: newQuotationId
+        },
+        basicInfo: {
+            quotation: newQuotationId,
+            soldToParty: mockInquiryData.customerName, // 从询价单获取客户信息
+            shipToParty: 'SHIP-99999', // 假设默认
+            customerReference: newCustomerReference, // 可以关联到询价单ID
+            netValue: 0, // 初始为0，可能需要根据items计算
+            netValueUnit: 'USD',
+            customerReferenceDate: new Date().toISOString().slice(0, 10)
+        },
+        itemOverview: {
+            validFrom: new Date().toISOString().slice(0, 10),
+            validTo: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().slice(0, 10),
+            reqDelivDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().slice(0, 10),
+            expectOralVal: '0.00',
+            expectOralValUnit: 'USD',
+            items: mockInquiryData.materialRequests.map((req, index) => ({
+                item: (index + 1) * 10 + '',
+                material: req.material,
+                orderQuantity: req.quantity,
+                orderQuantityUnit: req.unit,
+                description: req.description,
+                su: 0, // 初始值，可能需要计算
+                altItm: index + 1
+            }))
+        }
+    };
+
+    // 在实际应用中，这里应该把 newQuotationData 保存到数据库
+
+    res.json({
+        success: true,
+        message: `根据 Inquiry ${inquiryId} 成功创建报价单 ${newQuotationId}`,
+        data: {
+            quotationData: newQuotationData // 返回新生成的报价单完整数据 (可选)
+        }
+    });
+});
+
+// ... (您现有的 router.post('quotation/items-tab-query', ...) 等其他路由) ...
+
+router.post('/items-tab-query',(req,res) =>{
     console.log('批量物品查询:', req.body);
 
     const items = req.body;
