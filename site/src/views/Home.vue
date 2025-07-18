@@ -123,7 +123,14 @@ const appTree = createTreeFromConfig({
             {
                 varType: 'string',
                 nodeType: "leaf",
-                name: 'Create Outbound Deliveries',
+                name: 'Create Outbound Delivery',
+                readonly: true,
+                iconPath: '@/assets/icons/create-outbound-deliveries.svg',
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Pick Outbound Delivery',
                 readonly: true,
                 iconPath: '@/assets/icons/create-outbound-deliveries.svg',
             },

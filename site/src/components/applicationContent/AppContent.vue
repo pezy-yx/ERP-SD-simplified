@@ -254,13 +254,19 @@ const allInterfaces = computed(() => ({
 }
 
 .bottom-bar > :global(.next-button) {
-  background: #007bff;
+  background: var(--theme-color-dark);
   color: white;
-  border-color: #007bff;
+  border-color: var(--theme-color-dark);
 }
 
 .bottom-bar > :global(.next-button:hover:not(:disabled)) {
-  background: #0056b3;
-  border-color: #0056b3;
+  background: var(--theme-color-darker);
+  border-color: var(--theme-color-darker);
+}
+
+.bottom-bar > :global(.next-button:active:not(:disabled)) {
+  background: var(--theme-color-lighter);
+  border-color: var(--theme-color-lighter);
+  color: var(--theme-color-darker);
 }
 </style>

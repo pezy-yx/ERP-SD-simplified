@@ -648,4 +648,204 @@ router.post('/mock/company', (req, res) => {
   }
 });
 
+// 交货单搜索 - Mock API
+router.post('/delivery-id', (req, res) => {
+  try {
+    console.log('交货单搜索参数:', req.body);
+
+    const mockDeliveries = [
+      {
+        id: 'DEL-2024-001',
+        result: 'DEL-2024-001',
+        description: '出库交货单 - 客户CUST-12345'
+      },
+      {
+        id: 'DEL-2024-002',
+        result: 'DEL-2024-002',
+        description: '出库交货单 - 客户CUST-67890'
+      },
+      {
+        id: 'DEL-2024-003',
+        result: 'DEL-2024-003',
+        description: '出库交货单 - 客户CUST-11111'
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: mockDeliveries,
+      total: mockDeliveries.length,
+      message: `找到 ${mockDeliveries.length} 个交货单`
+    });
+
+  } catch (error) {
+    console.error('交货单搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 客户搜索 - Mock API
+router.post('/customer', (req, res) => {
+  try {
+    console.log('客户搜索参数:', req.body);
+
+    const mockCustomers = [
+      {
+        id: 'CUST-12345',
+        result: 'CUST-12345',
+        description: '北京科技有限公司'
+      },
+      {
+        id: 'CUST-67890',
+        result: 'CUST-67890',
+        description: '上海贸易公司'
+      },
+      {
+        id: 'CUST-11111',
+        result: 'CUST-11111',
+        description: '深圳制造企业'
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: mockCustomers,
+      total: mockCustomers.length,
+      message: `找到 ${mockCustomers.length} 个客户`
+    });
+
+  } catch (error) {
+    console.error('客户搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 物料搜索 - Mock API
+router.post('/material', (req, res) => {
+  try {
+    console.log('物料搜索参数:', req.body);
+
+    const mockMaterials = [
+      {
+        id: 'MAT-001',
+        result: 'MAT-001',
+        description: '笔记本电脑 - ThinkPad X1'
+      },
+      {
+        id: 'MAT-002',
+        result: 'MAT-002',
+        description: '无线鼠标 - 罗技MX Master'
+      },
+      {
+        id: 'MAT-003',
+        result: 'MAT-003',
+        description: '机械键盘 - Cherry MX'
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: mockMaterials,
+      total: mockMaterials.length,
+      message: `找到 ${mockMaterials.length} 个物料`
+    });
+
+  } catch (error) {
+    console.error('物料搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 工厂搜索 - Mock API
+router.post('/plant', (req, res) => {
+  try {
+    console.log('工厂搜索参数:', req.body);
+
+    const mockPlants = [
+      {
+        id: '1000',
+        result: '1000',
+        description: '北京工厂'
+      },
+      {
+        id: '2000',
+        result: '2000',
+        description: '上海工厂'
+      },
+      {
+        id: '3000',
+        result: '3000',
+        description: '深圳工厂'
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: mockPlants,
+      total: mockPlants.length,
+      message: `找到 ${mockPlants.length} 个工厂`
+    });
+
+  } catch (error) {
+    console.error('工厂搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 存储位置搜索 - Mock API
+router.post('/storage-location', (req, res) => {
+  try {
+    console.log('存储位置搜索参数:', req.body);
+
+    const mockStorageLocations = [
+      {
+        id: '0001',
+        result: '0001',
+        description: '主仓库A区'
+      },
+      {
+        id: '0002',
+        result: '0002',
+        description: '主仓库B区'
+      },
+      {
+        id: '0003',
+        result: '0003',
+        description: '备用仓库'
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: mockStorageLocations,
+      total: mockStorageLocations.length,
+      message: `找到 ${mockStorageLocations.length} 个存储位置`
+    });
+
+  } catch (error) {
+    console.error('存储位置搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
