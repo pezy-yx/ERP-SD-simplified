@@ -11,7 +11,8 @@ import ExampleApplication from '@/views/example/ExampleApplication.vue';
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
-import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
+import CreateBp from '@/views/BPRelationship/Create.vue';
+import ManageSalesOrders from "@/views/ManageSO/ManageSalesOrders.vue";
 
 // 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
@@ -23,7 +24,14 @@ import CreateBPRelationship from '@/views/BPRelationship/Create.vue';
 import DisplayBPRelationship from "@/views/BPRelationship/Display.vue";
 import ChangeBPRelationship from "@/views/BPRelationship/Change.vue";
 
+// 出库交货单
+import CreateOutboundDelivery from '@/views/outboundDeliveries/Create.vue';
+import PickOutboundDelivery from '@/views/outboundDeliveries/Pick.vue';
+import ManageOutboundDeliveries from '@/views/outboundDeliveries/Manage.vue';
+
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
+import { title } from "process";
+import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
 
 const routes = [
   // 保留原有的路径
@@ -125,6 +133,12 @@ const routes = [
         meta: { title: 'Create Inquiry' }
       },
       {
+        path: 'manage-sales-quotations',
+        name: 'ManageSalesQuotations',
+        component: ManageSalesQuotations,
+        meta: { title: 'Manage Sales Quotations' }
+      },
+      {
         path: 'display-inquiry',
         name: 'DisplayInquiry',
         component: DisplayInquiry,
@@ -147,6 +161,24 @@ const routes = [
         name: 'ChangeBPRelationship',
         component: ChangeBPRelationship,
         meta: { title: 'Change BP Relationship' }
+      },
+      {
+        path: 'create-outbound-delivery',
+        name: 'CreateOutboundDelivery',
+        component: CreateOutboundDelivery,
+        meta: { title: 'Create Outbound Delivery' }
+      },
+      {
+        path: 'manage-outbound-deliveries',
+        name: 'ManageOutboundDeliveries',
+        component: ManageOutboundDeliveries,
+        meta: { title: 'Manage Outbound Deliveries' }
+      },
+      {
+        path: 'pick-outbound-delivery',
+        name: 'PickOutboundDelivery',
+        component: PickOutboundDelivery,
+        meta: { title: 'Pick Outbound Delivery' }
       },
     ]
   },

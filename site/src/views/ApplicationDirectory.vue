@@ -151,15 +151,21 @@ const applications = ref<ApplicationInfo[]>([
           "tags": ["order management"]
         },
         {
+          "applicationName": "Create Outbound Delivery",
+          "lore": "Create deliveries from sales orders",
+          "routePath": "/create-outbound-delivery",
+          "tags": ["delivery management"]
+        },
+        {
           "applicationName": "Manage Outbound Deliveries",
-          "lore": "",
+          "lore": "Manage and process existing deliveries",
           "routePath": "/manage-outbound-deliveries",
           "tags": ["delivery management"]
         },
         {
-          "applicationName": "Pick Outbound Deliveries",
+          "applicationName": "Pick Outbound Delivery",
           "lore": "From Sales Orders",
-          "routePath": "/pick-outbound-deliveries",
+          "routePath": "/pick-outbound-delivery",
           "tags": ["delivery management"]
         },
         {

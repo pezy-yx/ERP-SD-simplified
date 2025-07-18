@@ -109,7 +109,14 @@ const appTree = createTreeFromConfig({
             {
                 varType: 'string',
                 nodeType: "leaf",
-                name: 'Create Outbound Deliveries',
+                name: 'Create Outbound Delivery',
+                readonly: true,
+                iconPath: '@/assets/icons/create-outbound-deliveries.svg',
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Pick Outbound Delivery',
                 readonly: true,
                 iconPath: '@/assets/icons/create-outbound-deliveries.svg',
             },
@@ -189,7 +196,6 @@ const appCategories = computed(() => appTree.getRoot()?.children);
 .app-dashboard-container {
   padding-top: 20px; /* 与上方横线和页面标题的间距 */
   flex-grow: 1; /* 让仪表盘容器占据剩余空间 */
-  height: 100%;
   background-color: var(--theme-color-page);
   border-radius: 10px;
 }

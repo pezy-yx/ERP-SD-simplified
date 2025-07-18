@@ -236,8 +236,6 @@ watch(route, () => {
  background-color: var(--theme-color-page);
  padding: 20px;
  margin: 20px;
- border-radius: 8px;
- box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
  display: flex;
  flex-direction: column;
  padding-top: 50px; /* 调整顶部内边距 */
