@@ -11,7 +11,8 @@ import ExampleApplication from '@/views/example/ExampleApplication.vue';
 import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
-import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
+import CreateBp from '@/views/BPRelationship/Create.vue';
+import ManageSalesOrders from "@/views/ManageSO/ManageSalesOrders.vue";
 
 // 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
@@ -25,6 +26,7 @@ import ChangeBPRelationship from "@/views/BPRelationship/Change.vue";
 
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
+import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
 
 const routes = [
   // 保留原有的路径
@@ -124,6 +126,12 @@ const routes = [
         name: 'CreateInquiry',
         component: CreateInquiry,
         meta: { title: 'Create Inquiry' }
+      },
+      {
+        path: 'manage-sales-quotations',
+        name: 'ManageSalesQuotations',
+        component: ManageSalesQuotations,
+        meta: { title: 'Manage Sales Quotations' }
       },
       {
         path: 'display-inquiry',

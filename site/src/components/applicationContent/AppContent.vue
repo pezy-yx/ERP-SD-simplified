@@ -218,14 +218,24 @@ const allInterfaces = computed(() => ({
   display: flex;
   flex-direction: column;
   min-height: 0;
+  width: 100%;
+}
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-top: 1px solid var(--theme-color-border);
 }
 
 .bottom-bar > :global(.nav-button) {
+  height: 30px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
   background: white;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.2s ease;
 }
 
