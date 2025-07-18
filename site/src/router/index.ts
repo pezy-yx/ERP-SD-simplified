@@ -24,7 +24,6 @@ import DisplayBPRelationship from "@/views/BPRelationship/Display.vue";
 import ChangeBPRelationship from "@/views/BPRelationship/Change.vue";
 
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
-import { title } from "process";
 
 const routes = [
   // 保留原有的路径
@@ -105,7 +104,7 @@ const routes = [
         path: 'home',
         name: 'ApplicationHome',
         component: Home,
-        meta: { title: 'Home' }
+        meta: { title: 'Sales and Distribution' }
       },
       {
         path: 'create-bp-relationship',

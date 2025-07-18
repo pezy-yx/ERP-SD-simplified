@@ -59,13 +59,19 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'ApplicationDirectory',
-  data() {
-    return {
-      selectedTag: null,
-      applications: [
+<script lang="ts" setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import applicationHistoryManager, { type ApplicationInfo } from '@/utils/ApplicationHistoryManager';
+
+// 定义事件
+const emit = defineEmits<{
+  'update-title': [title: string]
+}>();
+
+// 响应式数据
+const selectedTag = ref<string | null>(null);
+const applications = ref<ApplicationInfo[]>([
         {
           "applicationName": "Curricular Material PDF",
           "lore": "Download Curricula",
@@ -223,52 +229,62 @@ export default {
           "tags": ["example"]
         },
       ]
-    };
-  },
-  computed: {
-    availableTags() {
-      const tags = new Set();
-      this.applications.forEach(app => {
-        app.tags.forEach(tag => tags.add(tag));
-      });
-      return Array.from(tags).sort();
-    },
-    filteredApplications() {
-      if (!this.selectedTag) {
-        return this.applications;
-      }
-      return this.applications.filter(app => 
-        app.tags.includes(this.selectedTag)
-      );
-    }
-  },
-  methods: {
-    selectTag(tag) {
-      this.selectedTag = tag;
-    },
-    getTagDisplayName(tag) {
-      const tagNames = {
-        'customer management': '客户管理',
-        'order management': '订单管理',
-        'delivery management': '交付管理',
-        'financial management': '财务管理',
-        'chore': '其他',
-        'test': '测试',
-        'example': '示例'
-      };
-      return tagNames[tag] || tag;
-    },
-    navigateToApplication(app) {
-      const fullPath = `/application${app.routePath}`;
-      console.log(`导航到应用: ${app.applicationName} -> ${fullPath}`);
-      this.$router.push(fullPath);
-    }
-  },
-  mounted() {
-    // 设置页面标题
-    this.$emit('update-title', '应用程序目录');
+);
+
+// 路由
+const router = useRouter();
+
+// 计算属性
+const availableTags = computed((): string[] => {
+  const tags = new Set<string>();
+  applications.value.forEach(app => {
+    app.tags?.forEach(tag => tags.add(tag));
+  });
+  return Array.from(tags).sort();
+});
+
+const filteredApplications = computed((): ApplicationInfo[] => {
+  if (!selectedTag.value) {
+    return applications.value;
   }
+  return applications.value.filter(app =>
+    app.tags?.includes(selectedTag.value!)
+  );
+});
+
+// 方法
+const selectTag = (tag: string | null): void => {
+  selectedTag.value = tag;
 };
+
+const getTagDisplayName = (tag: string): string => {
+  const tagNames: Record<string, string> = {
+    'customer management': '客户管理',
+    'order management': '订单管理',
+    'delivery management': '交付管理',
+    'financial management': '财务管理',
+    'chore': '其他',
+    'test': '测试',
+    'example': '示例'
+  };
+  return tagNames[tag] || tag;
+};
+
+const navigateToApplication = (app: ApplicationInfo): void => {
+  const fullPath = `/application${app.routePath}`;
+  console.log(`导航到应用: ${app.applicationName} -> ${fullPath}`);
+
+  // 记录应用程序访问历史
+  applicationHistoryManager.addVisitRecord(app);
+
+  router.push(fullPath);
+};
+
+// 生命周期
+onMounted(() => {
+  // 设置页面标题
+  emit('update-title', '应用程序目录');
+});
 </script>
 
 <style scoped>

@@ -1,7 +1,5 @@
 <template>
     <div class="home-page-layout">
-        <NavigationBar :pageTitle="currentPageTitle" @search="handleGlobalSearch"/>
-
         <div class="home-content">
             <div class="horizontal-line top-line"></div>
                 <div class="app-dashboard-container">
@@ -25,21 +23,9 @@
 </template>
 
 <script lang="ts" setup>
-import NavigationBar from '@/components/NavigationBar.vue';
 import SingleApp from '@/components/SingleApp.vue'; // 导入 SingleApp 组件
-import { ref, computed, watch } from 'vue';
-import { VarTree, createTreeFromConfig, cns, validators } from '@/utils/VarTree'; // 导入 VarTree 相关的工具函数
-import { useRoute } from 'vue-router'; // 导入 useRoute 用于路由相关的标题更新
-import { iconProps } from 'element-plus';
-
-// 现有功能保持不变
-const currentPageTitle = ref('Sales and Distribution');
-
-function handleGlobalSearch(query: string) {
-    console.log('全局搜索:', query);
-    // 处理全局搜索逻辑
-    // 可以通过事件总线或状态管理传递给子组件
-}
+import { computed } from 'vue';
+import { createTreeFromConfig, cns } from '@/utils/VarTree'; // 导入 VarTree 相关的工具函数
 
 // 定义 VarTree 结构来管理应用类别和每个类别下的应用列表
 const appTree = createTreeFromConfig({
@@ -168,19 +154,7 @@ const appCategories = computed(() => appTree.getRoot()?.children);
 
 // -- END NEW CONTENT --
 
-// 保持原有的标题更新逻辑，可以根据 Home 页面作为应用入口来设置。
-// 由于 Home 页面现在自身承载内容，我们可以固定其标题，或根据需要从路由 meta 获取
-const route = useRoute();
-watch(() => route.path, () => {
-    // 如果 Home 页面本身是顶层路由，通常其标题是固定的
-    // 但如果你希望它能响应路由 meta，可以这样写：
-    const routeMeta = route.meta;
-    if (routeMeta && routeMeta.title) {
-        currentPageTitle.value = routeMeta.title as string;
-    } else {
-        currentPageTitle.value = 'Sales and Distribution'; // 默认标题
-    }
-}, { immediate: true }); // immediate 确保组件加载时立即执行一次
+// Home 页面现在作为 Application 的子路由，标题由 Application 组件管理
 
 </script>
 

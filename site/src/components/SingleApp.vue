@@ -17,6 +17,7 @@
 <script>
 import { defineComponent,computed } from 'vue';
 import { useRouter } from 'vue-router';
+import applicationHistoryManager from '@/utils/ApplicationHistoryManager';
 
 // **关键改动：使用 require.context() 预加载所有可能的图标**
 // 这段代码放在组件定义外部，确保它只执行一次，预加载所有图标。
@@ -92,6 +93,21 @@ export default defineComponent({
         const handleClick = () => {
             // 检查 pagePath 是否存在，然后进行路由跳转
             if (props.pagePath) {
+                // 记录应用程序访问历史
+                // 从 pagePath 中提取 routePath (去掉 /application 前缀)
+                const routePath = props.pagePath.startsWith('/application')
+                    ? props.pagePath.substring('/application'.length)
+                    : props.pagePath;
+
+                const appInfo = {
+                    applicationName: props.pageName,
+                    routePath: routePath,
+                    lore: '', // HomePage中的应用没有描述信息
+                    tags: [] // HomePage中的应用没有标签信息
+                };
+
+                applicationHistoryManager.addVisitRecord(appInfo);
+
                 router.push(props.pagePath);
             } else {
                 console.warn(`SingleApp: pagePath for "${props.pageName}" is not defined. Cannot navigate.`);

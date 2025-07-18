@@ -35,61 +35,76 @@
   </div>
 </template>
 
-<script>
-import { useRouter } from 'vue-router'
-const router = useRouter(); 
-export default {
-  name: 'NavigationBar',
-  props: {
-    pageTitle: {
-      type: String,
-      default: '页面标题'
-    }
-  },
-  data() {
-    return {
-      showSearchInput: false,
-      searchQuery: ''
-    };
-  },
-  methods: {
-    goToUserProfile() {
-      // TODO: 跳转到用户主页的逻辑
-      console.log('点击用户图标：跳转到用户主页');
-      alert('跳转到用户主页功能待实现');
-    },
-    goBack() {
-      // TODO: 返回上一个页面的逻辑
-      console.log('点击返回箭头：返回上一个页面');
-      window.history.back(); // 简单回退浏览器历史记录
-    },
-    goToHomePage() {
-      // 检查当前是否在application路由下
-      if (0 && this.$route.path.startsWith('/application')) {
-        const homePageUrl = '/application'; // 跳转到应用程序目录
-        console.log(`点击主页图标：回到应用程序目录 (${homePageUrl})`);
-        this.$router.push(homePageUrl);
-      } else {
-        const homePageUrl = '/home'; // 原有路径
-        console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
-        this.$router.push(homePageUrl);
-      }
-    },
-    toggleSearchInput() {
-      this.showSearchInput = !this.showSearchInput;
-      if (this.showSearchInput) {
-        this.$nextTick(() => {
-          this.$el.querySelector('.search-input').focus();
-        });
-      }
-    },
-    performSearch() {
-      // TODO: 执行搜索的逻辑
-      console.log('执行搜索，搜索内容:', this.searchQuery);
-      alert(`执行搜索：${this.searchQuery} (功能待实现)`);
-      this.$emit('search', this.searchQuery);
-    }
+<script lang="ts" setup>
+import { ref, nextTick } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+
+// 定义 props
+interface Props {
+  pageTitle?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  pageTitle: '页面标题'
+});
+
+// 定义事件
+const emit = defineEmits<{
+  'profile-click': []
+  search: [query: string]
+}>();
+
+// 响应式数据
+const showSearchInput = ref<boolean>(false);
+const searchQuery = ref<string>('');
+
+// 路由
+const router = useRouter();
+const route = useRoute();
+
+// 方法
+const goToUserProfile = (): void => {
+  // TODO: 跳转到用户主页的逻辑
+  console.log('点击用户图标：跳转到用户主页');
+  emit('profile-click');
+};
+
+const goBack = (): void => {
+  // TODO: 返回上一个页面的逻辑
+  console.log('点击返回箭头：返回上一个页面');
+  window.history.back(); // 简单回退浏览器历史记录
+};
+
+const goToHomePage = (): void => {
+  // 检查当前是否在application路由下
+  if (route.path.startsWith('/application')) {
+    const homePageUrl = '/application/home'; // 跳转到application下的home页面
+    console.log(`点击主页图标：回到应用程序主页 (${homePageUrl})`);
+    router.push(homePageUrl);
+  } else {
+    const homePageUrl = '/home'; // 原有路径
+    console.log(`点击主页图标：回到系统主页 (${homePageUrl})`);
+    router.push(homePageUrl);
   }
+};
+
+const toggleSearchInput = (): void => {
+  showSearchInput.value = !showSearchInput.value;
+  if (showSearchInput.value) {
+    nextTick(() => {
+      const searchInput = document.querySelector('.search-input') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+      }
+    });
+  }
+};
+
+const performSearch = (): void => {
+  // TODO: 执行搜索的逻辑
+  console.log('执行搜索，搜索内容:', searchQuery.value);
+  alert(`执行搜索：${searchQuery.value} (功能待实现)`);
+  emit('search', searchQuery.value);
 };
 </script>
 
