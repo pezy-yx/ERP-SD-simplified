@@ -1,6 +1,6 @@
 <template>
   <div class="manage-sales-orders-view">
-    <div class="page-content" v-if="!showAppContent">
+    <div class="so-page-content" v-if="!showAppContent">
       <div class="sales-order-search">
         <VarBox
           :tree="salesOrderQueryTree"
@@ -1098,7 +1098,7 @@ const salesOrderDataTree = createTreeFromConfig(
     width: 100%;
   }
 
-  .page-content {
+  .so-page-content {
     flex-grow: 1;
     background-color: var(--theme-color-page);
     padding: 20px;

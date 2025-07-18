@@ -2,7 +2,7 @@
   <div class="maintain-business-partner-view">
     <FilterTabs :tabs="businessPartnerTabs" @tab-selected="handleTabSelected"/>
 
-    <div class="page-content">
+    <div class="bp-page-content">
       <div v-if="activeContentKey === 'sales_and_dist' || !activeContentKey" class="business-partner-search">
         <label for="businessPartnerInput">Business Partner:</label>
         <div class="input-with-icon">
@@ -194,7 +194,7 @@ background-color: #25484C;
 width:100%
 }
 
-.page-content {
+.bp-page-content {
 flex-grow: 1;
 background-color: #e6e5d8;
 padding: 20px;
