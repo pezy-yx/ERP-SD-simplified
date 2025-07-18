@@ -301,7 +301,7 @@ router.post('/details', (req, res) => {
     res.json(response);
 })
 
-router.post('quotation/items-tab-query',(req,res) =>{
+router.post('/items-tab-query',(req,res) =>{
     console.log('批量物品查询:', req.body);
 
     const items = req.body;
