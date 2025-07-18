@@ -218,6 +218,7 @@ const allInterfaces = computed(() => ({
   display: flex;
   flex-direction: column;
   min-height: 0;
+  width: 100%;
 }
 
 .bottom-bar > :global(.nav-button) {

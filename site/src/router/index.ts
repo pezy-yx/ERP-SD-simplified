@@ -11,7 +11,7 @@ import Login from '@/views/Login.vue';
 import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
-import ManageSalesOrders from "@/views/ManageSalesOrders.vue";
+import ManageSalesOrders from "@/views/ManageSO/ManageSalesOrders.vue";
 
 // 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
