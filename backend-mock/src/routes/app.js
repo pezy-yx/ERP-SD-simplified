@@ -420,4 +420,407 @@ router.post('/inquiry/items-tab-query', (req, res) => {
   });
 });
 
+// outbound-delivery/get-sales-orders - 获取销售订单列表
+router.post('/outbound-delivery/get-sales-orders', (req, res) => {
+  console.log('获取销售订单列表:', req.body);
+
+  // 模拟销售订单数据
+  const mockSalesOrders = [
+    {
+      id: '1',
+      plannedCreationDate: '2024-01-15',
+      plannedGIDate: '2024-01-20',
+      shippingPoint: '1000',
+      shipToParty: 'CUST-12345',
+      grossWeight: '125.5 KG'
+    },
+    {
+      id: '2',
+      plannedCreationDate: '2024-01-16',
+      plannedGIDate: '2024-01-21',
+      shippingPoint: '1000',
+      shipToParty: 'CUST-67890',
+      grossWeight: '89.2 KG'
+    },
+    {
+      id: '3',
+      plannedCreationDate: '2024-01-17',
+      plannedGIDate: '2024-01-22',
+      shippingPoint: '2000',
+      shipToParty: 'CUST-11111',
+      grossWeight: '203.8 KG'
+    }
+  ];
+
+  res.json({
+    success: true,
+    message: '获取销售订单成功',
+    data: {
+      orders: mockSalesOrders
+    }
+  })
+})
+
+// outbound-delivery/create-from-orders - 从销售订单创建出库交货单
+router.post('/outbound-delivery/create-from-orders', (req, res) => {
+  console.log('从销售订单创建出库交货单:', req.body);
+
+  const { selectedOrders } = req.body;
+  const createdDeliveries = [];
+
+  selectedOrders.forEach((order, index) => {
+    const deliveryId = `DEL-2024-${String(100 + index).padStart(3, '0')}`;
+    createdDeliveries.push(deliveryId);
+  });
+
+  res.json({
+    success: true,
+    message: `Successfully created ${createdDeliveries.length} outbound deliveries: ${createdDeliveries.join(', ')}`,
+    data: {
+      message: `Successfully created ${createdDeliveries.length} outbound deliveries: ${createdDeliveries.join(', ')}`,
+      createdDeliveries: createdDeliveries
+    }
+  })
+})
+
+// outbound-delivery/get-deliveries - 获取出库交货单列表
+router.post('/outbound-delivery/get-deliveries-summary', (req, res) => {
+  console.log('获取出库交货单列表:', req.body);
+
+  const mockDeliveries = [
+    {
+      outboundDelivery: 'DEL-2024-100',
+      pickingDate: '2024-01-20',
+      pickingStatus: 'Completed',
+      giStatus: 'Not Started',
+      pick: 'Pick',
+      // 添加详细信息以支持详情页面
+      detail: {
+        meta: {
+          posted: false,
+          readyToPost: true
+        },
+        actualGIDate: '01/20/2024',
+        plannedGIDate: '01/20/2024',
+        actualDate: '01/20/2024',
+        loadingDate: '01/20/2024',
+        deliveryDate: '01/20/2024',
+        pickingStatus: 'Completed',
+        overallStatus: 'In Progress',
+        giStatus: 'Not Started',
+        shipToParty: 'Customer A (CUST-001)',
+        address: '123 Main St, New York, NY 10001, USA',
+        grossWeight: '150.000',
+        grossWeightUnit: 'KG',
+        netWeight: '140.000',
+        netWeightUnit: 'KG',
+        volume: '1.2',
+        volumeUnit: 'm3',
+        priority: 'Normal Items',
+        shippingPoint: 'NY Shipping Point'
+      },
+      items: [
+        {
+          item: '000010',
+          material: 'MAT-100',
+          deliveryQuantity: '10',
+          deliveryQuantityUnit: 'EA',
+          pickingQuantity: '10',
+          pickingQuantityUnit: 'EA',
+          pickingStatus: 'Completed',
+          confirmationStatus: 'Confirmed'
+        }
+      ]
+    },
+    {
+      outboundDelivery: 'DEL-2024-101',
+      pickingDate: '2024-01-21',
+      pickingStatus: 'In Progress',
+      giStatus: 'Not Started',
+      pick: 'Pick',
+      detail: {
+        meta: {
+          posted: false,
+          readyToPost: false
+        },
+        actualGIDate: '01/21/2024',
+        plannedGIDate: '01/21/2024',
+        actualDate: '01/21/2024',
+        loadingDate: '01/21/2024',
+        deliveryDate: '01/21/2024',
+        pickingStatus: 'In Progress',
+        overallStatus: 'In Progress',
+        giStatus: 'Not Started',
+        shipToParty: 'Customer B (CUST-002)',
+        address: '456 Business Ave, Los Angeles, CA 90001, USA',
+        grossWeight: '200.000',
+        grossWeightUnit: 'KG',
+        netWeight: '190.000',
+        netWeightUnit: 'KG',
+        volume: '1.8',
+        volumeUnit: 'm3',
+        plant: 'Los Angeles',
+        shippingPoint: 'LA Shipping Point'
+      },
+      items: [
+        {
+          item: '000020',
+          material: 'MAT-200',
+          deliveryQuantity: '15',
+          deliveryQuantityUnit: 'EA',
+          pickingQuantity: '8',
+          pickingQuantityUnit: 'EA',
+          pickingStatus: 'In Progress',
+          confirmationStatus: 'Partially Confirmed'
+        }
+      ]
+    },
+    {
+      outboundDelivery: 'DEL-2024-102',
+      pickingDate: '2024-01-22',
+      pickingStatus: 'Not Started',
+      giStatus: 'Not Started',
+      pick: 'Pick',
+      detail: {
+        meta: {
+          posted: false,
+          readyToPost: false
+        },
+        actualGIDate: '01/22/2024',
+        plannedGIDate: '01/22/2024',
+        actualDate: '01/22/2024',
+        loadingDate: '01/22/2024',
+        deliveryDate: '01/22/2024',
+        pickingStatus: 'Not Started',
+        overallStatus: 'Open',
+        giStatus: 'Not Started',
+        shipToParty: 'Customer C (CUST-003)',
+        address: '789 Industrial Blvd, Chicago, IL 60601, USA',
+        grossWeight: '300.000',
+        grossWeightUnit: 'KG',
+        netWeight: '280.000',
+        netWeightUnit: 'KG',
+        volume: '2.5',
+        volumeUnit: 'm3',
+        plant: 'Chicago',
+        shippingPoint: 'CHI Shipping Point'
+      },
+      items: [
+        {
+          item: '000030',
+          material: 'MAT-300',
+          deliveryQuantity: '20',
+          deliveryQuantityUnit: 'EA',
+          pickingQuantity: '0',
+          pickingQuantityUnit: 'EA',
+          pickingStatus: 'Not Started',
+          confirmationStatus: 'Not Confirmed'
+        }
+      ]
+    }
+  ];
+
+  res.json({
+    success: true,
+    message: '获取出库交货单成功',
+    data: {
+      deliveries: mockDeliveries
+    }
+  })
+})
+
+// outbound-delivery/items-tab-query - 验证交货单数据
+router.post('/outbound-delivery/items-tab-query', (req, res) => {
+  console.log('验证交货单数据:', req.body);
+
+  // 模拟验证逻辑 - 总是返回成功
+  const isValid = true;
+
+  breakdowns = req.body
+
+  res.json({
+    success: isValid,
+    message: isValid ? '数据验证通过' : '数据验证失败',
+    data: {
+      result: {
+        allDataLegal: 1, // 1表示所有数据合法，0表示有不合法数据
+        badRecordIndices: []
+      },
+      generalData: {
+
+      },
+      breakdowns: breakdowns
+    }
+  })
+})
+
+// outbound-delivery/get-detail - 获取交货单详情
+router.post('/outbound-delivery/get-detail', (req, res) => {
+  console.log('获取交货单详情:', req.body);
+
+  const { deliveryId } = req.body;
+
+  // 模拟交货单详情数据
+  const mockDeliveryDetail = {
+    meta: {
+      id: deliveryId,
+      posted: (deliveryId=='33'||deliveryId=='DEL-2024-101')?true:false,
+      readyToPost: true
+    },
+    actualGIDate: '06/17/2018',
+    plannedGIDate: '06/17/2018',
+    actualDate: '06/17/2018',
+    loadingDate: '06/17/2018',
+    deliveryDate: '06/17/2018',
+    pickingStatus: 'Completely Processed',
+    overallStatus: 'Completely Processed',
+    giStatus: 'Not Started',
+    shipToParty: 'Domestic Elec (USNY)',
+    address: '123 Business St, Bronx NY, 10453, USA',
+    grossWeight: '100.000',
+    grossWeightUnit: 'KG',
+    netWeight: '95.000',
+    netWeightUnit: 'KG',
+    volume: '0.5',
+    volumeUnit: 'm3',
+    priority: 'Normal Items',
+    shippingPoint: 'NY Delivery (USNY)'
+  };
+
+  const mockDeliveryItems = {
+    items: [
+      {
+        item: '000010',
+        material: 'MAT-001',
+        deliveryQuantity: '5',
+        deliveryQuantityUnit: 'EA',
+        pickingQuantity: '5',
+        pickingQuantityUnit: 'EA',
+        pickingStatus: 'Completely Processed',
+        confirmationStatus: 'Confirmed',
+        salesOrder: 'SO-2024-001',
+        itemType: 'Standard',
+        originalDelivertyQuantity: '5',
+        conversionRate: '1',
+        baseUnitDeliveryQuantity: '5',
+        grossWeight: '10.000',
+        netWeight: '9.500',
+        volume: '0.1',
+        plant: 'New York',
+        storageLocation: '0001',
+        storageLocationDescription: 'Main Storage',
+        storageBin: 'A-01-01',
+        materialAvailability: '2024-01-15'
+      },
+      {
+        item: '000020',
+        material: 'MAT-002',
+        deliveryQuantity: '10',
+        deliveryQuantityUnit: 'EA',
+        pickingQuantity: '8',
+        pickingQuantityUnit: 'EA',
+        pickingStatus: 'Partially Processed',
+        confirmationStatus: 'Partially Confirmed',
+        salesOrder: 'SO-2024-002',
+        itemType: 'Standard',
+        originalDelivertyQuantity: '10',
+        conversionRate: '1',
+        baseUnitDeliveryQuantity: '10',
+        grossWeight: '20.000',
+        netWeight: '19.000',
+        volume: '0.2',
+        plant: 'New York',
+        storageLocation: '0001',
+        storageLocationDescription: 'Main Storage',
+        storageBin: 'A-01-02',
+        materialAvailability: '2024-01-15'
+      }
+    ]
+  };
+
+  res.json({
+    success: true,
+    message: `获取交货单 ${deliveryId} 详情成功`,
+    data: {
+      detail: mockDeliveryDetail,
+      items: mockDeliveryItems
+    }
+  })
+})
+
+// outbound-delivery/post-gis - 提交GI数据
+router.post('/outbound-delivery/post-gis', (req, res) => {
+  console.log('提交GI数据:', req.body);
+
+  const inputData = req.body;
+
+  // 模拟处理GI数据，返回breakdown结构，包含详细数据
+  const breakdowns = inputData.map((deliveryData, index) => {
+    // 更新状态为已过账
+    const updatedDeliveryDetail = {
+      ...deliveryData.deliveryDetail,
+      meta: {
+        ...deliveryData.deliveryDetail.meta,
+        posted: true,
+        readyToPost: false
+      },
+      giStatus: 'Completed',
+      overallStatus: 'Completed'
+    };
+
+    // 更新物品状态
+    const updatedItems = deliveryData.items.map(item => ({
+      ...item,
+      pickingStatus: 'Completed',
+      confirmationStatus: 'Confirmed'
+    }));
+
+    return {
+      detail: updatedDeliveryDetail,
+      items: updatedItems
+    };
+  });
+
+  res.json({
+    success: true,
+    message: 'GI数据提交成功',
+    data: {
+      result: {
+        allDataLegal: 1,
+        badRecordIndices: []
+      },
+      breakdowns: breakdowns
+    }
+  })
+})
+
+// outbound-delivery/post-gis-by-id - 提交GI数据
+router.post('/outbound-delivery/post-gis-by-id', (req, res) => {
+  console.log('提交GI数据:', req.body);
+
+  const { deliveryIds } = req.body; //是id的列表
+
+  // 模拟处理GI数据，返回breakdown结构，包含summary数据
+  const breakdowns = deliveryIds.map(deliveryId => {
+    return {
+      outboundDelivery: deliveryId,
+      pickingDate: '2024-01-20',
+      pickingStatus: 'Completed',
+      giStatus: 'Completed',
+    };
+  });
+
+  res.json({
+    success: true,
+    message: 'GI数据提交成功',
+    data: {
+      result: {
+        allDataLegal: 1,
+        badRecordIndices: []
+      },
+      breakdowns: breakdowns
+    }
+  })
+})
+
 module.exports = router;

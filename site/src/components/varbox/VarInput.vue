@@ -1154,7 +1154,7 @@ function createNewListItem(): VarNode | null {
   justify-content: center;
 }
 /* 表格内的输入框样式调整 */
-.list-table td :deep(*:not(input select)) {
+.list-table td :deep(*:not(input):not(select):not(button)) {
   /* display: none; */
   padding: 0;
   margin: 0;
