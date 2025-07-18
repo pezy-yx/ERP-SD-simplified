@@ -24,6 +24,8 @@ app.get('/', (req, res) => {
 app.use('/api/search', require('./routes/search'));
 app.use('/api/app', require('./routes/app'));
 app.use('/api/employee', require('./routes/employee'));
+app.use('/api/quotation', require('./routes/quotation'));
+app.use('/api/so', require('./routes/so'));
 
 // 启动服务器
 app.listen(PORT, () => {
