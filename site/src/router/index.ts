@@ -112,7 +112,7 @@ const routes = [
         path: 'home',
         name: 'ApplicationHome',
         component: Home,
-        meta: { title: 'Home' }
+        meta: { title: 'Sales and Distribution' }
       },
       {
         path: 'create-bp-relationship',
