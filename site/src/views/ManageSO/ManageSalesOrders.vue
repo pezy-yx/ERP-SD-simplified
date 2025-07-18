@@ -46,6 +46,19 @@
       <button class="search-enter-button create-sales-order-button" @click="createSalesOrder">Create Sales Order</button>
     </div>
 
+    <!-- Quotation Input Modal -->
+    <div v-if="showQuotationModal" class="modal-overlay">
+      <div class="modal-content">
+        <h4>Enter Quotation</h4>
+        <VarBox :tree="quotationQueryTree" class="quotation-input-varbox" />
+        <div class="modal-actions">
+          <button @click="cancelQuotationInput" class="cancel-button">Cancel</button>
+          <button @click="confirmQuotationInput" class="save-button">Confirm</button>
+        </div>
+        <p v-if="quotationModalMessage" class="modal-message">{{ quotationModalMessage }}</p>
+      </div>
+    </div>
+
     <AppContent
       v-if="showAppContent"
       :stages="['salesOrderForm', 'itemDetails']"
@@ -176,6 +189,20 @@ import AppContent from '@/components/applicationContent/AppContent.vue';
 const appContentRef = ref(null) as any;
 const currentAppStage = computed(() => appContentRef.value?.currentStage || 0);
 const showAppContent = ref(false);
+
+// Quotation Modal related states
+const showQuotationModal = ref(false);
+const quotationModalMessage = ref('');
+
+// Define the structure for the quotation input
+const quotationQueryStructure = cns(
+  "dict", "dict", "quotationQuery", null, false, { hideLabel: true },
+  [
+    cns("string", "leaf", "quotation_id", '', false, {searchMethods: quotationIdSearch}, [], "Quotation Number:"),
+  ]
+);
+const quotationQueryTree = createTreeFromConfig(quotationQueryStructure);
+
 
 type State = 'create' | 'change' | 'display';
 
@@ -350,8 +377,8 @@ const salesOrderDataTree = createTreeFromConfig(
     if (currentStage === 0) {
       // If in create or change mode, prompt for confirmation
       if (onCreateState.value || onChangeState.value) {
-        const confirmValue = confirm('Are you sure you want to cancel? Any unsaved changes will be lost.');
-        if (!confirmValue) {
+        // Using a custom modal/message box instead of confirm()
+        if (!await showConfirmationModal('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
           return false; // User chose not to cancel, prevent navigation
         }
       }
@@ -366,8 +393,8 @@ const salesOrderDataTree = createTreeFromConfig(
     if (currentStage === 1) {
       // For create or change mode, prompt for confirmation before going back to the form
       if (onCreateState.value || onChangeState.value) {
-        const confirmValue = confirm('Are you sure you want to go back? Unsaved item changes will be lost.');
-        if (!confirmValue) {
+        // Using a custom modal/message box instead of confirm()
+        if (!await showConfirmationModal('Are you sure you want to go back? Unsaved item changes will be lost.')) {
           return false; // User chose not to go back, prevent navigation
         }
       }
@@ -491,20 +518,89 @@ const salesOrderDataTree = createTreeFromConfig(
  };
 
   const createSalesOrder = () => {
-    console.log('Creating sales order');
-    showAppContent.value = true;
-    appToState('create');
-    salesOrderDataTree.root?.forceSetValue({});
-    selectedItems.value = []; // Clear selected items for new creation
-    currentItemIndex.value = 0;
-    salesOrderVarBoxKey.value++;
-    nextTick(() => {
-      if (appContentRef.value) {
-        appContentRef.value.goToStage(0);
-        appContentRef.value.footerMessage = 'Ready to create new Sales Order.';
-      }
-    });
+    console.log('Creating sales order - showing quotation input modal');
+    showQuotationModal.value = true;
+    quotationModalMessage.value = ''; // Clear previous messages
+    quotationQueryTree.root?.forceSetValue({ quotation_id: '' }); // Reset input
   };
+
+  const cancelQuotationInput = () => {
+    showQuotationModal.value = false;
+    quotationModalMessage.value = '';
+  };
+
+  const confirmQuotationInput = async () => {
+    const quotationId = quotationQueryTree.root?.findNodeByPath(['quotation_id'])?.getValue();
+    if (!quotationId) {
+      quotationModalMessage.value = 'Please enter a Quotation Number.';
+      return;
+    }
+
+    quotationModalMessage.value = 'Searching for quotation...';
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/quotation/details`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quotation_id: quotationId }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.data?.quotationData) {
+        const quotationData = result.data.quotationData;
+        console.log('Quotation data fetched:', quotationData);
+
+        showQuotationModal.value = false;
+        showAppContent.value = true;
+        appToState('create');
+        salesOrderDataTree.root?.forceSetValue({}); // Clear existing data
+
+        // Populate basicInfo
+        const basicInfoNode = salesOrderDataTree.findNodeByPath(['basicInfo']);
+        if (basicInfoNode && quotationData.basicInfo) {
+          basicInfoNode.findNodeByPath(['quotation_id'])?.setValue(quotationData.basicInfo.quotation);
+          basicInfoNode.findNodeByPath(['soldToParty'])?.setValue(quotationData.basicInfo.soldToParty);
+          basicInfoNode.findNodeByPath(['shipToParty'])?.setValue(quotationData.basicInfo.shipToParty);
+          basicInfoNode.findNodeByPath(['customerReference'])?.setValue(quotationData.basicInfo.customerReference);
+          basicInfoNode.findNodeByPath(['netValue'])?.setValue(quotationData.basicInfo.netValue);
+          basicInfoNode.findNodeByPath(['netValueUnit'])?.setValue(quotationData.basicInfo.netValueUnit);
+          basicInfoNode.findNodeByPath(['customerReferenceDate'])?.setValue(quotationData.basicInfo.customerReferenceDate);
+        }
+
+        // Populate itemOverview and items
+        const itemOverviewNode = salesOrderDataTree.findNodeByPath(['itemOverview']);
+        if (itemOverviewNode && quotationData.itemOverview) {
+          itemOverviewNode.findNodeByPath(['reqDelivDate'])?.setValue(quotationData.itemOverview.reqDelivDate);
+
+          const itemsListNode = itemOverviewNode.findNodeByPath(['items']);
+          if (itemsListNode && quotationData.itemOverview.items) {
+            // Clear existing items and add new ones from quotation
+            itemsListNode.children = [];
+            quotationData.itemOverview.items.forEach((itemData: any, index: number) => {
+              const newItemNode = createNodeFromConfig(itemsListNode.config.childTemplate!);
+              newItemNode.forceSetValue({ ...itemData, item: (index + 1).toString() }); // Assign item number
+              itemsListNode.addChild(newItemNode);
+            });
+          }
+        }
+
+        salesOrderVarBoxKey.value++; // Force VarBox re-render
+        nextTick(() => {
+          if (appContentRef.value) {
+            appContentRef.value.goToStage(0);
+            appContentRef.value.footerMessage = 'Quotation data loaded. Ready to create new Sales Order.';
+          }
+        });
+
+      } else {
+        quotationModalMessage.value = result.message || 'Quotation not found or API error.';
+        console.error('Failed to fetch quotation details:', result);
+      }
+    } catch (error: any) {
+      quotationModalMessage.value = `Error fetching quotation: ${error.message}`;
+      console.error('Error during quotation fetch:', error);
+    }
+  };
+
 
   const handleChangeToDisplayAndSave = async () => {
     appToState('display');
@@ -969,6 +1065,26 @@ const salesOrderDataTree = createTreeFromConfig(
     }
   }
 
+  // Custom Confirmation Modal Logic (replaces window.confirm)
+  const showConfirm = ref(false);
+  const confirmMessage = ref('');
+  let confirmResolve: ((value: boolean | PromiseLike<boolean>) => void) | null = null;
+
+  function showConfirmationModal(message: string): Promise<boolean> {
+    confirmMessage.value = message;
+    showConfirm.value = true;
+    return new Promise((resolve) => {
+      confirmResolve = resolve;
+    });
+  }
+
+  function handleConfirm(response: boolean) {
+    showConfirm.value = false;
+    if (confirmResolve) {
+      confirmResolve(response);
+      confirmResolve = null;
+    }
+  }
 
 </script>
 
@@ -1339,26 +1455,28 @@ const salesOrderDataTree = createTreeFromConfig(
 
 /* Save and Cancel button styles (copied from Main.vue) */
 .save-button {
-  padding: 8px 20px;
-  margin-right: 10px;
-  background-color: #28a745;
-  color: white;
+  padding: 4px 10px;
+  margin-right: -10px;
+  background-color: var(--theme-color-dark);
+  color: var(--theme-color-page);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.3s;
 }
 
 .save-button:hover {
-  background-color: #218838;
+  background-color: var(--theme-color-execute-button-hover);
 }
 
 .cancel-button {
-  padding: 8px 20px;
+  padding: 4px 10px;
+  margin-left: -10px;
   background-color: #6c757d;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
 }
@@ -1458,6 +1576,64 @@ const salesOrderDataTree = createTreeFromConfig(
 
 .table-extra-button:disabled {
   cursor: not-allowed;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--theme-color-page);
+  padding: 30px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content h4 {
+  margin-top: 0;
+  color: var(--theme-color-dark);
+  font-size: 1.5em;
+}
+
+.quotation-input-varbox {
+  width: 100%;
+}
+
+.quotation-input-varbox :deep(.var-input--main input) {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.modal-message {
+  color: red;
+  margin-top: 10px;
+  font-size: 0.9em;
 }
 
 </style>

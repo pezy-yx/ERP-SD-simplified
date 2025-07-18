@@ -1,7 +1,7 @@
 import { VarTree,SearchMethod, SearchResultHandler, createTreeFromConfig, cns } from '@/utils/VarTree'
 
 const bpParamSearchStructure = cns('dict', 'dict', 'params', null, false, {}, [
-  cns('string', 'leaf', 'customer_id', '', false),
+  cns('string', 'leaf', 'customer_id', '', false,),
   cns('string','leaf',"search_term",'001',false)
 ]);
 const bpParamSearchTree = createTreeFromConfig(bpParamSearchStructure);
@@ -70,10 +70,18 @@ export const quotationIdSearch: SearchMethod[] = [
   }
 ]
 
+const soParamSearchStructure  = cns('dict', 'dict', 'params', null, false, {}, [
+  cns('string', 'leaf', 'quotation_id', '', false,{searchMethods:quotationIdSearch}),
+  cns('string','leaf','soldToParty','',false,{searchMethods: bpSearch}),
+  cns('string','leaf','soldToParty','',false,{searchMethods:bpSearch}),
+  cns('string','leaf',"search_term",'',false),
+]);
+const soParamSearchTree = createTreeFromConfig(soParamSearchStructure);
+
 export const salesOrderIdSearch: SearchMethod[] = [
   {
     name: '销售订单搜索',
-    paramTree: null,
+    paramTree: soParamSearchTree,
     serviceUrl: '/api/search/salesOrder-id'
   }
 ]
