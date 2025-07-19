@@ -26,6 +26,7 @@ app.use('/api/app', require('./routes/app'));
 app.use('/api/employee', require('./routes/employee'));
 app.use('/api/quotation', require('./routes/quotation'));
 app.use('/api/so', require('./routes/so'));
+app.use('/api/bp', require('./routes/bp'));
 
 // 启动服务器
 app.listen(PORT, () => {
