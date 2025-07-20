@@ -139,7 +139,9 @@ watch(route, () => {
   max-height: 100vh;
   background-color: var(--theme-color-dark); /* 应用的背景色 */
   --nav-height: 4vh;
-  --side-width: 15%;
+  --side-width: 28%;
+  --side-zone-hard-bg-width-dark-ratio: 90;
+  --side-zone-hard-bg-width-light-ratio: 130;
 }
 
 .navigation-bar {
@@ -171,8 +173,8 @@ watch(route, () => {
   background: 
     linear-gradient(to right, 
       var(--theme-color-dark) 0%, 
-      var(--theme-color-dark) calc(var(--side-width) * 90 / 100), 
-      var(--theme-color-light) calc(var(--side-width) * 120 / 100), 
+      var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-dark-ratio) / 100), 
+      var(--theme-color-light) calc(var(--side-width) * var(--side-zone-hard-bg-width-light-ratio) / 100), 
       var(--theme-color-light-a) 80%,
       rgba(0,0,0,0) 100%
     );
@@ -190,7 +192,7 @@ watch(route, () => {
   background: 
     linear-gradient(to right, 
       var(--theme-color-dark) 0%, 
-      var(--theme-color-dark) calc(var(--side-width) * 80 / 100),
+      var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-ratio) / 100),
       rgba(0,0,0,0)
     );
   overflow: hidden;
@@ -224,7 +226,7 @@ watch(route, () => {
 }
 
 .side-zone-content-container {
-  width: 40%;
+  width: calc(var(--side-width));
   height: 100%;
   display: flex;
   flex-direction: column;
