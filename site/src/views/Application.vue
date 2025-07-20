@@ -1,5 +1,5 @@
 <template>
-  <div class="application-layout">
+  <div class="application-layout" id="application-layout">
     <!-- 固定的导航栏 -->
     <NavigationBar
       :pageTitle="currentPageTitle"
@@ -10,6 +10,7 @@
     <!-- 主要内容区域 - 这里会根据子路由显示不同的内容 -->
     <div
       :class="`application-content-container ${showProfileSideZone?'showingSideZone':''}`"
+      id="application-content-container"
     >
       <router-view
         @update-title="updatePageTitle"
@@ -217,13 +218,14 @@ watch(route, () => {
   transition: all 0.3s ease;
 }
 
-:deep(.application-content-container.showingSideZone .page-content .bottom-bar) {
-  transform: translateY(333vh) scale(0.73);  
+:deep(.application-content-container.showingSideZone ~ .bottom-bar) {
+  transform: translate(100vw, 30vh) scale(0.73);  
 }
-:deep(.page-content .bottom-bar) {
-  transform: translateY(0);  
+:deep(.bottom-bar) {
+  transform: translate(0 ,0);  
   transform-origin: 68% 43%; 
-  transition: all 0.3s ease;
+  transition: all 0.1s ease;
+  z-index: 50;
 }
 
 .side-zone-content-container {
@@ -252,30 +254,6 @@ watch(route, () => {
   display: none;
 }
 
-:deep(.bottom-bar) {
-  position: fixed;
-  bottom: 1%;
-  left: 1%;
-  height: 3vh;
-  width: calc(100% - 2 * 1%);
-  border-radius: 5px;
-  background-color: rgba(47, 60, 72, 0.99);
-  color: #EEEED4;
-  padding: 5px;
-  display: flex;
-  flex-direction: row;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-  gap: 5px;
-}
-
-:deep(.bottom-bar button) {
-  padding: 0px 8px;
-}
-
-:deep(.bottom-bar-spacer) {
-  flex-grow: 1;
-}
-
 :deep(.execute-button) {
   background-color: var(--theme-color-execute-button);
   color: white;
@@ -293,8 +271,15 @@ watch(route, () => {
 }
 
 /* 只显示一个灰色层，其他透明但是要接受鼠标事件 */
-:deep(#application-content > .gray-layer ~ .gray-layer) {
+:deep(#application-layout > .gray-layer ~ .gray-layer) {
   opacity: 0;
   background-color: transparent;
+}
+
+:deep(.gray-layer) {
+  z-index: 80;
+}
+:deep(.search-modal) {
+  z-index: 90;
 }
 </style>

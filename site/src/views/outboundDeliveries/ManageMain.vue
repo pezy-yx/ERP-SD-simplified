@@ -247,7 +247,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
       {{ appContentRef?.getCurrentStageName() }}
       <button
         v-if="appContentRef?.currentStage == 0"
-        class = "execute-button"
+        class = "nav-button next-button"
         @click="handlePostGIs"
       >
         Post GIs

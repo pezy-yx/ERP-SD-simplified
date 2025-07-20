@@ -1,6 +1,6 @@
 <template>
   <div v-if="visible" class="search-modal-backdrop" @click="handleBackdropClick" :key="forceUpdateKey">
-      <teleport to="#application-content">
+      <teleport :to="modalTo">
       <span class="gray-layer"></span>
       <div class="search-modal" @click.stop>
         <!-- 弹窗头部 -->
@@ -110,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue'
 import ParamInput from './ParamInput.vue'
 import { VarTree, createTreeFromConfig, cns, SearchMethod } from '@/utils/VarTree'
@@ -122,8 +122,15 @@ const props = defineProps<{
   searchMethods: SearchMethod[]
 }>()
 
+const modalTo = ref('body')
+
+onMounted(() => {
+  // 确保底部导航栏在应用内容容器内
+  modalTo.value = '#application-layout'
+})
+
 // 定义emits
-const emit = defineEmits<{
+const emit = defineEmits<{    
   (e: 'close'): void
   (e: 'confirm', data: any): void
 }>()
@@ -315,7 +322,6 @@ defineExpose({
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 2;
 }
 .search-modal-backdrop {
   position: fixed;
@@ -326,7 +332,6 @@ defineExpose({
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
 }
 
 .search-modal {
@@ -345,7 +350,6 @@ defineExpose({
   min-width: 400px;
   min-height: 300px;
   border: 2px solid var(--theme-color-dark);
-  z-index: 3;
 }
 
 .search-modal-header {
