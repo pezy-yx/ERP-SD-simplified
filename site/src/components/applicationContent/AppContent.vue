@@ -13,6 +13,8 @@
         <h2>{{ stages[currentStage] }}</h2>
       </slot>
 
+      <span class="bottom-bar-spacing-block"></span>
+
       <teleport :to="bottomBarTo">
         <!-- 底部导航栏 -->
         <div class="bottom-bar">
@@ -295,5 +297,9 @@ const allInterfaces = computed(() => ({
   background: var(--theme-color-lighter);
   border-color: var(--theme-color-lighter);
   color: var(--theme-color-darker);
+}
+
+.bottom-bar-spacing-block {
+  height: 3vh;
 }
 </style>
