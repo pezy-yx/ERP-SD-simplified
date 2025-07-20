@@ -234,11 +234,10 @@ watch(route, () => {
 :deep(.page-content) {
  /* flex-grow: 1; */
  background-color: var(--theme-color-page);
- padding: 20px;
  margin: 20px;
+ border-radius: 4px;
  display: flex;
  flex-direction: column;
- padding-top: 50px; /* 调整顶部内边距 */
  overflow-y: auto;
  min-height: calc(100vh - var(--nav-height) - 40px);
  max-height: calc(100vh - var(--nav-height) - 40px);
