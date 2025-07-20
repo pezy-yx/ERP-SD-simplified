@@ -14,6 +14,7 @@
       <router-view
         @update-title="updatePageTitle"
         class = "application-content"
+        id = "application-content"
       />
     </div>
     
@@ -237,6 +238,8 @@ watch(route, () => {
  /* flex-grow: 1; */
  background-color: var(--theme-color-page);
  margin: 20px;
+ padding: 0 20px;
+ padding-top: 50px;
  border-radius: 4px;
  display: flex;
  flex-direction: column;
@@ -287,5 +290,11 @@ watch(route, () => {
 :deep(.execute-button:active) {
   background-color: var(--theme-color-execute-button-active);
   color: black;
+}
+
+/* 只显示一个灰色层，其他透明但是要接受鼠标事件 */
+:deep(#application-content > .gray-layer ~ .gray-layer) {
+  opacity: 0;
+  background-color: transparent;
 }
 </style>

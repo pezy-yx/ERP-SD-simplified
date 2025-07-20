@@ -1,110 +1,112 @@
 <template>
   <div v-if="visible" class="search-modal-backdrop" @click="handleBackdropClick" :key="forceUpdateKey">
-    <span class="gray-layer"></span>
-    <div class="search-modal" @click.stop>
-      <!-- 弹窗头部 -->
-      <div class="search-modal-header">
-        <h3>{{ stage === 0 ? stage0Title : stage1Title }}</h3>
-        <button class="close-button" @click="closeModal">
-          <span>&times;</span>
-        </button>
-      </div>
-      
-      <!-- Stage 0: 搜索方式选择和参数输入 -->
-      <div v-if="stage === 0" class="search-modal-body">
-        <!-- 搜索方式选择顶栏 -->
-        <div v-if="searchMethods.length > 1" class="search-method-selector">
-          <div class="method-tabs">
-            <div
-              v-for="(method, index) in visibleMethods"
-              :key="index"
-              :class="['method-tab', { active: selectedMethodIndex === index }]"
-              @click="selectedMethodIndex = index"
-            >
-              {{ method.name }}
+      <teleport to="#application-content">
+      <span class="gray-layer"></span>
+      <div class="search-modal" @click.stop>
+        <!-- 弹窗头部 -->
+        <div class="search-modal-header">
+          <h3>{{ stage === 0 ? stage0Title : stage1Title }}</h3>
+          <button class="close-button" @click="closeModal">
+            <span>&times;</span>
+          </button>
+        </div>
+        
+        <!-- Stage 0: 搜索方式选择和参数输入 -->
+        <div v-if="stage === 0" class="search-modal-body">
+          <!-- 搜索方式选择顶栏 -->
+          <div v-if="searchMethods.length > 1" class="search-method-selector">
+            <div class="method-tabs">
+              <div
+                v-for="(method, index) in visibleMethods"
+                :key="index"
+                :class="['method-tab', { active: selectedMethodIndex === index }]"
+                @click="selectedMethodIndex = index"
+              >
+                {{ method.name }}
+              </div>
+              <!-- 更多按钮 -->
+              <div
+                v-if="hasMoreMethods"
+                class="method-tab more-tab"
+                @click="showMoreMethods = !showMoreMethods"
+              >
+                ...
+              </div>
             </div>
-            <!-- 更多按钮 -->
-            <div
-              v-if="hasMoreMethods"
-              class="method-tab more-tab"
-              @click="showMoreMethods = !showMoreMethods"
-            >
-              ...
-            </div>
-          </div>
 
-          <!-- 更多方法的下拉菜单 -->
-          <div v-if="showMoreMethods && hasMoreMethods" class="more-methods-dropdown">
-            <div
-              v-for="(method, index) in hiddenMethods"
-              :key="visibleMethodsCount + index"
-              :class="['dropdown-item', { active: selectedMethodIndex === visibleMethodsCount + index }]"
-              @click="selectHiddenMethod(visibleMethodsCount + index)"
-            >
-              {{ method.name }}
+            <!-- 更多方法的下拉菜单 -->
+            <div v-if="showMoreMethods && hasMoreMethods" class="more-methods-dropdown">
+              <div
+                v-for="(method, index) in hiddenMethods"
+                :key="visibleMethodsCount + index"
+                :class="['dropdown-item', { active: selectedMethodIndex === visibleMethodsCount + index }]"
+                @click="selectHiddenMethod(visibleMethodsCount + index)"
+              >
+                {{ method.name }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- 参数输入区域 -->
+          <div class="param-input-area">
+            <ParamInput
+              :varTree="currentMethod?.paramTree || null"
+              @update="handleParamUpdate"
+            />
+          </div>
+        </div>
+        
+        <!-- Stage 1: 搜索结果展示 -->
+        <div v-if="stage === 1" class="search-modal-body">
+          <div class="result-area">
+            <VarBox
+              v-if="resultTree"
+              :tree="resultTree"
+              :readonly="true"
+            />
+            <div v-else class="no-results">
+              <p>暂无搜索结果</p>
             </div>
           </div>
         </div>
         
-        <!-- 参数输入区域 -->
-        <div class="param-input-area">
-          <ParamInput
-            :varTree="currentMethod?.paramTree || null"
-            @update="handleParamUpdate"
-          />
+        <!-- 弹窗底部 -->
+        <div class="search-modal-footer">
+          <!-- Stage 0 底栏: Execute按钮 -->
+          <template v-if="stage === 0">
+            <button class="execute-button" @click="handleExecute">
+              <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+              </svg>
+              <!-- 执行搜索 -->
+            </button>
+          </template>
+          
+          <!-- Stage 1 底栏: 返回、取消、确认按钮 -->
+          <template v-if="stage === 1">
+            <button class="back-button" @click="handleBack">
+              <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <!-- 返回 -->
+            </button>
+            <button class="cancel-button" @click="closeModal">
+              <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <!-- 取消 -->
+            </button>
+            <button class="confirm-button" @click="handleConfirm">
+              <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <!-- 确认 -->
+            </button>
+          </template>
         </div>
       </div>
-      
-      <!-- Stage 1: 搜索结果展示 -->
-      <div v-if="stage === 1" class="search-modal-body">
-        <div class="result-area">
-          <VarBox
-            v-if="resultTree"
-            :tree="resultTree"
-            :readonly="true"
-          />
-          <div v-else class="no-results">
-            <p>暂无搜索结果</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 弹窗底部 -->
-      <div class="search-modal-footer">
-        <!-- Stage 0 底栏: Execute按钮 -->
-        <template v-if="stage === 0">
-          <button class="execute-button" @click="handleExecute">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
-            </svg>
-            <!-- 执行搜索 -->
-          </button>
-        </template>
-        
-        <!-- Stage 1 底栏: 返回、取消、确认按钮 -->
-        <template v-if="stage === 1">
-          <button class="back-button" @click="handleBack">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <!-- 返回 -->
-          </button>
-          <button class="cancel-button" @click="closeModal">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <!-- 取消 -->
-          </button>
-          <button class="confirm-button" @click="handleConfirm">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <!-- 确认 -->
-          </button>
-        </template>
-      </div>
-    </div>
-  </div>
+    </teleport>
+    </div> 
 </template>
 
 <script lang="ts" setup>
@@ -306,15 +308,14 @@ defineExpose({
 </script>
 
 <style scoped>
-.search-modal-backdrop .gray-layer {
-  position: absolute;
+.gray-layer {
+  position: fixed;
   left:0;
   top:0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  scale: 3; /** prevent side-zone scaling */
-  z-index: -1;
+  z-index: 2;
 }
 .search-modal-backdrop {
   position: fixed;
@@ -329,6 +330,10 @@ defineExpose({
 }
 
 .search-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
   width: 33vw;
   height: 42vh;
   background-color: var(--theme-color-page);
@@ -340,6 +345,7 @@ defineExpose({
   min-width: 400px;
   min-height: 300px;
   border: 2px solid var(--theme-color-dark);
+  z-index: 3;
 }
 
 .search-modal-header {
