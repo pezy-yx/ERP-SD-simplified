@@ -139,7 +139,7 @@ watch(route, () => {
   max-height: 100vh;
   background-color: var(--theme-color-dark); /* 应用的背景色 */
   --nav-height: 4vh;
-  --side-width: 25%;
+  --side-width: 15%;
 }
 
 .navigation-bar {
