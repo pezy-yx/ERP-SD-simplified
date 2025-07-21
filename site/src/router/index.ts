@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Application from '@/views/Application.vue';
 import ApplicationDirectory from '@/views/ApplicationDirectory.vue';
-import MaintainBusinessPartnerView from '@/views/MaintainBusinessPartnerView.vue';
+import MaintainBusinessPartnerView from '@/views/MaintainBP/MaintainBusinessPartnerView.vue';
 import TestPageErp from "@/test/varbox/TestPageErp.vue";
 import SearchModalTest from "@/test/SearchModalTest.vue";
 import AppContentTest from "@/test/AppContentTest.vue";

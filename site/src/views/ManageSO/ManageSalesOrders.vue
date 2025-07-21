@@ -1105,6 +1105,8 @@ const salesOrderDataTree = createTreeFromConfig(
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 20px;
+    margin: 20px;
   }
 
   /* Sales order query area style, adjusted based on business-partner-search */
