@@ -120,11 +120,11 @@
             <template #footer-content-right>
                 {{ appContentRef?.getCurrentStageName() }}
                 <template v-if="appContentRef?.currentStage === 0">
-                    <button v-if="onSearchState" class="nav-button" @click="initializeCreation()">Create New</button>
+                    <button v-if="onSearchState" class="nav-button next-button" @click="initializeCreation()">Create New</button>
                 </template>
                 <template v-if="appContentRef?.currentStage == 2">
-                    <button class="nav-button" @click="cancelItemCondition">{{itemDetailStageCancelButtonLabel}}</button>
-                    <button class="nav-button" @click="saveItemConditionData" v-if="itemDetailStageExecuteButtonVisible">Save</button>
+                    <button class="nav-button next-button" @click="cancelItemCondition">{{itemDetailStageCancelButtonLabel}}</button>
+                    <button class="nav-button prev-button" @click="saveItemConditionData" v-if="itemDetailStageExecuteButtonVisible">Save</button>
                 </template>
             </template>
         </AppContent>
@@ -1392,7 +1392,7 @@ td .status-badge {
     font-size: 1.1em;
 }
 
-.nav-button {
+/* .nav-button {
     padding: 8px 16px;
     margin-left: 10px;
     border: none;
@@ -1405,7 +1405,7 @@ td .status-badge {
 
 .nav-button:hover {
     background-color: #5a6268;
-}
+} */
 
 .table-extra-button {
     width: inherit;

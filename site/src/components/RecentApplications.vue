@@ -182,6 +182,7 @@ onMounted(() => {
   color: var(--theme-color-page);
   font-size: 1.1rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .clear-btn {
@@ -193,11 +194,12 @@ onMounted(() => {
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .clear-btn:hover {
   background-color: var(--theme-color-lighter-a);
-  color: var(--theme-color-darker);
+  color: var(--theme-color-page);
 }
 
 .logout-btn {
@@ -209,6 +211,7 @@ onMounted(() => {
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .logout-btn:hover {
@@ -223,6 +226,7 @@ onMounted(() => {
   justify-content: center;
   color: var(--theme-color);
   font-style: italic;
+  white-space: nowrap;
 }
 
 .recent-list {
@@ -249,6 +253,19 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
+.recent-item:hover .remove-btn,
+.recent-item:hover .app-name,
+.recent-item:hover .app-lore,
+.recent-item:hover .visit-time,
+.recent-item:hover .visit-count {
+  color: var(--theme-color-darker)
+}
+
+.recent-item:hover .app-name,
+.recent-item:hover .app-lore  {
+  opacity: 1;
+}
+
 .app-info {
   flex: 1;
   min-width: 0;
@@ -256,10 +273,12 @@ onMounted(() => {
 
 .app-name {
   font-weight: 600;
-  color: var(--theme-color-darker);
+  color: var(--theme-color-page);
   margin-bottom: 0.25rem;
   font-size: 0.9rem;
   line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0.8;
 }
 
 .app-lore {
@@ -273,6 +292,8 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+  white-space: nowrap;
+  opacity: 0.8;
 }
 
 .app-meta {
@@ -280,14 +301,19 @@ onMounted(() => {
   gap: 0.5rem;
   font-size: 0.7rem;
   color: var(--theme-color);
+  white-space: nowrap;
 }
 
 .visit-time {
   opacity: 0.8;
+  white-space: nowrap;
+  color: var(--theme-color-page);
 }
 
 .visit-count {
   opacity: 0.6;
+  white-space: nowrap;
+  color: var(--theme-color-page);
 }
 
 .app-actions {

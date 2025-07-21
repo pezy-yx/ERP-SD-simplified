@@ -13,44 +13,54 @@
         <h2>{{ stages[currentStage] }}</h2>
       </slot>
 
-      <!-- 底部导航栏 -->
-      <div class="bottom-bar">
-        <!-- 自定义插槽内容 -->
-        <p>{{ footerMessage }}</p>
-        <slot name="footer-content-left" v-bind="allInterfaces"></slot>
+      <span class="bottom-bar-spacing-block"></span>
 
-        <div class="bottom-bar-spacer"></div>
-
-        <slot name="footer-content-right" v-bind="allInterfaces"></slot>
-
-        <!-- 导航按钮 -->
-        <button
-          v-if="mergedFooterButtons.showPrev && mergedFooterButtons.prevText != hideMagicString"
-          @click="handlePrev"
-          class="nav-button prev-button"
-          :disabled="isNavigating"
-        >
-          {{ mergedFooterButtons.prevText }}
-        </button>
-
-        <button
-          v-if="mergedFooterButtons.showNext && mergedFooterButtons.nextText != hideMagicString"
-          @click="handleNext"
-          class="nav-button next-button"
-          :disabled="isNavigating"
-        >
-          {{ mergedFooterButtons.nextText }}
-        </button>
-      </div>
+      <teleport :to="bottomBarTo">
+        <!-- 底部导航栏 -->
+        <div class="bottom-bar">
+          <!-- 自定义插槽内容 -->
+          <p>{{ footerMessage }}</p>
+          <slot name="footer-content-left" v-bind="allInterfaces"></slot>
+  
+          <div class="bottom-bar-spacer"></div>
+  
+          <slot name="footer-content-right" v-bind="allInterfaces"></slot>
+  
+          <!-- 导航按钮 -->
+          <button
+            v-if="mergedFooterButtons.showPrev && mergedFooterButtons.prevText != hideMagicString"
+            @click="handlePrev"
+            class="nav-button prev-button"
+            :disabled="isNavigating"
+          >
+            {{ mergedFooterButtons.prevText }}
+          </button>
+  
+          <button
+            v-if="mergedFooterButtons.showNext && mergedFooterButtons.nextText != hideMagicString"
+            @click="handleNext"
+            class="nav-button next-button"
+            :disabled="isNavigating"
+          >
+            {{ mergedFooterButtons.nextText }}
+          </button>
+        </div>
+      </teleport>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, toRefs, defineEmits, computed } from 'vue'
+import { ref, toRefs, defineEmits, computed, onMounted } from 'vue'
 
 // 定义钩子函数类型
 type NavigationHook = (currentStage: number, targetStage: number) => boolean | Promise<boolean>
+
+const bottomBarTo = ref('body')
+onMounted(() => {
+  // 确保底部导航栏在应用内容容器内
+  bottomBarTo.value = '#application-layout'
+})
 
 const props = defineProps<{
   stages: string[]
@@ -227,6 +237,25 @@ const allInterfaces = computed(() => ({
   justify-content: space-between;
   padding: 20px;
   border-top: 1px solid var(--theme-color-border);
+  position: fixed;
+  bottom: 1%;
+  left: 1%;
+  height: 3vh;
+  width: calc(100% - 2 * 1%);
+  border-radius: 5px;
+  background-color: rgba(47, 60, 72, 0.99);
+  color: #EEEED4;
+  flex-direction: row;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  gap: 5px;
+}
+
+.bottom-bar :global(button) {
+  padding: 0px 8px;
+}
+
+.bottom-bar > :global(.bottom-bar-spacer) {
+  flex-grow: 1;
 }
 
 .bottom-bar > :global(.nav-button) {
@@ -268,5 +297,9 @@ const allInterfaces = computed(() => ({
   background: var(--theme-color-lighter);
   border-color: var(--theme-color-lighter);
   color: var(--theme-color-darker);
+}
+
+.bottom-bar-spacing-block {
+  height: 3vh;
 }
 </style>

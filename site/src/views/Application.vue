@@ -1,5 +1,5 @@
 <template>
-  <div class="application-layout">
+  <div class="application-layout" id="application-layout">
     <!-- 固定的导航栏 -->
     <NavigationBar
       :pageTitle="currentPageTitle"
@@ -10,10 +10,12 @@
     <!-- 主要内容区域 - 这里会根据子路由显示不同的内容 -->
     <div
       :class="`application-content-container ${showProfileSideZone?'showingSideZone':''}`"
+      id="application-content-container"
     >
       <router-view
         @update-title="updatePageTitle"
         class = "application-content"
+        id = "application-content"
       />
     </div>
     
@@ -139,7 +141,9 @@ watch(route, () => {
   max-height: 100vh;
   background-color: var(--theme-color-dark); /* 应用的背景色 */
   --nav-height: 4vh;
-  --side-width: 25%;
+  --side-width: 28%;
+  --side-zone-hard-bg-width-dark-ratio: 90;
+  --side-zone-hard-bg-width-light-ratio: 130;
 }
 
 .navigation-bar {
@@ -171,8 +175,8 @@ watch(route, () => {
   background: 
     linear-gradient(to right, 
       var(--theme-color-dark) 0%, 
-      var(--theme-color-dark) calc(var(--side-width) * 90 / 100), 
-      var(--theme-color-light) calc(var(--side-width) * 120 / 100), 
+      var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-dark-ratio) / 100), 
+      var(--theme-color-light) calc(var(--side-width) * var(--side-zone-hard-bg-width-light-ratio) / 100), 
       var(--theme-color-light-a) 80%,
       rgba(0,0,0,0) 100%
     );
@@ -190,7 +194,7 @@ watch(route, () => {
   background: 
     linear-gradient(to right, 
       var(--theme-color-dark) 0%, 
-      var(--theme-color-dark) calc(var(--side-width) * 80 / 100),
+      var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-ratio) / 100),
       rgba(0,0,0,0)
     );
   overflow: hidden;
@@ -214,17 +218,18 @@ watch(route, () => {
   transition: all 0.3s ease;
 }
 
-:deep(.application-content-container.showingSideZone .page-content .bottom-bar) {
-  transform: translateY(333vh) scale(0.73);  
+:deep(.application-content-container.showingSideZone ~ .bottom-bar) {
+  transform: translate(100vw, 30vh) scale(0.73);  
 }
-:deep(.page-content .bottom-bar) {
-  transform: translateY(0);  
+:deep(.bottom-bar) {
+  transform: translate(0 ,0);  
   transform-origin: 68% 43%; 
-  transition: all 0.3s ease;
+  transition: all 0.1s ease;
+  z-index: 50;
 }
 
 .side-zone-content-container {
-  width: 40%;
+  width: calc(var(--side-width));
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -234,11 +239,12 @@ watch(route, () => {
 :deep(.page-content) {
  /* flex-grow: 1; */
  background-color: var(--theme-color-page);
- padding: 20px;
  margin: 20px;
+ padding: 0 20px;
+ padding-top: 50px;
+ border-radius: 4px;
  display: flex;
  flex-direction: column;
- padding-top: 50px; /* 调整顶部内边距 */
  overflow-y: auto;
  min-height: calc(100vh - var(--nav-height) - 40px);
  max-height: calc(100vh - var(--nav-height) - 40px);
@@ -246,30 +252,6 @@ watch(route, () => {
 
 :deep(.page-content::-webkit-scrollbar) {
   display: none;
-}
-
-:deep(.bottom-bar) {
-  position: fixed;
-  bottom: 1%;
-  left: 1%;
-  height: 3vh;
-  width: calc(100% - 2 * 1%);
-  border-radius: 5px;
-  background-color: rgba(47, 60, 72, 0.99);
-  color: #EEEED4;
-  padding: 5px;
-  display: flex;
-  flex-direction: row;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-  gap: 5px;
-}
-
-:deep(.bottom-bar button) {
-  padding: 0px 8px;
-}
-
-:deep(.bottom-bar-spacer) {
-  flex-grow: 1;
 }
 
 :deep(.execute-button) {
@@ -286,5 +268,18 @@ watch(route, () => {
 :deep(.execute-button:active) {
   background-color: var(--theme-color-execute-button-active);
   color: black;
+}
+
+/* 只显示一个灰色层，其他透明但是要接受鼠标事件 */
+:deep(#application-layout > .gray-layer ~ .gray-layer) {
+  opacity: 0;
+  background-color: transparent;
+}
+
+:deep(.gray-layer) {
+  z-index: 80;
+}
+:deep(.search-modal) {
+  z-index: 90;
 }
 </style>
