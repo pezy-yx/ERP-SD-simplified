@@ -121,7 +121,7 @@
                     @focus="handleFocus"
                   >
                     <!-- 透传插槽 -->
-                    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
+                    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
                       <slot :name="slotName" v-bind="slotProps"></slot>
                     </template>
                   </VarInput>
@@ -142,7 +142,7 @@
                     @update="handleChildUpdate"
                   >
                     <!-- 透传插槽 -->
-                    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps: any">
+                    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
                       <slot :name="slotName" v-bind="slotProps"></slot>
                     </template>
                   </VarInput>
@@ -232,7 +232,7 @@
                             @update="handleChildUpdate"
                           >
                             <!-- 透传插槽 -->
-                            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
+                            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
                               <slot :name="slotName" v-bind="slotProps"></slot>
                             </template>
                           </VarInput>
@@ -249,7 +249,7 @@
                           @update="handleChildUpdate"
                         >
                             <!-- 透传插槽 -->
-                            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
+                            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
                               <slot :name="slotName" v-bind="slotProps"></slot>
                             </template>
                         </VarInput>
@@ -286,7 +286,7 @@
                       @update="handleChildUpdate"
                     >
                       <!-- 透传插槽 -->
-                      <template v-for="(_, slotName) in $slots" #[slotName]="slotProps:any">
+                      <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
                         <slot :name="slotName" v-bind="slotProps"></slot>
                       </template>
                     </VarInput>
@@ -312,6 +312,8 @@ import BooleanInput from './inputs/BooleanInput.vue'
 
 import {getPathString} from './utils'
 
+type SlotProps = Record<string, any>
+
 const props = defineProps<{
   varTree: VarTree
   nodePath: string[]
@@ -324,6 +326,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update', payload: { path: string[]; value?: any; node?: VarNode; action?: string; index?: number }): void
+}>()
+
+defineSlots<{
+  [key: string]: (props: SlotProps) => any
 }>()
 
 const validationError = ref<string>('')

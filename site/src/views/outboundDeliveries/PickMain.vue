@@ -674,7 +674,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
       <!-- 操作按钮 -->
        
       <button
-        class="post-button"
+        class="next-button"
         @click="handlePostGIs"
         v-if="appContentRef?.currentStage == 0"
       >
@@ -698,7 +698,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
   gap: 10px;
 }
 
-.go-button, .post-button {
+.go-button {
   padding: 4px 10px;
   background-color: var(--theme-color-dark);
   color: white;
@@ -708,10 +708,10 @@ async function handleExecute(currentStage: number, targetStage: number) {
   font-weight: bold;
 }
 
-.go-button:hover, .post-button:hover {
+.go-button:hover {
   background-color: var(--theme-color-darker);
 }
-.go-button:active, .post-button:active {
+.go-button:active {
   background-color: var(--theme-color-light);
 }
 
