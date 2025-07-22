@@ -1,31 +1,32 @@
 <template>
-    <div class="home-page-layout">
-        <div class="home-content">
-            <div class="horizontal-line top-line"></div>
-                <div class="app-dashboard-container">
-                    <div class="app-categories">
-                        <div v-for="categoryNode in appCategories" :key="categoryNode.name" class="app-category">
-                            <h3>{{ <string>(categoryNode.name) }}</h3>
-                            <div class="app-list">
-                                <SingleApp
-                                    v-for="app in categoryNode.children"
-                                    :key="app.name"
-                                    :pageName="app.name"
-                                    :pagePath="`/application/${app.name.toLowerCase().replace(/\s/g, '-')}`"
-                                    :iconPath="app.iconPath"
-                                />
-                            </div>
-                        </div>
+    <AppContent
+        :stages="['home']"
+        :showBottomBar="false"
+    >
+        <template #stage-home>
+            <div class="app-categories">
+                <div v-for="categoryNode in appCategories" :key="categoryNode.name" class="app-category">
+                    <h3>{{ <string>(categoryNode.name) }}</h3>
+                    <div class="app-list">
+                        <SingleApp
+                            v-for="app in categoryNode.children"
+                            :key="app.name"
+                            :pageName="app.name"
+                            :pagePath="`/application/${app.name.toLowerCase().replace(/\s/g, '-')}`"
+                            :iconPath="app.iconPath"
+                        />
                     </div>
                 </div>
             </div>
-    </div>
+        </template>
+    </AppContent>
 </template>
 
 <script lang="ts" setup>
 import SingleApp from '@/components/SingleApp.vue'; // 导入 SingleApp 组件
 import { computed } from 'vue';
 import { createTreeFromConfig, cns } from '@/utils/VarTree'; // 导入 VarTree 相关的工具函数
+import AppContent from '@/components/applicationContent/AppContent.vue'; // 导入 AppContent 组件
 
 // 定义 VarTree 结构来管理应用类别和每个类别下的应用列表
 const appTree = createTreeFromConfig({
