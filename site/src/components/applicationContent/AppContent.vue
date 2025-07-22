@@ -15,7 +15,10 @@
 
       <span class="bottom-bar-spacing-block"></span>
 
-      <teleport :to="bottomBarTo">
+      <teleport
+        :to="bottomBarTo"
+        v-if="showBottomBar && stages.length > 0"
+      >
         <!-- 底部导航栏 -->
         <div class="bottom-bar">
           <!-- 自定义插槽内容 -->
@@ -73,7 +76,13 @@ const props = defineProps<{
   // 自定义按钮文本
   prevText?: string
   nextText?: string
+  showBottomBar?: boolean
 }>()
+
+const showBottomBar = computed(() => {
+  // 如果showBottomBar未定义，则默认为true
+  return props.showBottomBar !== false
+})
 
 const emit = defineEmits<{
   (e: 'stage-change', newStage: number, oldStage: number): void
