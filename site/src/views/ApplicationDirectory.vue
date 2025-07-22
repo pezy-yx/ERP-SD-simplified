@@ -234,6 +234,12 @@ const applications = ref<ApplicationInfo[]>([
           "routePath": "/example",
           "tags": ["example"]
         },
+        {
+          "applicationName": "VarBox Tutorial",
+          "lore": "VarBox的所有用法",
+          "routePath": "/vartree-&-varinput-tutorial",
+          "tags": ["example"]
+        },
       ]
 );
 

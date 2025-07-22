@@ -209,9 +209,20 @@ watch(route, () => {
   transform: translateX(0);
 }
 
+
+:deep(.application-content-container.showingSideZone .show-side--away) {
+  opacity: 0;
+}
+:deep(.show-side--away) {
+  opacity: 1;
+}
+
+:deep(.application-content-container.showingSideZone .show-side--away),
 :deep(.application-content-container.showingSideZone .page-content > *) {
   transform: translateX( calc(var(--side-width) / 2) ) scale(0.73);  
 }
+
+:deep(.show-side--away),
 :deep(.page-content > *) {
   transform: translateX(0);  
   transform-origin: 68% 43%; 
