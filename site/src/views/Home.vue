@@ -1,7 +1,7 @@
 <template>
     <AppContent
         :stages="['home']"
-        :showBottomBar="false"
+        :hideBottomBar="true"
     >
         <template #stage-home>
             <div class="app-categories">
