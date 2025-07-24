@@ -76,12 +76,11 @@ const props = defineProps<{
   // 自定义按钮文本
   prevText?: string
   nextText?: string
-  showBottomBar?: boolean
+  hideBottomBar?: boolean
 }>()
 
 const showBottomBar = computed(() => {
-  // 如果showBottomBar未定义，则默认为true
-  return props.showBottomBar !== false
+  return props.hideBottomBar?false:true
 })
 
 const emit = defineEmits<{

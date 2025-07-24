@@ -14,7 +14,7 @@
         <li><a href="#advanced-examples">8. 高级应用示例</a></li>
       </ul>
     </nav>
-    <AppContent :stages="['tutorial']" :showBottomBar="false">
+    <AppContent :stages="['tutorial']" :hideBottomBar="true">
       <template #stage-tutorial>
         <div class="vartree-tutorial">
 
