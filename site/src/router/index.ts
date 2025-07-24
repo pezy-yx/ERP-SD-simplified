@@ -32,6 +32,7 @@ import ManageOutboundDeliveries from '@/views/outboundDeliveries/Manage.vue';
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
 import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
+import VarTreeTutorial from '@/views/VarTreeTutorial.vue';
 
 const routes = [
   // 保留原有的路径
@@ -64,7 +65,7 @@ const routes = [
         path: '',
         name: 'ApplicationDirectory',
         component: ApplicationDirectory,
-        meta: { title: '应用程序目录' }
+        meta: { title: 'Applications: Development' }
       },
       {
         path: 'maintain-business-partner',
@@ -179,6 +180,12 @@ const routes = [
         name: 'PickOutboundDelivery',
         component: PickOutboundDelivery,
         meta: { title: 'Pick Outbound Delivery' }
+      },
+      {
+        path: 'vartree-&-varinput-tutorial',
+        name: 'VarTreeTutorial',
+        component: VarTreeTutorial,
+        meta: { title: 'VarBox Tutorial' }
       },
     ]
   },

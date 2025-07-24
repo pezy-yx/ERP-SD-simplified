@@ -125,6 +125,14 @@
                       <slot :name="slotName" v-bind="slotProps"></slot>
                     </template>
                   </VarInput>
+                  <!-- 叶子插槽，参与grid布局 -->
+                  <template v-if="$slots[`${pathString}--leaf`]" :class="`dict-leaf-slot ${baseClassPrefix}--dict-leaf-slot`">
+                    <slot
+                      :name="`${pathString}--leaf`"
+                      v-bind="slotScopeData"
+                    >
+                    </slot>
+                  </template>
                 </div>
 
                 <!-- 再渲染所有复杂节点（dict和list） -->
@@ -146,6 +154,14 @@
                       <slot :name="slotName" v-bind="slotProps"></slot>
                     </template>
                   </VarInput>
+                  <!-- 复杂叶子插槽，参与布局 -->
+                  <template v-if="$slots[`${pathString}--complex-leaf`]">
+                    <slot
+                      :name="`${pathString}--complex-leaf`"
+                      v-bind="slotScopeData"
+                    >
+                    </slot>
+                  </template>
                 </div>
               </div>
             </div>

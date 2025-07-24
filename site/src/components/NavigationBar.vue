@@ -1,5 +1,5 @@
 <template>
-  <div class="navigation-bar">
+  <div class="navigation-bar" id="navigation-bar" @contextmenu="handleRightClick">
     <div class="nav-left">
       <div class="icon-wrapper" @click="goToUserProfile">
         <img src="../assets/user.png" alt="User" class="nav-icon" />
@@ -61,6 +61,12 @@ const searchQuery = ref<string>('');
 // 路由
 const router = useRouter();
 const route = useRoute();
+
+// 右键点击#navigation-bar时去路由/application
+const handleRightClick = (event: MouseEvent) => {
+  event.preventDefault();
+  router.push('/application');
+};
 
 // 方法
 const goToUserProfile = (): void => {
