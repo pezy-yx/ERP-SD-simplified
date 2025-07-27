@@ -135,7 +135,21 @@ const appTree = createTreeFromConfig({
             {
                 varType: 'string',
                 nodeType: "leaf",
-                name: 'Create Billing Documents',
+                name: 'Create Billing Document',
+                readonly: true,
+                iconPath: '@/assets/icons/create-billing-documents.svg',
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Display Billing Document',
+                readonly: true,
+                iconPath: '@/assets/icons/create-billing-documents.svg',
+            },
+            {
+                varType: 'string',
+                nodeType: "leaf",
+                name: 'Change Billing Document',
                 readonly: true,
                 iconPath: '@/assets/icons/create-billing-documents.svg',
             },
