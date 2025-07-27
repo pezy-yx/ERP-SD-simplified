@@ -573,7 +573,7 @@ const leafChildren = computed(() => {
 
 const complexChildren = computed(() => {
   if (!currentNode.value?.children) return []
-  return currentNode.value.children.filter(child => isChildDisplay(child) && child.nodeType === 'dict' || child.nodeType === 'list')
+  return currentNode.value.children.filter(child => isChildDisplay(child) && (child.nodeType === 'dict' || child.nodeType === 'list'))
 })
 
 const listItems = computed(()=>{
