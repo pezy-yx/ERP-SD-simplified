@@ -38,7 +38,13 @@
           <div v-else :class="`var-input-container ${baseClassPrefix}--var-input-container`" :style="containerStyle">
             <!-- 叶子节点渲染 -->
             <div v-if="isLeafNode" :class="`leaf-node ${baseClassPrefix}--leaf-node`">
-              <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+              <!-- 标签插槽 -->
+              <slot
+                :name="`${pathString}--var-label`"
+                v-bind="slotScopeData"
+              >
+                <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+              </slot>
               <!-- 输入框和额外组件的容器 -->
               <div :class="`leaf-input-container ${baseClassPrefix}--leaf-input-container`">
                 <!-- 基础类型输入框 -->
@@ -98,7 +104,13 @@
             <!-- 字典节点渲染 -->
             <div v-else-if="isDictNode" :class="`dict-node ${baseClassPrefix}--dict-node`">
               <div v-if="isShowLabel" :class="`dict-header ${baseClassPrefix}--dict-header`">
-                <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+                <!-- 标签插槽 -->
+                <slot
+                  :name="`${pathString}--var-label`"
+                  v-bind="slotScopeData"
+                >
+                  <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+                </slot>
               </div>
               <!-- 字典节点的额外组件插槽 -->
               <div v-if="$slots[`${pathString}--extra`]" :class="extraComponentsClass">
@@ -177,7 +189,13 @@
             <!-- 列表节点渲染 -->
             <div v-else-if="isListNode" :class="`list-node ${baseClassPrefix}--list-node`">
               <div v-if="isShowLabel" :class="`list-header ${baseClassPrefix}--list-header`">
-                <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+                <!-- 标签插槽 -->
+                <slot
+                  :name="`${pathString}--var-label`"
+                  v-bind="slotScopeData"
+                >
+                  <label v-if="isShowLabel" :class="`var-label ${baseClassPrefix}--var-label`">{{ nameDisplay }}</label>
+                </slot>
               </div>
               <div :class="`list-header-actions ${baseClassPrefix}--list-header-actions`">
                 <!-- 动态列表的添加/删除按钮 -->

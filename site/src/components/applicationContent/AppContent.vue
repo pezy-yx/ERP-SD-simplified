@@ -58,6 +58,7 @@ import { ref, toRefs, defineEmits, computed, onMounted } from 'vue'
 
 // 定义钩子函数类型
 type NavigationHook = (currentStage: number, targetStage: number) => boolean | Promise<boolean>
+type AfterNavigationHook = (currentStage: number, targetStage: number) => void | Promise<void>
 
 const bottomBarTo = ref('body')
 onMounted(() => {
@@ -71,6 +72,8 @@ const props = defineProps<{
   // 导航钩子函数
   beforeNext?: NavigationHook
   beforePrev?: NavigationHook
+  afterNext?: AfterNavigationHook
+  afterPrev?: AfterNavigationHook
   // 按钮显示控制
   showNavButtons?: boolean
   // 自定义按钮文本
@@ -123,8 +126,16 @@ async function handleNext() {
       return
     }
 
+    const _currentStage = currentStage.value
+    const _targetStage = currentStage.value + 1
+
     emit('next', currentStage.value)
     await goToStage(currentStage.value + 1)
+
+    // 执行后置钩子
+    if (props.afterNext) {
+      await props.afterNext(_currentStage, _targetStage)
+    }
   } finally {
     isNavigating.value = false
   }
@@ -143,9 +154,17 @@ async function handlePrev() {
         return
       }
     }
+    
+    const _currentStage = currentStage.value
+    const _targetStage = currentStage.value + 1
 
     emit('prev', currentStage.value)
     await goToStage(currentStage.value - 1)
+
+    // 执行后置钩子
+    if (props.afterPrev) {
+      await props.afterPrev(_currentStage, _targetStage)
+    }
   } finally {
     isNavigating.value = false
   }
