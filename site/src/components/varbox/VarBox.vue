@@ -2,7 +2,7 @@
   <VarInput
     v-if="props.tree"
     :varTree="props.tree"
-    :nodePath="[]"
+    :nodePath="props.path ?? []"
     :readonly="props.tree.root?.readonly"
     :config="props.tree.root?.config"
     :indentLevel="props.indentLevel"
@@ -27,6 +27,7 @@ const props = defineProps<{
   indentLevel?: number, 
   showLabel?: boolean,
   wrapperStyle?: Record<string, any>
+  path?: string[]
 }>()
 const emit = defineEmits<{
   (e: 'update', payload: any): void
