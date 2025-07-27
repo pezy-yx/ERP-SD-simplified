@@ -38,6 +38,7 @@ import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
 import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
 import VarTreeTutorial from '@/views/VarTreeTutorial.vue';
+import ItemConditionKitTest from '@/views/test/ItemConditionKitTest.vue';
 
 const routes = [
   // 保留原有的路径
@@ -107,6 +108,12 @@ const routes = [
         name: 'ApplicationBPRelationshipTest',
         component: BPRelationshipTest,
         meta: { title: 'BP Relationship Test' }
+      },
+      {
+        path: 'test/item-condition-kit',
+        name: 'ApplicationItemConditionKitTest',
+        component: ItemConditionKitTest,
+        meta: { title: 'ItemConditionKit Test' }
       },
       {
         path: 'example',
