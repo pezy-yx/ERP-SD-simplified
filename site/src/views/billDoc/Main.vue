@@ -119,18 +119,43 @@ const billingDataTree = createTreeFromConfig(
     cns('dict','dict','itemOverview',{},false,{},[
       cns('dynamiclist','list','items',null,false,{
         hideLabel:true,
+        hideList: ['netValueUnit', 'pricingDate', 'orderProbability','reqDelivDate','taxValueUnit','pricingElements','netValue','taxValue'],
         childTemplate:cns('dict','dict','item',null,false,{},[
           cns('string','leaf','item','',true,{},[],"Item"),
-          cns('string','leaf','salesDocument','',false,{},[],"Sales Document"),
-          cns('string','leaf','salesDocumentItem','',false,{},[],"S.Doc.Item"),
           cns('string','leaf','material','',false,{},[],"Material"),
+          cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
+          cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[],"SU"),
           cns('string','leaf','description','',false,{},[],"Description"),
-          cns('string','leaf','billingQuantity','',false,{},[],"Billing Qty"),
-          cns('string','leaf','quantityUnit','',false,{hideLabel:true},[],"Unit"),
-          cns('string','leaf','netValue','',true,{},[],"Net Value"),
-          cns('string','leaf','taxValue','',true,{},[],"Tax"),
-          cns('string','leaf','grossValue','',true,{},[],"Gross Value"),
-          cns('string','leaf','currency','',true,{hideLabel:true},[],"Curr."),
+          cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date"),
+          cns('string','leaf','netValue','',true,{},[],"Net: "),
+          cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit"),
+          cns('string','leaf','taxValue','',true,{},[],"Tax: "),
+          cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[],"Tax Value Unit"),
+          cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
+          cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
+          cns('dynamiclist','list','pricingElements',null,true,{
+            rowProvided:0,
+            hideLabel:true,
+            childTemplate:cns('dict','dict','pricingElement',null,false,{},[
+              cns('string','leaf','cnty','',true,{},[],"Cnty"),
+              cns('string','leaf','name','',true,{},[],"Name"),
+              cns('string','leaf','amount','',true,{},[],"Amount"),
+              cns('string','leaf','city','',true,{},[],"City"),
+              cns('string','leaf','per','',true,{},[],"Per"),
+              cns('string','leaf','uom','',true,{},[],"UoM"),
+              cns('string','leaf','conditionValue','',true,{},[],"Condition Value"),
+              cns('string','leaf','curr','',true,{},[],"Curr"),
+              cns('string','leaf','status','',true,{},[],"Status"),
+              cns('string','leaf','numC','',true,{},[],"NumC"),
+              cns('string','leaf','atoMtsComponent','',true,{},[],"ATO/MTS Component"),
+              cns('string','leaf','oun','',true,{},[],"OUn"),
+              cns('string','leaf','cconDe','',true,{},[],"CConDe"),
+              cns('string','leaf','un','',true,{},[],"Un"),
+              cns('string','leaf','conditionValue2','',true,{},[],"Condition Value 2"),
+              cns('string','leaf','cdCur','',true,{},[],"CdCur"),
+              cns('boolean','leaf','stat','',true,{},[],"Stat"),
+            ]),
+          },[],"Pricing Elements")
         ]),
       },[],"Items")
     ],'Item Overview')
@@ -269,8 +294,8 @@ async function handleExecute(currentStage: number, targetStage: number) {
       // footer
       if (data.success){
         appContentRef.value.footerMessage = data.data.message
-        if (data.data.content?.id) {
-          billingDataTree.findNodeByPath(['meta','id'])!.setValue(data.data.content?.id)
+        if (data.data.content) {
+          billingDataTree.forceSetValue(data.data.content)
         }
         appToState('display')
       }

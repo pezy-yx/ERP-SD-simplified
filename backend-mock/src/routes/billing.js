@@ -4,119 +4,238 @@ const router = express.Router();
 // Mock数据
 const mockBillingDocuments = [
   {
+    type: 'Invoice',
     id: 'BD001',
-    billingDocument: 'BD001',
-    soldToParty: 'C001 - ABC Company',
-    billToParty: 'C001 - ABC Company',
-    payerParty: 'C001 - ABC Company',
+    payer: 'C001 - ABC Company',
     netValue: '1500.00',
-    currency: 'USD',
+    netValueUnit: 'USD',
     billingDate: '2024-01-15',
-    reference: 'REF001',
-    totalNetValue: '1500.00',
-    totalTaxValue: '150.00',
-    totalGrossValue: '1650.00',
     items: [
       {
-        item: '10',
-        salesDocument: 'SO001',
-        salesDocumentItem: '10',
-        material: 'MAT001',
-        description: 'Product A',
-        billingQuantity: '10',
-        quantityUnit: 'PC',
-        netValue: '1000.00',
-        taxValue: '100.00',
-        grossValue: '1100.00',
-        currency: 'USD'
+        item: '1',
+        material: 'MAT-001',
+        orderQuantity: '100',
+        orderQuantityUnit: 'EA',
+        description: '高品质电子元件',
+        reqDelivDate: '2024-02-15',
+        netValue: '1500.00',
+        netValueUnit: 'USD',
+        taxValue: '225.00',
+        taxValueUnit: 'USD',
+        pricingDate: '2024-01-15',
+        orderProbability: '95',
+        pricingElements: [
+          {
+            cnty: 'US',
+            name: 'Base Price',
+            amount: '1500.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '1500.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '1',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '1500.00',
+            cdCur: 'USD',
+            stat: true
+          },
+          {
+            cnty: 'US',
+            name: 'Tax',
+            amount: '225.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '225.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '2',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '225.00',
+            cdCur: 'USD',
+            stat: true
+          }
+        ]
       },
       {
-        item: '20',
-        salesDocument: 'SO001',
-        salesDocumentItem: '20',
-        material: 'MAT002',
-        description: 'Product B',
-        billingQuantity: '5',
-        quantityUnit: 'PC',
-        netValue: '500.00',
-        taxValue: '50.00',
-        grossValue: '550.00',
-        currency: 'USD'
+        item: '2',
+        material: 'MAT-002',
+        orderQuantity: '50',
+        orderQuantityUnit: 'EA',
+        description: '精密传感器模块',
+        reqDelivDate: '2024-02-20',
+        netValue: '2800.00',
+        netValueUnit: 'USD',
+        taxValue: '420.00',
+        taxValueUnit: 'USD',
+        pricingDate: '2024-01-15',
+        orderProbability: '90',
+        pricingElements: [
+          {
+            cnty: 'US',
+            name: 'Base Price',
+            amount: '2800.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '2800.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '1',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '2800.00',
+            cdCur: 'USD',
+            stat: true
+          },
+          {
+            cnty: 'US',
+            name: 'Tax',
+            amount: '420.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '420.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '2',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '420.00',
+            cdCur: 'USD',
+            stat: true
+          }
+        ]
       }
     ]
   },
   {
+    type: 'Invoice',
     id: 'BD002',
-    billingDocument: 'BD002',
-    soldToParty: 'C002 - XYZ Corp',
-    billToParty: 'C002 - XYZ Corp',
-    payerParty: 'C002 - XYZ Corp',
+    payer: 'C002 - XYZ Corp',
     netValue: '2500.00',
-    currency: 'EUR',
+    netValueUnit: 'EUR',
     billingDate: '2024-01-20',
-    reference: 'REF002',
-    totalNetValue: '2500.00',
-    totalTaxValue: '500.00',
-    totalGrossValue: '3000.00',
     items: [
       {
-        item: '10',
-        salesDocument: 'SO002',
-        salesDocumentItem: '10',
-        material: 'MAT003',
-        description: 'Product C',
-        billingQuantity: '20',
-        quantityUnit: 'PC',
-        netValue: '2500.00',
-        taxValue: '500.00',
-        grossValue: '3000.00',
-        currency: 'EUR'
-      }
-    ]
-  }
-];
-
-// Mock开票到期清单数据
-const mockBillingDueList = [
-  {
-    salesDocument: 'SO001',
-    soldToParty: 'C001 - ABC Company',
-    netValue: '1500.00',
-    currency: 'USD',
-    deliveryDate: '2024-01-10',
-    items: [
-      {
-        item: '10',
-        material: 'MAT001',
-        description: 'Product A',
-        deliveredQuantity: '10',
-        quantityUnit: 'PC',
-        netValue: '1000.00'
+        item: '1',
+        material: 'MAT-001',
+        orderQuantity: '100',
+        orderQuantityUnit: 'EA',
+        description: '高品质电子元件',
+        reqDelivDate: '2024-02-15',
+        netValue: '1500.00',
+        netValueUnit: 'USD',
+        taxValue: '225.00',
+        taxValueUnit: 'USD',
+        pricingDate: '2024-01-15',
+        orderProbability: '95',
+        pricingElements: [
+          {
+            cnty: 'US',
+            name: 'Base Price',
+            amount: '1500.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '1500.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '1',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '1500.00',
+            cdCur: 'USD',
+            stat: true
+          },
+          {
+            cnty: 'US',
+            name: 'Tax',
+            amount: '225.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '225.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '2',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '225.00',
+            cdCur: 'USD',
+            stat: true
+          }
+        ]
       },
       {
-        item: '20',
-        material: 'MAT002',
-        description: 'Product B',
-        deliveredQuantity: '5',
-        quantityUnit: 'PC',
-        netValue: '500.00'
-      }
-    ]
-  },
-  {
-    salesDocument: 'SO002',
-    soldToParty: 'C002 - XYZ Corp',
-    netValue: '2500.00',
-    currency: 'EUR',
-    deliveryDate: '2024-01-15',
-    items: [
-      {
-        item: '10',
-        material: 'MAT003',
-        description: 'Product C',
-        deliveredQuantity: '20',
-        quantityUnit: 'PC',
-        netValue: '2500.00'
+        item: '2',
+        material: 'MAT-002',
+        orderQuantity: '50',
+        orderQuantityUnit: 'EA',
+        description: '精密传感器模块',
+        reqDelivDate: '2024-02-20',
+        netValue: '2800.00',
+        netValueUnit: 'USD',
+        taxValue: '420.00',
+        taxValueUnit: 'USD',
+        pricingDate: '2024-01-15',
+        orderProbability: '90',
+        pricingElements: [
+          {
+            cnty: 'US',
+            name: 'Base Price',
+            amount: '2800.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '2800.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '1',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '2800.00',
+            cdCur: 'USD',
+            stat: true
+          },
+          {
+            cnty: 'US',
+            name: 'Tax',
+            amount: '420.00',
+            city: 'USD',
+            per: '1',
+            uom: 'EA',
+            conditionValue: '420.00',
+            curr: 'USD',
+            status: 'Active',
+            numC: '2',
+            atoMtsComponent: '',
+            oun: '',
+            cconDe: '',
+            un: '',
+            conditionValue2: '420.00',
+            cdCur: 'USD',
+            stat: true
+          }
+        ]
       }
     ]
   }
@@ -126,63 +245,43 @@ const mockBillingDueList = [
 router.post('/initialize', (req, res) => {
   try {
     const { billingDate, soldToParty } = req.body.billingDueList || {};
-    
+
     console.log('Billing initialize request:', req.body);
-    
-    // 模拟根据条件筛选到期清单
-    let filteredList = mockBillingDueList;
-    
-    if (soldToParty) {
-      filteredList = filteredList.filter(item => 
-        item.soldToParty.toLowerCase().includes(soldToParty.toLowerCase())
-      );
-    }
-    
-    // 模拟创建开票凭证的初始数据
+
+    // 返回第一个开票凭证的数据作为初始化模板
+    const templateDoc = mockBillingDocuments[0];
+
     const billingData = {
       meta: {
         id: ''
       },
       basicInfo: {
-        type: 'Invoice',
+        type: templateDoc.type,
         id: '',
         netValue: '0.00',
-        netValueUnit: 'USD',
-        payer: soldToParty || '',
-        billingDate: billingDate || new Date().toISOString().split('T')[0]
+        netValueUnit: templateDoc.netValueUnit,
+        payer: soldToParty || templateDoc.payer,
+        billingDate: billingDate || templateDoc.billingDate
       },
       itemOverview: {
-        totalNetValue: '0.00',
-        totalTaxValue: '0.00',
-        totalGrossValue: '0.00',
-        currency: 'USD',
-        items: filteredList.length > 0 ? filteredList[0].items.map((item, index) => ({
-          item: (index + 1) * 10,
-          salesDocument: filteredList[0].salesDocument,
-          salesDocumentItem: item.item,
+        items: templateDoc.items.map((item) => ({
+          item: item.item,
           material: item.material,
+          orderQuantity: item.orderQuantity,
+          orderQuantityUnit: item.orderQuantityUnit,
           description: item.description,
-          billingQuantity: item.deliveredQuantity,
-          quantityUnit: item.quantityUnit,
+          reqDelivDate: item.reqDelivDate,
           netValue: item.netValue,
-          taxValue: (parseFloat(item.netValue) * 0.1).toFixed(2),
-          grossValue: (parseFloat(item.netValue) * 1.1).toFixed(2),
-          currency: filteredList[0].currency
-        })) : []
+          netValueUnit: item.netValueUnit,
+          taxValue: item.taxValue,
+          taxValueUnit: item.taxValueUnit,
+          pricingDate: item.pricingDate,
+          orderProbability: item.orderProbability,
+          pricingElements: item.pricingElements
+        }))
       }
     };
-    
-    // 计算总计
-    const totalNet = billingData.itemOverview.items.reduce((sum, item) => sum + parseFloat(item.netValue), 0);
-    const totalTax = billingData.itemOverview.items.reduce((sum, item) => sum + parseFloat(item.taxValue), 0);
-    const totalGross = billingData.itemOverview.items.reduce((sum, item) => sum + parseFloat(item.grossValue), 0);
-    
-    billingData.basicInfo.netValue = totalNet.toFixed(2);
-    billingData.basicInfo.netValueUnit = filteredList.length > 0 ? filteredList[0].currency : 'USD';
-    billingData.itemOverview.totalNetValue = totalNet.toFixed(2);
-    billingData.itemOverview.totalTaxValue = totalTax.toFixed(2);
-    billingData.itemOverview.totalGrossValue = totalGross.toFixed(2);
-    
+
     res.json({
       success: true,
       data: {
@@ -213,34 +312,30 @@ router.post('/get', (req, res) => {
       });
     }
     
-    const billingDoc = mockBillingDocuments.find(doc => 
-      doc.billingDocument === billingDocumentId || doc.id === billingDocumentId
+    const billingDoc = mockBillingDocuments.find(doc =>
+      doc.id === billingDocumentId
     );
-    
+
     if (!billingDoc) {
       return res.json({
         success: false,
         message: 'Billing document not found'
       });
     }
-    
+
     const billingData = {
       meta: {
         id: billingDoc.id
       },
       basicInfo: {
-        type: 'Invoice',
-        id: billingDoc.billingDocument,
+        type: billingDoc.type,
+        id: billingDoc.id,
         netValue: billingDoc.netValue,
-        netValueUnit: billingDoc.currency,
-        payer: billingDoc.payerParty,
+        netValueUnit: billingDoc.netValueUnit,
+        payer: billingDoc.payer,
         billingDate: billingDoc.billingDate
       },
       itemOverview: {
-        totalNetValue: billingDoc.totalNetValue,
-        totalTaxValue: billingDoc.totalTaxValue,
-        totalGrossValue: billingDoc.totalGrossValue,
-        currency: billingDoc.currency,
         items: billingDoc.items
       }
     };
@@ -274,29 +369,39 @@ router.post('/edit', (req, res) => {
       // 创建新的开票凭证
       const newId = 'BD' + String(mockBillingDocuments.length + 1).padStart(3, '0');
       const newBillingDoc = {
+        type: billingData.basicInfo.type,
         id: newId,
-        billingDocument: newId,
-        soldToParty: billingData.basicInfo.payer,
-        billToParty: billingData.basicInfo.payer,
-        payerParty: billingData.basicInfo.payer,
+        payer: billingData.basicInfo.payer,
         netValue: billingData.basicInfo.netValue,
-        currency: billingData.basicInfo.netValueUnit,
+        netValueUnit: billingData.basicInfo.netValueUnit,
         billingDate: billingData.basicInfo.billingDate,
-        reference: '',
-        totalNetValue: billingData.itemOverview.totalNetValue,
-        totalTaxValue: billingData.itemOverview.totalTaxValue,
-        totalGrossValue: billingData.itemOverview.totalGrossValue,
         items: billingData.itemOverview.items
       };
-      
+
       mockBillingDocuments.push(newBillingDoc);
       
+      // 返回完整的创建后数据
+      const createdBillingData = {
+        meta: {
+          id: newId
+        },
+        basicInfo: {
+          type: newBillingDoc.type,
+          id: newId,
+          netValue: newBillingDoc.netValue,
+          netValueUnit: newBillingDoc.netValueUnit,
+          payer: newBillingDoc.payer,
+          billingDate: newBillingDoc.billingDate
+        },
+        itemOverview: {
+          items: newBillingDoc.items
+        }
+      };
+
       res.json({
         success: true,
         data: {
-          content: {
-            id: newId
-          },
+          content: createdBillingData,
           message: `Billing document ${newId} created successfully`
         }
       });
@@ -313,25 +418,36 @@ router.post('/edit', (req, res) => {
       
       mockBillingDocuments[existingIndex] = {
         ...mockBillingDocuments[existingIndex],
-        soldToParty: billingData.basicInfo.payer,
-        billToParty: billingData.basicInfo.payer,
-        payerParty: billingData.basicInfo.payer,
+        type: billingData.basicInfo.type,
+        payer: billingData.basicInfo.payer,
         netValue: billingData.basicInfo.netValue,
-        currency: billingData.basicInfo.netValueUnit,
+        netValueUnit: billingData.basicInfo.netValueUnit,
         billingDate: billingData.basicInfo.billingDate,
-        reference: '',
-        totalNetValue: billingData.itemOverview.totalNetValue,
-        totalTaxValue: billingData.itemOverview.totalTaxValue,
-        totalGrossValue: billingData.itemOverview.totalGrossValue,
         items: billingData.itemOverview.items
       };
       
+      // 返回完整的更新后数据
+      const updatedBillingData = {
+        meta: {
+          id: billingData.meta.id
+        },
+        basicInfo: {
+          type: mockBillingDocuments[existingIndex].type,
+          id: mockBillingDocuments[existingIndex].id,
+          netValue: mockBillingDocuments[existingIndex].netValue,
+          netValueUnit: mockBillingDocuments[existingIndex].netValueUnit,
+          payer: mockBillingDocuments[existingIndex].payer,
+          billingDate: mockBillingDocuments[existingIndex].billingDate
+        },
+        itemOverview: {
+          items: mockBillingDocuments[existingIndex].items
+        }
+      };
+
       res.json({
         success: true,
         data: {
-          content: {
-            id: billingData.meta.id
-          },
+          content: updatedBillingData,
           message: `Billing document ${billingData.meta.id} updated successfully`
         }
       });
@@ -355,24 +471,20 @@ router.post('/search', (req, res) => {
     let results = mockBillingDocuments;
     
     if (query) {
-      results = results.filter(doc => 
-        doc.billingDocument.toLowerCase().includes(query.toLowerCase()) ||
-        doc.soldToParty.toLowerCase().includes(query.toLowerCase()) ||
-        doc.reference.toLowerCase().includes(query.toLowerCase())
+      results = results.filter(doc =>
+        doc.id.toLowerCase().includes(query.toLowerCase()) ||
+        doc.payer.toLowerCase().includes(query.toLowerCase())
       );
     }
-    
+
     res.json({
       success: true,
       data: {
         results: results.map(doc => ({
-          id: doc.id,
-          billingDocument: doc.billingDocument,
-          soldToParty: doc.soldToParty,
+          result: doc.id,
+          soldToParty: doc.payer,
           netValue: doc.netValue,
-          currency: doc.currency,
-          billingDate: doc.billingDate,
-          reference: doc.reference
+          currency: doc.netValueUnit
         }))
       }
     });
