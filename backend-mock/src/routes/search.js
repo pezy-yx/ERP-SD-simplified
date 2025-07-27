@@ -848,4 +848,165 @@ router.post('/storage-location', (req, res) => {
   }
 });
 
+// 开票凭证搜索
+router.post('/billing-document-id', (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    const mockBillingDocuments = [
+      { id: 'BD001', result: 'BD001', soldToParty: 'C001 - ABC Company', netValue: '1500.00', currency: 'USD' },
+      { id: 'BD002', result: 'BD002', soldToParty: 'C002 - XYZ Corp', netValue: '2500.00', currency: 'EUR' },
+      { id: 'BD003', result: 'BD003', soldToParty: 'C003 - DEF Ltd', netValue: '3000.00', currency: 'USD' },
+      { id: 'BD004', result: 'BD004', soldToParty: 'C004 - GHI Inc', netValue: '1800.00', currency: 'EUR' },
+      { id: 'BD005', result: 'BD005', soldToParty: 'C005 - JKL Corp', netValue: '2200.00', currency: 'USD' }
+    ];
+
+    let filteredResults = mockBillingDocuments;
+    
+    if (query && query.trim()) {
+      filteredResults = mockBillingDocuments.filter(doc => 
+        doc.billingDocument.toLowerCase().includes(query.toLowerCase()) ||
+        doc.soldToParty.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    res.json({
+      success: true,
+      data: filteredResults,
+      total: filteredResults.length,
+      message: `找到 ${filteredResults.length} 个开票凭证`
+    });
+
+  } catch (error) {
+    console.error('开票凭证搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 售达方搜索
+router.post('/sold-to-party', (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    const mockSoldToParties = [
+      { id: 'C001', result: 'C001 - ABC Company', city: 'New York', country: 'US' },
+      { id: 'C002', result: 'C002 - XYZ Corp', city: 'London', country: 'UK' },
+      { id: 'C003', result: 'C003 - DEF Ltd', city: 'Tokyo', country: 'JP' },
+      { id: 'C004', result: 'C004 - GHI Inc', city: 'Berlin', country: 'DE' },
+      { id: 'C005', result: 'C005 - JKL Corp', city: 'Paris', country: 'FR' },
+      { id: 'C006', result: 'C006 - MNO SA', city: 'Madrid', country: 'ES' },
+      { id: 'C007', result: 'C007 - PQR Srl', city: 'Rome', country: 'IT' }
+    ];
+
+    let filteredResults = mockSoldToParties;
+    
+    if (query && query.trim()) {
+      filteredResults = mockSoldToParties.filter(party => 
+        party.name.toLowerCase().includes(query.toLowerCase()) ||
+        party.city.toLowerCase().includes(query.toLowerCase()) ||
+        party.country.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    res.json({
+      success: true,
+      data: filteredResults,
+      total: filteredResults.length,
+      message: `找到 ${filteredResults.length} 个售达方`
+    });
+
+  } catch (error) {
+    console.error('售达方搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 开票方搜索
+router.post('/bill-to-party', (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    const mockBillToParties = [
+      { id: 'B001', result: 'B001 - ABC Company Billing', city: 'New York', country: 'US' },
+      { id: 'B002', result: 'B002 - XYZ Corp Finance', city: 'London', country: 'UK' },
+      { id: 'B003', result: 'B003 - DEF Ltd Accounting', city: 'Tokyo', country: 'JP' },
+      { id: 'B004', result: 'B004 - GHI Inc Finance', city: 'Berlin', country: 'DE' },
+      { id: 'B005', result: 'B005 - JKL Corp Billing', city: 'Paris', country: 'FR' }
+    ];
+
+    let filteredResults = mockBillToParties;
+    
+    if (query && query.trim()) {
+      filteredResults = mockBillToParties.filter(party => 
+        party.name.toLowerCase().includes(query.toLowerCase()) ||
+        party.city.toLowerCase().includes(query.toLowerCase()) ||
+        party.country.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    res.json({
+      success: true,
+      data: filteredResults,
+      total: filteredResults.length,
+      message: `找到 ${filteredResults.length} 个开票方`
+    });
+
+  } catch (error) {
+    console.error('开票方搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 付款方搜索
+router.post('/payer-party', (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    const mockPayerParties = [
+      { id: 'P001', result: 'P001 - ABC Company Treasury', city: 'New York', country: 'US' },
+      { id: 'P002', result: 'P002 - XYZ Corp Payment', city: 'London', country: 'UK' },
+      { id: 'P003', result: 'P003 - DEF Ltd Treasury', city: 'Tokyo', country: 'JP' },
+      { id: 'P004', result: 'P004 - GHI Inc Payment', city: 'Berlin', country: 'DE' },
+      { id: 'P005', result: 'P005 - JKL Corp Treasury', city: 'Paris', country: 'FR' }
+    ];
+
+    let filteredResults = mockPayerParties;
+    
+    if (query && query.trim()) {
+      filteredResults = mockPayerParties.filter(party => 
+        party.name.toLowerCase().includes(query.toLowerCase()) ||
+        party.city.toLowerCase().includes(query.toLowerCase()) ||
+        party.country.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    res.json({
+      success: true,
+      data: filteredResults,
+      total: filteredResults.length,
+      message: `找到 ${filteredResults.length} 个付款方`
+    });
+
+  } catch (error) {
+    console.error('付款方搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
