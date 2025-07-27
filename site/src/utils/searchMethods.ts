@@ -189,3 +189,55 @@ export const salesOrderIdSearch: SearchMethod[] = [
     serviceUrl: '/api/search/salesOrder-id'
   }
 ]
+export const billingDocumentIdSearch: SearchMethod[] = [
+  {
+    name: '开票凭证搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/billing-document-id',
+    resultHeaderDisplay: {
+      'result': '开票凭证号',
+      'soldToParty': '售达方',
+      'netValue': '净值',
+      'currency': '货币'
+    }
+  }
+]
+
+export const soldToPartySearch: SearchMethod[] = [
+  {
+    name: '售达方搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/sold-to-party',
+    resultHeaderDisplay: {
+      'result': '售达方',
+      'city': '城市',
+      'country': '国家'
+    }
+  }
+]
+
+export const billToPartySearch: SearchMethod[] = [
+  {
+    name: '开票方搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/bill-to-party',
+    resultHeaderDisplay: {
+      'result': '开票方',
+      'city': '城市',
+      'country': '国家'
+    }
+  }
+]
+
+export const payerPartySearch: SearchMethod[] = [
+  {
+    name: '付款方搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/payer-party',
+    resultHeaderDisplay: {
+      'result': '付款方',
+      'city': '城市',
+      'country': '国家'
+    }
+  }
+]
