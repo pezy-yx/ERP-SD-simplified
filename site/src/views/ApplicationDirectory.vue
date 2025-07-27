@@ -189,13 +189,13 @@ const applications = ref<ApplicationInfo[]>([
         {
           "applicationName": "Create Billing Documents VRF11",
           "lore": "VRF11",
-          "routePath": "/create-billing-documents",
+          "routePath": "/create-billing-document",
           "tags": ["financial management"]
         },
         {
           "applicationName": "Display Billing Documents",
           "lore": "76\nBilling Due List Items",
-          "routePath": "/display-billing-documents",
+          "routePath": "/display-billing-document",
           "tags": ["financial management"]
         },
         {
