@@ -1399,7 +1399,73 @@
               <p>综合运用所有特性的实际应用场景。</p>
 
               <div class="example-container">
-                <h3>8.1 员工管理表单 - 综合示例</h3>
+                <h3>8.1 复杂节点隐藏功能测试</h3>
+                <p>测试 hideSelf、hideList、showWhiteList 对复杂节点（dict和list）的隐藏效果。</p>
+
+                <div class="code-blocks-container">
+                  <div class="code-block">
+                    <h4>树定义 (Script)</h4>
+                    <div class="code-example">
+                      <pre><code>&lt;script lang="ts" setup&gt;
+        // 测试复杂节点隐藏功能
+        const testHideComplexNodes = createTreeFromConfig(
+          cns('dict', 'dict', 'testRoot', null, false, {
+            hideList: ['hiddenDict', 'hiddenList'],
+            showWhiteList: ['visibleDict', 'visibleList']
+          }, [
+            cns('dict', 'dict', 'visibleDict', null, false, {}, [
+              cns('string', 'leaf', 'field1', 'value1', false, {}, [], '字段1')
+            ], '可见字典'),
+            cns('dict', 'dict', 'hiddenDict', null, false, {}, [
+              cns('string', 'leaf', 'field2', 'value2', false, {}, [], '字段2')
+            ], '隐藏字典'),
+            cns('dynamiclist', 'list', 'visibleList', null, false, {
+              childTemplate: cns('string', 'leaf', 'item', '', false, {}, [], '项目')
+            }, [], '可见列表'),
+            cns('dynamiclist', 'list', 'hiddenList', null, false, {
+              childTemplate: cns('string', 'leaf', 'item', '', false, {}, [], '项目')
+            }, [], '隐藏列表'),
+            cns('dict', 'dict', 'selfHiddenDict', null, false, {
+              hideSelf: true
+            }, [
+              cns('string', 'leaf', 'field3', 'value3', false, {}, [], '字段3')
+            ], '自隐藏字典')
+          ], '测试根节点')
+        )
+        &lt;/script&gt;</code></pre>
+                    </div>
+                  </div>
+
+                  <div class="code-block">
+                    <h4>模板 (Template)</h4>
+                    <div class="code-example">
+                      <pre><code>&lt;template&gt;
+          &lt;VarBox :tree="testHideComplexNodes" /&gt;
+        &lt;/template&gt;</code></pre>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="result-container">
+                  <h4>运行结果</h4>
+                  <div class="result-box">
+                    <VarBox :tree="advancedExamples.testHideComplexNodes" />
+                  </div>
+                  <div class="explanation">
+                    <p><strong>预期结果：</strong></p>
+                    <ul>
+                      <li>✅ 只显示 "可见字典" 和 "可见列表"</li>
+                      <li>❌ "隐藏字典" 被 hideList 隐藏</li>
+                      <li>❌ "隐藏列表" 被 hideList 隐藏</li>
+                      <li>❌ "自隐藏字典" 被 hideSelf 隐藏</li>
+                    </ul>
+                    <p><strong>说明：</strong>showWhiteList 优先级高于 hideList，只有白名单中的节点会显示。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="example-container">
+                <h3>8.2 员工管理表单 - 综合示例</h3>
 
                 <div class="code-blocks-container">
                   <div class="code-block">
@@ -1838,6 +1904,32 @@ const gridExamples = {
 
 // 高级示例
 const advancedExamples = {
+
+  testHideComplexNodes: createTreeFromConfig(
+    cns('dict', 'dict', 'testRoot', null, false, {
+      hideList: ['hiddenDict', 'hiddenList'],
+      showWhiteList: ['visibleDict', 'visibleList']
+    }, [
+      cns('dict', 'dict', 'visibleDict', null, false, {}, [
+        cns('string', 'leaf', 'field1', 'value1', false, {}, [], '字段1')
+      ], '可见字典'),
+      cns('dict', 'dict', 'hiddenDict', null, false, {}, [
+        cns('string', 'leaf', 'field2', 'value2', false, {}, [], '字段2')
+      ], '隐藏字典'),
+      cns('dynamiclist', 'list', 'visibleList', null, false, {
+        childTemplate: cns('string', 'leaf', 'item', '', false, {}, [], '项目')
+      }, [], '可见列表'),
+      cns('dynamiclist', 'list', 'hiddenList', null, false, {
+        childTemplate: cns('string', 'leaf', 'item', '', false, {}, [], '项目')
+      }, [], '隐藏列表'),
+      cns('dict', 'dict', 'selfHiddenDict', null, false, {
+        hideSelf: true
+      }, [
+        cns('string', 'leaf', 'field3', 'value3', false, {}, [], '字段3')
+      ], '自隐藏字典')
+    ], '测试根节点')
+  ),
+
   employeeForm: createTreeFromConfig(
     cns('dict', 'dict', 'employeeInfo', {}, false, {}, [
       cns('dict', 'dict', 'basicInfo', {}, false, {}, [

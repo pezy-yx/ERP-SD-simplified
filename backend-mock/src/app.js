@@ -27,6 +27,7 @@ app.use('/api/employee', require('./routes/employee'));
 app.use('/api/quotation', require('./routes/quotation'));
 app.use('/api/so', require('./routes/so'));
 app.use('/api/bp', require('./routes/bp'));
+app.use('/api/app/billing', require('./routes/billing'));
 app.use('/api/material', require('./routes/material'));
 
 // 启动服务器

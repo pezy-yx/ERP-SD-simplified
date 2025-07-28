@@ -29,6 +29,11 @@ import CreateOutboundDelivery from '@/views/outboundDeliveries/Create.vue';
 import PickOutboundDelivery from '@/views/outboundDeliveries/Pick.vue';
 import ManageOutboundDeliveries from '@/views/outboundDeliveries/Manage.vue';
 
+// 开票凭证
+import CreateBillingDocument from '@/views/billDoc/Create.vue';
+import DisplayBillingDocument from '@/views/billDoc/Display.vue';
+import ChangeBillingDocument from '@/views/billDoc/Change.vue';
+
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
 import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuotations.vue';
@@ -185,6 +190,29 @@ const routes = [
         meta: { title: 'Pick Outbound Delivery' }
       },
       {
+        path: 'vartree-&-varinput-tutorial',
+        name: 'VarTreeTutorial',
+        component: VarTreeTutorial,
+        meta: { title: 'VarBox Tutorial' }
+      },
+      {
+        path: 'create-billing-document',
+        name: 'CreateBillingDocument',
+        component: CreateBillingDocument,
+        meta: { title: 'Create Billing Document' }
+      },
+      {
+        path: 'display-billing-document',
+        name: 'DisplayBillingDocument',
+        component: DisplayBillingDocument,
+        meta: { title: 'Display Billing Document' }
+      },
+      {
+        path: 'change-billing-document',
+        name: 'ChangeBillingDocument',
+        component: ChangeBillingDocument,
+        meta: { title: 'Change Billing Document' }
+      },
         path: 'material-documents-overview',
         name: 'MaterialDocumentOverview',
         component: MaterialDocumentOverview,
