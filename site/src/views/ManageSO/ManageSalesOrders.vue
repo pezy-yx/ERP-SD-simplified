@@ -7,7 +7,7 @@
           class="sales-order-query-varbox"
         />
         <div class="go-button-container" @click="performSalesOrderSearch">
-          <button class="search-enter-button go-button">Go</button>
+          <button class="go-button">Go</button>
         </div>
       </div>
       <div v-if="searchPerformed && salesOrdersResult && salesOrdersResult.length > 0" class="query-results-list" style="width: 100%;">
@@ -43,7 +43,7 @@
       </div>
     </div>
     <div class="bottom-actions" v-if="!showAppContent">
-      <button class="search-enter-button create-sales-order-button" @click="createSalesOrder">Create Sales Order</button>
+      <button class="create-sales-order-button" @click="createSalesOrder">Create Sales Order</button>
     </div>
 
     <!-- Quotation Input Modal -->
@@ -360,12 +360,12 @@ const salesOrderDataTree = createTreeFromConfig(
   });
 
   const itemDetailsPrevButtonLabel = computed(() => {
-    return 'Back to Form';
+    return '/hide';
   });
 
   const itemDetailsNextButtonLabel = computed(() => {
     if (onCreateState.value || onChangeState.value) {
-      return 'Confirm Items';
+      return '/hide';
     }
     return '/hide';
   });
@@ -1399,7 +1399,7 @@ const salesOrderDataTree = createTreeFromConfig(
   background-color: var(--btn-default-bg); /* Or other color */
   color: var(--btn-default-text);
   font-weight: bold;
-  padding: 10px 20px;
+  padding: 2px 8px;
   border: none;
   border-radius: 5px;
   font-size: 1em;
@@ -1591,7 +1591,6 @@ const salesOrderDataTree = createTreeFromConfig(
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
 .modal-content {
