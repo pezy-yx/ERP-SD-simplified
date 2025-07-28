@@ -2,11 +2,13 @@
 import {ref, Ref, computed} from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue';
 import AppContent from '@/components/applicationContent/AppContent.vue'
-import {createTreeFromConfig, cns, VarNodeValue} from '@/utils/VarTree';
+import {createTreeFromConfig, cns, VarNodeValue, VarNode} from '@/utils/VarTree';
 import {
   billingDocumentIdSearch,
   soldToPartySearch,
 } from '@/utils/searchMethods'
+import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
+import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
 const API_BASE_URL = window.API_BASE_URL || ''
 const appContentRef = ref(null) as any
@@ -114,49 +116,27 @@ const billingDataTree = createTreeFromConfig(
       cns('date','leaf','billingDate','',false,{},[],"Billing Date: "),
     ]),
     cns('dict','dict','itemOverview',{},false,{},[
-      cns('dynamiclist','list','items',null,false,{
-        hideLabel:true,
-        hideList: ['netValueUnit', 'pricingDate', 'orderProbability','reqDelivDate','taxValueUnit','pricingElements','netValue','taxValue'],
-        childTemplate:cns('dict','dict','item',null,false,{},[
-          cns('string','leaf','item','',true,{},[],"Item"),
-          cns('string','leaf','material','',false,{},[],"Material"),
-          cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
-          cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[],"SU"),
-          cns('string','leaf','description','',false,{},[],"Description"),
-          cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date"),
-          cns('string','leaf','netValue','',true,{},[],"Net: "),
-          cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit"),
-          cns('string','leaf','taxValue','',true,{},[],"Tax: "),
-          cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[],"Tax Value Unit"),
-          cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
-          cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
-          cns('dynamiclist','list','pricingElements',null,true,{
-            rowProvided:0,
-            hideLabel:true,
-            childTemplate:cns('dict','dict','pricingElement',null,false,{},[
-              cns('string','leaf','cnty','',true,{},[],"Cnty"),
-              cns('string','leaf','name','',true,{},[],"Name"),
-              cns('string','leaf','amount','',true,{},[],"Amount"),
-              cns('string','leaf','city','',true,{},[],"City"),
-              cns('string','leaf','per','',true,{},[],"Per"),
-              cns('string','leaf','uom','',true,{},[],"UoM"),
-              cns('string','leaf','conditionValue','',true,{},[],"Condition Value"),
-              cns('string','leaf','curr','',true,{},[],"Curr"),
-              cns('string','leaf','status','',true,{},[],"Status"),
-              cns('string','leaf','numC','',true,{},[],"NumC"),
-              cns('string','leaf','atoMtsComponent','',true,{},[],"ATO/MTS Component"),
-              cns('string','leaf','oun','',true,{},[],"OUn"),
-              cns('string','leaf','cconDe','',true,{},[],"CConDe"),
-              cns('string','leaf','un','',true,{},[],"Un"),
-              cns('string','leaf','conditionValue2','',true,{},[],"Condition Value 2"),
-              cns('string','leaf','cdCur','',true,{},[],"CdCur"),
-              cns('boolean','leaf','stat','',true,{},[],"Stat"),
-            ]),
-          },[],"Pricing Elements")
-        ]),
-      },[],"Items")
+      // items节点将通过ItemConditionKit动态创建
     ],'Item Overview')
   ])
+)
+
+// 创建 ItemConditionKit 实例
+const itemConditionKit = createItemConditionKit({
+  validationEndpoint: '/api/app/billing/items-tab-query',
+  readonly: false,
+  navigationLabels: {
+    cancel: 'Cancel',
+    save: 'Save',
+    previous: '← Previous',
+    next: 'Next →'
+  }
+})
+
+// 使用 ItemConditionKit 创建 items 节点（使用默认模板）
+itemConditionKit.summonItemsNode(
+  billingDataTree,
+  ['itemOverview', 'items']
 )
 
 /**
@@ -303,11 +283,59 @@ async function handleExecute(currentStage: number, targetStage: number) {
   return false
 }
 
+/**
+ * ItemConditionDetail 事件处理函数
+ */
+function handleItemConditionValidationSuccess(items: VarNode[]) {
+  console.log('Item condition validation success:', items)
+}
+
+function handleItemConditionValidationFailed(items: VarNode[]) {
+  console.log('Item condition validation failed:', items)
+}
+
+function handleItemConditionSave() {
+  console.log('Item condition save')
+  // 返回到主页面
+  appContentRef.value.goToStage(1) // 返回到information阶段
+}
+
+function handleItemConditionCancel() {
+  console.log('Item condition cancel')
+  // 返回到主页面
+  appContentRef.value.goToStage(1) // 返回到information阶段
+}
+
+/**
+ * 处理 Items Table 的按钮点击事件（使用ItemConditionKit）
+ */
+async function handleItemsTableClick() {
+  const itemsNode = billingDataTree.findNodeByPath(['itemOverview', 'items'])!;
+  const selectedChildren = [...itemsNode.getSelectedChildren()]; // 获取所有选中的子节点
+
+  if (selectedChildren && selectedChildren.length > 0) {
+    // 检查是否有未验证的items
+    const unvalidatedItems = selectedChildren.filter(item =>
+      item.config.data?.validation !== true
+    );
+
+    if (unvalidatedItems.length > 0) {
+      console.log('发现未验证的items，正在验证...');
+      // 这里可以添加验证逻辑，暂时跳过
+    }
+
+    // 切换到详情页面
+    appContentRef.value.goToStage(2); // Stage 2 是itemCondition
+  } else {
+    console.log('没有选中任何物品。');
+  }
+}
+
 </script>
 
 <template>
   <AppContent
-    :stages="['initialScreen','information']"
+    :stages="['initialScreen','information','itemCondition']"
     :before-next="handleExecute"
     :before-prev="handleCancel"
     :after-next="handleAfterNext"
@@ -315,6 +343,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     :footer-config="[
       { nextText:initializeStageNextButtonLabel },
       { prevText:informationStagePrevButtonLabel, nextText:informationStageNextButtonLabel },
+      { prevText:'Back', nextText:'/hide' },
     ]"
     ref="appContentRef"
   >
@@ -344,7 +373,39 @@ async function handleExecute(currentStage: number, targetStage: number) {
             :path="['basicInfo','type']"
           ></VarBox>
         </template>
+        <template #[`billingData-itemOverview-items--extra-buttons`]>
+          <button
+            class="execute-button table-extra-button"
+            @click="handleItemsTableClick"
+            :disabled="billingDataTree.findNodeByPath(['itemOverview','items'])?.getSelectedChildren().length === 0"
+          >
+            ...
+          </button>
+        </template>
       </VarBox>
+    </template>
+
+    <template #stage-itemCondition>
+      <ItemConditionDetail
+        :kit="itemConditionKit"
+        :config="{
+          navigationLabels: {
+            cancel: 'Cancel',
+            save: 'Save',
+            previous: '← Previous',
+            next: 'Next →'
+          }
+        }"
+        @validation-success="handleItemConditionValidationSuccess"
+        @validation-failed="handleItemConditionValidationFailed"
+        @save="handleItemConditionSave"
+        @cancel="handleItemConditionCancel"
+      >
+        <!-- teleport目标插槽 -->
+        <template #footer-content-right>
+          <slot name="footer-content-right"></slot>
+        </template>
+      </ItemConditionDetail>
     </template>
 
     <template #[`footer-content-right`]>

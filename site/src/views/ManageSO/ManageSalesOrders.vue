@@ -96,61 +96,26 @@
       </template>
 
       <template #stage-itemDetails>
-        <!-- Item switching navigation -->
-        <div class="item-navigation" v-if="selectedItems.length > 1">
-          <button
-            class="item-nav-button item-prev-button"
-            @click="switchToPreviousItem"
-            :disabled="currentItemIndex === 0"
-          >
-            ← Previous
-          </button>
-          <span class="item-counter">
-            Item {{ currentItemIndex + 1 }} of {{ selectedItems.length }}
-          </span>
-          <button
-            class="item-nav-button item-next-button"
-            @click="switchToNextItem"
-            :disabled="currentItemIndex === selectedItems.length - 1"
-          >
-            Next →
-          </button>
-        </div>
-
-        <VarBox
-          :tree="itemDetailHeaderTree"
-        ></VarBox>
-        <!-- Optional tabs for Sales and Conditions -->
-        <!-- tab bar -->
-        <FilterTabs
-          :tabs="[{label:'Sales',value:0},{label:'Conditions',value:1}]"
-          @tab-selected="handleItemConditionTabClick" class="reverse middle hide-bottom-line"
-          :initialActiveTab="0"
-        />
-        <!-- Sales -->
-        <VarBox
-          v-if="itemConditionTabBarStage==0"
-          :tree="itemDetailSalesTree"
-          @enter-from-node="handleEnterFromNodeItemCondition"
-          @input-from-node="handleInputFromNodeItemCondition"
-        ></VarBox>
-        <!-- Conditions -->
-        <VarBox
-          v-else
-          :tree="itemDetailConditionTree"
-          @enter-from-node="handleEnterFromNodeItemCondition"
-          @input-from-node="handleInputFromNodeItemCondition"
+        <ItemConditionDetail
+          :kit="itemConditionKit"
+          :config="{
+            navigationLabels: {
+              cancel: 'Cancel',
+              save: 'Save',
+              previous: '← Previous',
+              next: 'Next →'
+            }
+          }"
+          @validation-success="handleItemConditionValidationSuccess"
+          @validation-failed="handleItemConditionValidationFailed"
+          @save="handleItemConditionSave"
+          @cancel="handleItemConditionCancel"
         >
-          <template #itemDetailConditions-pricingElements--extra-buttons>
-            <button
-              class = "execute-button table-extra-button"
-              @click="handlePricingElementsRemoveButtonClick"
-              :disabled="itemDetailConditionTree.findNodeByPath(['pricingElements'])?.getSelectedChildren().length == 0"
-            >
-              Delete
-            </button>
+          <!-- teleport目标插槽 -->
+          <template #footer-content-right>
+            <slot name="footer-content-right"></slot>
           </template>
-        </VarBox>
+        </ItemConditionDetail>
       </template>
 
       <template #footer-content-right>
@@ -166,10 +131,7 @@
           class="footer-cancel-button">
           Save and Display
         </button>
-        <template v-if="currentAppStage === 1">
-          <button class="cancel-button" @click="cancelItemCondition">{{itemDetailStageCancelButtonLabel}}</button>
-          <button class="save-button" @click="saveItemConditionData" v-if="itemDetailStageExecuteButtonVisible">Save</button>
-        </template>
+        <!-- ItemConditionDetail 组件会自动处理 Cancel 和 Save 按钮 -->
       </template>
 
     </AppContent>
@@ -178,13 +140,27 @@
 
 <script setup lang="ts">
 import VarBox from '@/components/varbox/VarBox.vue';
-import FilterTabs from '@/components/FilterTabs.vue'; // Import FilterTabs
+// FilterTabs 不再需要，ItemConditionDetail 内部处理标签页
 import { ref, Ref, computed, nextTick } from 'vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
 import { bpSearch, quotationIdSearch, salesOrderIdSearch } from '@/utils/searchMethods';
+import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
+import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || '';
 
 import AppContent from '@/components/applicationContent/AppContent.vue';
+
+// 创建 ItemConditionKit 实例
+const itemConditionKit = createItemConditionKit({
+  validationEndpoint: '/api/app/sales-order/items-tab-query',
+  readonly: false,
+  navigationLabels: {
+    cancel: 'Cancel',
+    save: 'Save',
+    previous: '← Previous',
+    next: 'Next →'
+  }
+})
 
 const appContentRef = ref(null) as any;
 const currentAppStage = computed(() => appContentRef.value?.currentStage || 0);
@@ -263,49 +239,16 @@ const salesOrderDataTree = createTreeFromConfig(
      ]),
      cns('dict','dict','itemOverview',{},false,{},[
        cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date:"),
-       cns('dynamiclist','list','items',null,false,{
-         hideLabel:true,
-         hideList: ['netValue', 'netValueUnit', 'pricingDate', 'orderProbability','reqDelivDate','taxValue','taxValueUnit','pricingElements'],
-         childTemplate:cns('dict','dict','item',null,false,{},[
-           cns('string','leaf','item','',true,{},[],"Item"),
-           cns('string','leaf','material','',false,{},[],"Material"),
-           cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
-           cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[],"SU"),
-           cns('string','leaf','description','',false,{},[],"Description"),
-           cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date"),
-           cns('string','leaf','netValue','',true,{},[],"Net: "),
-           cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit"),
-           cns('string','leaf','taxValue','',true,{},[],"Tax: "),
-           cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[],"Tax Value Unit"),
-           cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
-           cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
-           cns('dynamiclist','list','pricingElements',null,true,{
-             rowProvided:0,
-             childTemplate:cns('dict','dict','condition',null,false,{},[
-               cns('string','leaf','cnty','',false,{},[],"Cnty"),
-               cns('string','leaf','name','',false,{},[],"Name"),
-               cns('string','leaf','amount','',false,{},[],"Amount"),
-               cns('string','leaf','city','',false,{},[],"City"),
-               cns('string','leaf','per','',false,{},[],"per"),
-               cns('string','leaf','uom','',false,{},[],"UoM"),
-               cns('string','leaf','conditionValue','',false,{},[],"Condition Value"),
-               cns('string','leaf','curr','',false,{},[],"Curr."),
-               cns('string','leaf','status','',false,{},[],"Status"),
-               cns('string','leaf','numC','',false,{},[],"NumC"),
-               cns('string','leaf','atoMtsComponent','',false,{},[],"ATO/MTS Component"),
-               cns('string','leaf','oun','',false,{},[],"OUn"),
-               cns('string','leaf','cconDe','',false,{},[],"CConDe"),
-               cns('string','leaf','un','',false,{},[],"Un"),
-               cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
-               cns('string','leaf','cdCur','',false,{},[],"CdCur"),
-               cns('boolean','leaf','stat',false,false,{},[],"Stat"),
-             ]),
-           },[],"Pricing Elements"),
-         ]),
-       },[],"Items")
+       // items节点将通过ItemConditionKit动态创建
      ],'Item Overview')
    ])
  );
+
+// 使用 ItemConditionKit 创建 items 节点（使用默认模板）
+itemConditionKit.summonItemsNode(
+  salesOrderDataTree,
+  ['itemOverview', 'items']
+)
 
   const salesOrderQueryTree = createTreeFromConfig(salesOrderQueryStructure);
   const salesOrdersResult: Ref<SalesOrderResult[]> = ref([]);
@@ -611,191 +554,19 @@ const salesOrderDataTree = createTreeFromConfig(
 
   writableTrees.push(salesOrderDataTree);
 
-  /**
-   * Item Detail View Logic (Copied and adapted from Main.vue)
-   */
-
-  /**
-   * @description Sales Order Item Detail Header
-   */
-  const itemDetailHeaderTree = createTreeFromConfig(
-    cns('dict','dict','itemDetailHeader',{},true,{
-      childNameDisplayTranslation: {
-        item: 'Sales Document Item',
-        material: 'Material'
-      }
-    },[
-      cns('string','leaf','item','',false,{},[]),
-      cns('string','leaf','material','',false,{},[]),
-    ])
-  );
-
-  /**
-   * @description Sales Order Item Detail Sales
-   */
-  const itemDetailSalesTree = createTreeFromConfig(
-    cns('dict','dict','itemDetailSales',{},false,{hideLabel:true},[
-      cns('dict','dict','orderQuantityAndDeliveryDate',{},false,{
-        childNameDisplayTranslation: {
-          orderQuantity: 'Quantity',
-          reqDelivDate: 'First Delivery Date'
-        }
-      },[
-        cns('string','leaf','orderQuantity','',false,{},[]),
-        cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[]),
-        cns('date','leaf','reqDelivDate','',false,{},[]),
-      ],'Order Quantity and Delivery Date'),
-      cns('dict','dict','generalSalesData',{},false,{
-        childNameDisplayTranslation: {
-          pricingDate: 'Pricing Date: ',
-          orderProbability: 'Order Probability: '
-        }
-      },[
-        cns('string','leaf','netValue','',true,{},[]),
-        cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
-        cns('string','leaf','pricingDate','',false,{},[]),
-        cns('string','leaf','orderProbability','1',false,{},[]),
-      ])
-    ])
-  );
-
-  /**
-   * @description Sales Order Item Detail Conditions
-   */
-  const itemDetailConditionTree = createTreeFromConfig(
-    cns('dict','dict','itemDetailConditions',{},false,{
-      childNameDisplayTranslation: {
-        orderQuantity: 'Quantity',
-      }
-    },[
-      cns('string','leaf','orderQuantity','',false,{},[]),
-      cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[]),
-      cns('string','leaf','netValue','',true,{},[]),
-      cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
-      cns('string','leaf','taxValue','',true,{},[]),
-      cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[]),
-      cns('dynamiclist','list','pricingElements',null,true,{
-        rowProvided:0,
-        childTemplate:cns('dict','dict','condition',null,false,{},[
-          cns('string','leaf','cnty','',false,{},[],"Cnty"),
-          cns('string','leaf','name','',false,{},[],"Name"),
-          cns('string','leaf','amount','',false,{},[],"Amount"),
-          cns('string','leaf','city','',false,{},[],"City"),
-          cns('string','leaf','per','',false,{},[],"per"),
-          cns('string','leaf','uom','',false,{},[],"UoM"),
-          cns('string','leaf','conditionValue','',false,{},[],"Condition Value"),
-          cns('string','leaf','curr','',false,{},[],"Curr."),
-          cns('string','leaf','status','',false,{},[],"Status"),
-          cns('string','leaf','numC','',false,{},[],"NumC"),
-          cns('string','leaf','atoMtsComponent','',false,{},[],"ATO/MTS Component"),
-          cns('string','leaf','oun','',false,{},[],"OUn"),
-          cns('string','leaf','cconDe','',false,{},[],"CConDe"),
-          cns('string','leaf','un','',false,{},[],"Un"),
-          cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
-          cns('string','leaf','cdCur','',false,{},[],"CdCur"),
-          cns('boolean','leaf','stat',false,false,{},[],"Stat"),
-        ]),
-      },[],"Pricing Elements")
-    ])
-  );
-
-  writableTrees.push(itemDetailSalesTree, itemDetailConditionTree); // Add item detail trees to writable trees
+  // ItemConditionKit 已经处理了所有 item detail 相关的逻辑
 
   const selectedItems = ref<VarNode[]>([]);
   const currentItemIndex = ref(0);
-  const editingNode = {
-    node: createNodeFromConfig(salesOrderDataTree.findNodeByPath(['itemOverview','items'])!.config.childTemplate!)
-  };
+  // ItemConditionKit 自动处理编辑节点
 
-  const itemConditionTabBarStage = ref(0);
-  function handleItemConditionTabClick(index: number) {
-    itemConditionTabBarStage.value = index;
-  }
+  // ItemConditionDetail 内部处理标签页切换
 
-  const itemDetailStageCancelButtonLabel = computed(() => {
-    if (onCreateState.value) {
-      return 'Cancel';
-    }
-    if (onChangeState.value) {
-      return 'Cancel';
-    }
-    if (onDisplayState.value) {
-      return 'Back';
-    }
-    return 'Back';
-  });
+  // ItemConditionDetail 内部处理按钮标签和可见性
 
-  const itemDetailStageExecuteButtonVisible = computed(() => {
-    return onCreateState.value || onChangeState.value;
-  });
+  // ItemConditionKit 自动处理所有 item detail 数据更新
 
-  /**
-   * Update the tree data for the detail page
-   * @description Set editingNode.node to a copy of the current editing node, and point the input fields in itemCondition to this copy's nodes.
-   */
-  function updateItemDetailTrees() {
-    if (selectedItems.value.length === 0) return;
-
-    const currentItem = selectedItems.value[currentItemIndex.value];
-    editingNode.node = currentItem.clone();
-    const node = editingNode.node;
-
-    // Use value copy instead of reference for setting
-    const setValueFromItem = (sourcePath: string[], targetPath: string[], targetTree: VarTree) => {
-      const sourceNode = node.findNodeByPath(sourcePath);
-      if (sourceNode) {
-        const targetNode = targetTree.findNodeByPath(targetPath);
-        if (targetNode) {
-          targetTree.replaceNodeByPath(sourceNode, targetPath);
-        }
-      }
-    };
-
-    // Header data
-    setValueFromItem(['item'], ['item'], itemDetailHeaderTree);
-    setValueFromItem(['material'], ['material'], itemDetailHeaderTree);
-
-    // Sales data
-    setValueFromItem(['orderQuantity'], ['orderQuantityAndDeliveryDate', 'orderQuantity'], itemDetailSalesTree);
-    setValueFromItem(['orderQuantityUnit'], ['orderQuantityAndDeliveryDate', 'orderQuantityUnit'], itemDetailSalesTree);
-    setValueFromItem(['reqDelivDate'], ['orderQuantityAndDeliveryDate', 'reqDelivDate'], itemDetailSalesTree);
-    setValueFromItem(['netValue'], ['generalSalesData', 'netValue'], itemDetailSalesTree);
-    setValueFromItem(['netValueUnit'], ['generalSalesData', 'netValueUnit'], itemDetailSalesTree);
-    setValueFromItem(['pricingDate'], ['generalSalesData', 'pricingDate'], itemDetailSalesTree);
-    setValueFromItem(['orderProbability'], ['generalSalesData', 'orderProbability'], itemDetailSalesTree);
-
-    // Condition data - also use value copy
-    setValueFromItem(['orderQuantity'], ['orderQuantity'], itemDetailConditionTree);
-    setValueFromItem(['orderQuantityUnit'], ['orderQuantityUnit'], itemDetailConditionTree);
-    setValueFromItem(['netValue'], ['netValue'], itemDetailConditionTree);
-    setValueFromItem(['netValueUnit'], ['netValueUnit'], itemDetailConditionTree);
-    setValueFromItem(['taxValue'], ['taxValue'], itemDetailConditionTree);
-    setValueFromItem(['taxValueUnit'], ['taxValueUnit'], itemDetailConditionTree);
-    setValueFromItem(['pricingElements'], ['pricingElements'], itemDetailConditionTree);
-
-    // Force update UI display
-    if (appContentRef.value) {
-      appContentRef.value.forceUpdate();
-    }
-  }
-
-  /**
-   * @description Pricing Element Rules
-   * @description Deletion: After deletion, pass to backend for validation and return normalized data / if value is corrupted, set validation to false
-   */
-  async function handlePricingElementsDeletion() {
-    const pricingElementsNode = itemDetailConditionTree.findNodeByPath(['pricingElements'])!;
-    const deletionNodes = pricingElementsNode.getSelectedChildren();
-    pricingElementsNode.children = pricingElementsNode.children.filter(child => !deletionNodes.includes(child));
-    await validateCurrentItemConditionData();
-    appContentRef.value.forceUpdate();
-  }
-  /**
-   * @description Call handlePricingElementsDeletion to delete selected records and validate
-   */
-  async function handlePricingElementsRemoveButtonClick() {
-    await handlePricingElementsDeletion();
-  }
+  // ItemConditionKit 自动处理定价元素的删除和验证
 
   /**
    * @description Pricing Element Rules
@@ -803,117 +574,7 @@ const salesOrderDataTree = createTreeFromConfig(
    * @description No need to write, just follow the validation logic of handleEnterFromNodeItemCondition
    */
 
-  /**
-   * Validate current itemCondition data and sync to original item
-   * @description Send data from editingNode.node to backend for validation, and if successful, update the original item's data
-   * @description All use itemsTabQuery
-   */
-  async function validateCurrentItemConditionData() {
-    // If not changed (config.data.validation is true), return directly
-    if (editingNode.node.config.data?.validation) {
-      console.log('Data not changed, no need to validate', editingNode.node);
-      return true;
-    }
-    const nodeList = [editingNode.node];
-    const isValidate = await itemsTabQuery(nodeList);
-    if (isValidate) {
-      console.log('Data validated successfully');
-      // Sync data
-      const currentNode = selectedItems.value[currentItemIndex.value];
-      currentNode.forceSetValue(editingNode.node.getValue());
-    } else {
-      console.log('Data validation failed');
-    }
-    return isValidate;
-  }
-
-  /**
-   * Handle user input events, immediately mark the maintained node as unvalidated
-   */
-  function handleInputFromNodeItemCondition(_node: VarNode, value: string, data: any) {
-    if (!editingNode.node.config.data) {
-      editingNode.node.config.data = {};
-    }
-    editingNode.node.config.data.validation = false;
-  }
-
-  /**
-   * Switch to the previous/next selected item
-   * @description Safe method, will validate current data first
-   */
-  async function switchToItem(index: number) {
-    const isValid = await validateCurrentItemConditionData();
-    if (isValid) {
-      _switchToItemWhenValidate(index);
-    } else {
-      console.log('Data validation failed, cannot switch');
-    }
-  }
-  function _switchToItemWhenValidate(index: number) {
-    if (index >= 0 && index < selectedItems.value.length) {
-      currentItemIndex.value = index;
-      updateItemDetailTrees();
-    }
-  }
-
-  /**
-   * Switch to previous item
-   * @description Wrapper for switchToItem method
-   */
-  async function switchToPreviousItem() {
-    switchToItem(currentItemIndex.value - 1);
-  }
-
-  /**
-   * Switch to next item
-   * @description Wrapper for switchToItem method
-   */
-  async function switchToNextItem() {
-    switchToItem(currentItemIndex.value + 1);
-  }
-
-  /**
-   * Save itemCondition data and return to stage 0 (sales order form)
-   */
-  async function saveItemConditionData(): Promise<boolean> {
-    const isValid = await validateCurrentItemConditionData();
-    if (isValid) {
-      // Validation successful, go back to stage 0 (sales order form)
-      appContentRef.value.goToStage(0);
-      console.log('Data validated and returned to stage 0');
-      return true;
-    } else {
-      console.log('Data validation failed, cannot save');
-      return false;
-    }
-  }
-
-  /**
-   * Cancel itemCondition editing, return to stage 0 (sales order form)
-   */
-  function cancelItemCondition() {
-    // Reset validation status of currently selected items to avoid issues next time
-    if (selectedItems.value.length > 0) {
-      selectedItems.value.forEach(item => {
-        if (item.config.data?.validation === false) {
-          // Reset validation status to undefined, indicating re-validation is needed
-          item.config.data.validation = undefined;
-        }
-      });
-    }
-    selectedItems.value = [];
-    currentItemIndex.value = 0;
-    // Do not save data, directly return to stage 0
-    appContentRef.value.goToStage(0);
-  }
-
-  /**
-   * Handle data change events on the itemCondition page (Enter or blur)
-   */
-  async function handleEnterFromNodeItemCondition(_node: VarNode, value: string, data: any) {
-    // Key operation: validate data on Enter
-    await validateCurrentItemConditionData();
-  }
+  // ItemConditionKit 自动处理所有验证、切换、保存和取消逻辑
 
   /**
    * @description Sales order variable tree enter-from-node event handler
@@ -1050,19 +711,41 @@ const salesOrderDataTree = createTreeFromConfig(
       selectedItems.value = selectedChildren;
       currentItemIndex.value = 0;
 
-      // Update data for the detail page
-      updateItemDetailTrees();
-
       // Switch to the detail page
       appContentRef.value.goToStage(1); // Stage 1 is itemDetails
 
-      // After successfully entering the detail page, clear the selection status of the items table
-      items.children.forEach(child => {
-        child.setSelection(false);
-      });
+      // 延迟清空items表格的选中状态，让ItemConditionDetail组件先初始化
+      setTimeout(() => {
+        items.children.forEach(child => {
+          child.setSelection(false);
+        });
+      }, 100);
     } else {
       console.log('No items selected');
     }
+  }
+
+  /**
+   * ItemConditionDetail 事件处理函数
+   */
+  function handleItemConditionValidationSuccess(items: VarNode[]) {
+    console.log('Item condition validation success:', items)
+  }
+
+  function handleItemConditionValidationFailed(items: VarNode[]) {
+    console.log('Item condition validation failed:', items)
+  }
+
+  function handleItemConditionSave() {
+    console.log('Item condition save')
+    // 返回到主页面
+    appContentRef.value.goToStage(0)
+  }
+
+  function handleItemConditionCancel() {
+    console.log('Item condition cancel')
+    // 返回到主页面
+    appContentRef.value.goToStage(0)
   }
 
   // Custom Confirmation Modal Logic (replaces window.confirm)

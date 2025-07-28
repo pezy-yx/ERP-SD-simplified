@@ -246,6 +246,14 @@ export class ItemConditionKit {
   }
 
   /**
+   * 设置 items 节点引用
+   * @param itemsNode - 要设置的 items 节点
+   */
+  setItemsNode(itemsNode: VarNode | null) {
+    this.itemsNodeRef.value = itemsNode
+  }
+
+  /**
    * 更新配置
    */
   updateConfig(newConfig: Partial<ItemConditionKitConfig>) {

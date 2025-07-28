@@ -6,7 +6,7 @@
     :readonly="props.tree.root?.readonly"
     :config="props.tree.root?.config"
     :indentLevel="props.indentLevel"
-    :showLabel="true"
+    :showLabel="props.showLabel ?? true"
     :wrapperStyle="props.wrapperStyle"
     @update="handleUpdate"
     v-bind="$attrs"

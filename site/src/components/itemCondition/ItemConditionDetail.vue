@@ -3,7 +3,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue'
 import FilterTabs from '@/components/FilterTabs.vue'
 import { type ItemConditionKit } from '@/utils/ItemConditionKit'
-import { VarNode } from '@/utils/VarTree'
+import { VarNode, VarTree } from '@/utils/VarTree'
 
 // Props
 interface Props {
@@ -397,10 +397,45 @@ function checkTeleportTarget() {
   }
 }
 
+/**
+ * 初始化组件数据
+ */
+async function initializeComponent() {
+  if (!config.value.itemsNode) {
+    console.error('Items node not found')
+    return
+  }
+
+  const selectedChildren = [...config.value.itemsNode.getSelectedChildren()]
+
+  if (selectedChildren && selectedChildren.length > 0) {
+    console.log('发现选中的items，自动初始化详细信息页面')
+
+    // 设置选中的items
+    selectedItems.value = selectedChildren as VarNode[]
+    currentItemIndex.value = 0
+    currentTabIndex.value = 0
+
+    // 确保数据准备完成后再更新详细信息树
+    await nextTick()
+    updateItemDetailTrees()
+
+    // 等待数据准备完成
+    await nextTick()
+    isDataReady.value = true
+
+    emit('validation-success', selectedChildren as VarNode[])
+  } else {
+    console.log('没有选中的items，等待用户选择')
+    isDataReady.value = false
+  }
+}
+
 // 生命周期钩子
 onMounted(() => {
   nextTick(() => {
     checkTeleportTarget()
+    initializeComponent()
   })
 })
 
@@ -488,12 +523,14 @@ defineExpose({
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['orderQuantityAndDeliveryDate','orderQuantityUnit']"
+          :showLabel="false"
         />
       </template>
       <template #[`itemDetailSales-generalSalesData-netValue--extra`]>
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['generalSalesData','netValueUnit']"
+          :showLabel="false"
         />
       </template>
 
@@ -502,18 +539,21 @@ defineExpose({
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['orderQuantityUnit']"
+          :showLabel="false"
         />
       </template>
       <template #[`itemDetailConditions-netValue--extra`]>
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['netValueUnit']"
+          :showLabel="false"
         />
       </template>
       <template #[`itemDetailConditions-taxValue--extra`]>
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['taxValueUnit']"
+          :showLabel="false"
         />
       </template>
     >
