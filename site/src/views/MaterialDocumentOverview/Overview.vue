@@ -159,7 +159,7 @@ cns('string','leaf','orderQuantityUnit','',true,{hideLabel:true},[],"SU"),
 },[],"Items"),
 
 cns('dynamiclist', 'list', 'processFlow', null, true, {
-hideList: ['flowItem', 'dlvId', 'materialDocument', 'billId'],
+hideSelf: true,
 childTemplate:
 cns("dict", "dict", "flowItem", null, false, {}, [
 cns("string", "leaf", "dlvId", '', true, {}, [], "Delivery ID:"),
@@ -378,6 +378,7 @@ const getArrowStatusClass = (prevIdKey: string, nextIdKey: string) => {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-height: 90%;
     padding: 20px;
     margin: 20px;
   }
