@@ -213,6 +213,7 @@ const routes = [
         component: ChangeBillingDocument,
         meta: { title: 'Change Billing Document' }
       },
+      {
         path: 'material-documents-overview',
         name: 'MaterialDocumentOverview',
         component: MaterialDocumentOverview,
