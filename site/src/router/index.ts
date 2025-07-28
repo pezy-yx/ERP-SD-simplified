@@ -40,6 +40,9 @@ import ManageSalesQuotations from '@/views/manageSalesQuotations/manageSalesQuot
 import VarTreeTutorial from '@/views/VarTreeTutorial.vue';
 import ItemConditionKitTest from '@/views/test/ItemConditionKitTest.vue';
 
+import MaterialDocumentOverview from '@/views/MaterialDocumentOverview/Overview.vue';
+import path from "path";
+
 const routes = [
   // 保留原有的路径
   {
@@ -217,6 +220,12 @@ const routes = [
         component: ChangeBillingDocument,
         meta: { title: 'Change Billing Document' }
       },
+      {
+        path: 'material-documents-overview',
+        name: 'MaterialDocumentOverview',
+        component: MaterialDocumentOverview,
+        meta: { title: 'MaterialDocumentOverview' }
+      }
     ]
   },
   { 

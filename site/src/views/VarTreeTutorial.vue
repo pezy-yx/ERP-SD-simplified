@@ -1904,6 +1904,7 @@ const gridExamples = {
 
 // 高级示例
 const advancedExamples = {
+
   testHideComplexNodes: createTreeFromConfig(
     cns('dict', 'dict', 'testRoot', null, false, {
       hideList: ['hiddenDict', 'hiddenList'],
@@ -1928,6 +1929,7 @@ const advancedExamples = {
       ], '自隐藏字典')
     ], '测试根节点')
   ),
+
   employeeForm: createTreeFromConfig(
     cns('dict', 'dict', 'employeeInfo', {}, false, {}, [
       cns('dict', 'dict', 'basicInfo', {}, false, {}, [
