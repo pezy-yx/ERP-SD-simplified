@@ -11,11 +11,25 @@ import {
   divisionSearch,
   inquiryIdSearch,
 } from '@/utils/searchMethods'
+import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
+import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
 const API_BASE_URL = window.API_BASE_URL || ''
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'
+
+// 创建 ItemConditionKit 实例
+const itemConditionKit: ItemConditionKit = createItemConditionKit({
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
+  readonly: false,
+  navigationLabels: {
+    cancel: 'Cancel',
+    save: 'Save',
+    previous: '← Previous',
+    next: 'Next →'
+  }
+})
 /**
  * @description 应用模式-创建/修改/查看
  */
@@ -140,121 +154,23 @@ const inquiryDataTree = createTreeFromConfig(
       cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date:"),
       cns('string','leaf','expectOralVal','0.0',true,{},[],"Expect. Oral Val:"),
       cns('string','leaf','expectOralValUnit','',true,{hideLabel:true},[],"Expect. Oral Val Unit:"),
-      cns('dynamiclist','list','items',null,false,{
-        hideLabel:true, 
-        hideList: ['netValue', 'netValueUnit', 'pricingDate', 'orderProbability','reqDelivDate','taxValue','taxValueUnit','pricingElements'],
-        childTemplate:cns('dict','dict','item',null,false,{},[
-          cns('string','leaf','item','',true,{},[],"Item"),
-          cns('string','leaf','material','',false,{},[],"Material"),
-          cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
-          cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[],"SU"),
-          cns('string','leaf','description','',false,{},[],"Description"),
-          cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date"),
-          cns('string','leaf','netValue','',true,{},[],"Net: "),
-          cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit"),
-          cns('string','leaf','taxValue','',true,{},[],"Tax: "),
-          cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[],"Tax Value Unit"),
-          cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
-          cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
-          cns('dynamiclist','list','pricingElements',null,true,{
-            rowProvided:0,
-            childTemplate:cns('dict','dict','condition',null,false,{},[
-              cns('string','leaf','cnty','',false,{},[],"Cnty"),
-              cns('string','leaf','name','',false,{},[],"Name"),
-              cns('string','leaf','amount','',false,{},[],"Amount"),
-              cns('string','leaf','city','',false,{},[],"City"),
-              cns('string','leaf','per','',false,{},[],"per"),
-              cns('string','leaf','uom','',false,{},[],"UoM"),
-              cns('string','leaf','conditionValue','',false,{},[],"Condition Value"),
-              cns('string','leaf','curr','',false,{},[],"Curr."),
-              cns('string','leaf','status','',false,{},[],"Status"),
-              cns('string','leaf','numC','',false,{},[],"NumC"),
-              cns('string','leaf','atoMtsComponent','',false,{},[],"ATO/MTS Component"),
-              cns('string','leaf','oun','',false,{},[],"OUn"),
-              cns('string','leaf','cconDe','',false,{},[],"CConDe"),
-              cns('string','leaf','un','',false,{},[],"Un"),
-              cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
-              cns('string','leaf','cdCur','',false,{},[],"CdCur"),
-              cns('boolean','leaf','stat',false,false,{},[],"Stat"),
-            ]),
-          },[],"Pricing Elements"),
-        ]),
-      },[],"Items")
+      // items 节点将通过 itemConditionKit.summonItemsNode 添加
     ],'Item Overview')
   ])
 )
 
-/**
- * @description 询价单物品详细信息-头部
- */
-const itemDetailHeaderTree = createTreeFromConfig(
-  cns('dict','dict','itemDetailHeader',{},true,{
-    childNameDisplayTranslation: {
-      item: 'Sales Document Item',
-      material: 'Material'
-    }
-  },[
-    cns('string','leaf','item','',false,{},[]),
-    cns('string','leaf','material','',false,{},[]),
-  ])
-)
-
-/**
- * @description 询价单物品详细信息-Sales
- */
-const itemDetailSalesTree = createTreeFromConfig(
-  cns('dict','dict','itemDetailSales',{},false,{hideLabel:true},[
-    cns('dict','dict','orderQuantityAndDeliveryDate',{},false,{
-      childNameDisplayTranslation: {
-        orderQuantity: 'Quantity',
-        reqDelivDate: 'First Delivery Date'
-      }
-    },[
-      cns('string','leaf','orderQuantity','',false,{},[]),
-      cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[]),
-      cns('date','leaf','reqDelivDate','',false,{},[]),
-    ],'Order Quantity and Delivery Date'),
-    cns('dict','dict','generalSalesData',{},false,{
-      childNameDisplayTranslation: {
-        pricingDate: 'Pricing Date: ',
-        orderProbability: 'Order Probability: '
-      }
-    },[
-      cns('string','leaf','netValue','',true,{},[]),
-      cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
-      cns('string','leaf','pricingDate','',false,{},[]),
-      cns('string','leaf','orderProbability','1',false,{},[]),
-    ])
-  ])
-)
-
-/**
- * @description 询价单物品详细信息-Conditions
- */
-const itemDetailConditionTree = createTreeFromConfig(
-  cns('dict','dict','itemDetailConditions',{},false,{
-    childNameDisplayTranslation: {
-      orderQuantity: 'Quantity',
-    }
-  },[
-    cns('string','leaf','orderQuantity','',false,{},[]),
-    cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[]),
-    cns('string','leaf','netValue','',true,{},[]),
-    cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
-    cns('string','leaf','taxValue','',true,{},[]),
-    cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[]),
-    cns('dynamiclist','list','pricingElements',null,true,{
-      // never mind because it had to be replaced with some item in inquiryData.itemOverview.items[x]
-    },[],"Pricing Elements")
-  ])
+// 使用 ItemConditionKit 创建 items 节点（使用默认模板）
+itemConditionKit.summonItemsNode(
+  inquiryDataTree,
+  ['itemOverview', 'items']
+  // 不传递自定义模板，使用默认模板
 )
 
 /**
  * @description 询价单物品的可写树，即stage1 stage2，用于显示状态和编辑状态的切换
- * @description 特别说明，不包括inquiryDetailHeader
- * @returns {VarTree[]} 
+ * @description 现在只包含主数据树，item detail由ItemConditionKit管理
  */
-const writableTrees = [inquiryDataTree, itemDetailSalesTree, itemDetailConditionTree]
+const writableTrees = [inquiryDataTree]
 
 const initializeResult = ref(false)
 /**
@@ -391,31 +307,38 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
     }
 
     writableTrees.map(tree => tree.forceUpdate())
-    itemDetailHeaderTree.forceUpdate()
     return data.data.result.allDataLegal === 1
   }
 
   return false
 }
 
-/**
- * 物品的详细信息
- */
-const selectedItems = ref<VarNode[]>([])
-const currentItemIndex = ref(0)
-const editingNode = {
-  node: createNodeFromConfig(inquiryDataTree.findNodeByPath(['itemOverview','items'])!.config.childTemplate!)
+// ItemConditionKit 相关的事件处理函数
+function handleSave() {
+  console.log('保存数据')
+  // 返回到主页面
+  appContentRef.value.goToStage(1)
 }
 
-const itemConditionTabBarStage = ref(0)
-function handleItemConditionTabClick(index: number) {
-  itemConditionTabBarStage.value = index
+function handleItemConditionCancel() {
+  console.log('取消编辑')
+  // 返回到主页面
+  appContentRef.value.goToStage(1)
+}
+
+function handleValidationFailed() {
+  console.log('验证失败')
+}
+
+function handleValidationSuccess() {
+  console.log('验证成功')
 }
 /**
  * @descrition 处理Items Table的按钮点击事件
  * @param selection 选中的行
  */
 async function handleItemsTableClick() {
+  // 获取items节点
   const items = inquiryDataTree.findNodeByPath(['itemOverview','items'])!
   const selectedChildren = [...items.getSelectedChildren()]
 
@@ -445,222 +368,25 @@ async function handleItemsTableClick() {
       return // 有验证未通过的item，不继续执行
     }
 
-    // 所有验证都通过，继续执行
-    selectedItems.value = selectedChildren
-    currentItemIndex.value = 0
-
-    // 更新详情页面的数据
-    updateItemDetailTrees()
-
-    // 切换到详情页面
+    // 所有验证都通过，切换到详情页面
     appContentRef.value.goToStage(2)
 
-    // 成功进入详情页面后，清空items表格的选中状态
-    items.children.forEach(child => {
-      child.setSelection(false)
-    })
+    // 延迟清空items表格的选中状态，让ItemConditionDetail组件先初始化
+    setTimeout(() => {
+      items.children.forEach(child => {
+        child.setSelection(false)
+      })
+    }, 100)
   } else {
     console.log('No items selected')
   }
 }
 
-/**
- * 更新详情页面的树结构数据
- * @description 把editingNode.node设为正在编辑节点的一个拷贝，将itemCondition中的输入框指向这个拷贝中的节点
- */
-function updateItemDetailTrees() {
-  if (selectedItems.value.length === 0) return
 
-  const currentItem = selectedItems.value[currentItemIndex.value]
-  editingNode.node = currentItem.clone()
-  const node = editingNode.node
 
-  // 使用值拷贝而不是引用设置
-  const setValueFromItem = (sourcePath: string[], targetPath: string[], targetTree: VarTree) => {
-    const sourceNode = node.findNodeByPath(sourcePath)
-    if (sourceNode) {
-      const targetNode = targetTree.findNodeByPath(targetPath)
-      if (targetNode) {
-        // replaceNodeByPath
-        targetTree.replaceNodeByPath(sourceNode, targetPath)
-        // targetNode.forceSetValue(sourceNode.getValue())
-      }
-    }
-  }
 
-  // Header数据
-  setValueFromItem(['item'], ['item'], itemDetailHeaderTree)
-  setValueFromItem(['material'], ['material'], itemDetailHeaderTree)
 
-  // Sales数据
-  setValueFromItem(['orderQuantity'], ['orderQuantityAndDeliveryDate', 'orderQuantity'], itemDetailSalesTree)
-  setValueFromItem(['orderQuantityUnit'], ['orderQuantityAndDeliveryDate', 'orderQuantityUnit'], itemDetailSalesTree)
-  setValueFromItem(['reqDelivDate'], ['orderQuantityAndDeliveryDate', 'reqDelivDate'], itemDetailSalesTree)
-  setValueFromItem(['netValue'], ['generalSalesData', 'netValue'], itemDetailSalesTree)
-  setValueFromItem(['netValueUnit'], ['generalSalesData', 'netValueUnit'], itemDetailSalesTree)
-  setValueFromItem(['pricingDate'], ['generalSalesData', 'pricingDate'], itemDetailSalesTree)
-  setValueFromItem(['orderProbability'], ['generalSalesData', 'orderProbability'], itemDetailSalesTree)
 
-  // Condition数据 - 也使用值拷贝
-  setValueFromItem(['orderQuantity'], ['orderQuantity'], itemDetailConditionTree)
-  setValueFromItem(['orderQuantityUnit'], ['orderQuantityUnit'], itemDetailConditionTree)
-  setValueFromItem(['netValue'], ['netValue'], itemDetailConditionTree)
-  setValueFromItem(['netValueUnit'], ['netValueUnit'], itemDetailConditionTree)
-  setValueFromItem(['taxValue'], ['taxValue'], itemDetailConditionTree)
-  setValueFromItem(['taxValueUnit'], ['taxValueUnit'], itemDetailConditionTree)
-  setValueFromItem(['pricingElements'], ['pricingElements'], itemDetailConditionTree)
-
-  // 强制更新界面显示
-  if (appContentRef.value) {
-    appContentRef.value.forceUpdate()
-  }
-}
-
-/**
- * @description Pricing Element Rules
- * @description Deletion: 删除后传入后端，进行验证并返回规范化的数据/破坏的值则把validation设为false
- */
-async function handlePricingElementsDeletion() {
-  const pricingElementsNode = itemDetailConditionTree.findNodeByPath(['pricingElements'])!
-  const deletionNodes = pricingElementsNode.getSelectedChildren()
-  pricingElementsNode.children = pricingElementsNode.children.filter(child => !deletionNodes.includes(child))
-  await validateCurrentItemConditionData()
-  itemDetailConditionTree.forceUpdate()
-}
-
-/**
- * @description 尝试添加一个新行 
- */
-async function handlePricingElementsAdditionButtonClick() {
-  const pricingElementsNode = itemDetailConditionTree.findNodeByPath(['pricingElements'])!
-  const newItem = createNodeFromConfig(pricingElementsNode.config.childTemplate!)
-  newItem.readonly = false
-  pricingElementsNode.addChild(newItem)
-  itemDetailConditionTree.forceUpdate()
-}
-/**
- * @description 调用handlePricingElementsDeletion删除选中的记录并验证
- */
-async function handlePricingElementsRemoveButtonClick() {
-  await handlePricingElementsDeletion()
-}
-
-/**
- * @description Pricing Element Rules
- * @description Addition: 直接传入后端进行验证并返回规范化的数据/破坏的值则把validation设为false
- * @description 无需编写，直接跟着handleEnterFromNodeItemCondition走验证逻辑即可
- */
-
-/**
- * 验证当前itemCondition数据并同步到原始item
- * @description 把editingNode.node中的数据发送给后端验证，验证成功后更新原始item的数据
- * @description 统一使用了itemstabquery
- */
-async function validateCurrentItemConditionData() {
-  // 如果未更改过(config.data.validation is true) 直接返回
-  if (editingNode.node.config.data?.validation) {
-    console.log('数据未更改，无需验证', editingNode.node)
-    return true
-  }
-  const nodeList = [editingNode.node]
-  const isValidate = await itemsTabQuery(nodeList)
-  if (isValidate) {
-    console.log('数据验证成功')
-    // 同步数据
-    const currentNode = selectedItems.value[currentItemIndex.value]
-    currentNode.forceSetValue(editingNode.node.getValue())
-  } else {
-    console.log('数据验证失败')
-  }
-  return isValidate
-}
-
-/**
- * 处理用户输入事件，立即将维护的节点标记为未验证
- */
-function handleInputFromNodeItemCondition(_node: VarNode, value: string, data: any) {
-  if (!editingNode.node.config.data) {
-    editingNode.node.config.data = {}
-  }
-  editingNode.node.config.data.validation = false
-}
-
-/**
- * 切换到上一个/下一个选中的item
- * @description 安全的方法，会先验证当前数据
- */
-async function switchToItem(index: number) {
-  const isValid = await validateCurrentItemConditionData()
-  if (isValid) {
-    _switchToItemWhenValidate(index)
-  } else {
-    console.log('数据验证失败，无法切换')
-  }
-}
-function _switchToItemWhenValidate(index: number) {
-  if (index >= 0 && index < selectedItems.value.length) {
-    currentItemIndex.value = index
-    updateItemDetailTrees()
-  }
-}
-
-/**
- * 切换到上一个item
- * @description 包装switchToItem方法
- */
-async function switchToPreviousItem() {
-  switchToItem(currentItemIndex.value - 1)
-}
-
-/**
- * 切换到下一个item
- * @description 包装switchToItem方法
- */
-async function switchToNextItem() {
-  switchToItem(currentItemIndex.value + 1)
-}
-
-/**
- * 保存itemCondition数据并返回stage1
- */
-async function saveItemConditionData(): Promise<boolean> {
-  const isValid = await validateCurrentItemConditionData()
-  if (isValid) {
-    // 验证成功，返回stage1
-    appContentRef.value.goToStage(1)
-    console.log('数据已验证并返回stage1')
-    return true
-  } else {
-    console.log('数据验证失败，无法保存')
-    return false
-  }
-}
-
-/**
- * 取消itemCondition编辑，返回stage1
- */
-function cancelItemCondition() {
-  // 重置当前选中items的validation状态，避免因为未完成的编辑导致下次无法进入
-  if (selectedItems.value.length > 0) {
-    selectedItems.value.forEach(item => {
-      if (item.config.data?.validation === false) {
-        // 将validation状态重置为undefined，表示需要重新验证
-        item.config.data.validation = undefined
-      }
-    })
-  }
-  selectedItems.value = []
-  // 不保存数据，直接返回stage1
-  appContentRef.value.goToStage(1)
-}
-
-/**
- * 处理itemCondition页面的数据变更事件（回车或失去焦点）
- */
-async function handleEnterFromNodeItemCondition(_node: VarNode, value: string, data: any) {
-  // 关键操作：回车时验证数据
-  await validateCurrentItemConditionData()
-}
 
 /**
  * @description 询价单变量树的enter-from-node事件处理
@@ -789,90 +515,37 @@ async function handleExecute(currentStage: number, targetStage: number) {
       </VarBox>
     </template>
     <template #[`stage-itemCondition`]>
-      <!-- Item切换导航 -->
-      <div class="item-navigation" v-if="selectedItems.length > 1">
-        <button
-          class="item-nav-button item-prev-button"
-          @click="switchToPreviousItem"
-          :disabled="currentItemIndex === 0"
-        >
-          ← Previous
-        </button>
-        <span class="item-counter">
-          Item {{ currentItemIndex + 1 }} of {{ selectedItems.length }}
-        </span>
-        <button
-          class="item-nav-button item-next-button"
-          @click="switchToNextItem"
-          :disabled="currentItemIndex === selectedItems.length - 1"
-        >
-          Next →
-        </button>
-      </div>
-
-      <VarBox
-        :tree="itemDetailHeaderTree"
-      ></VarBox>
-      <!-- 可选的tab Sales和Conditions -->
-      <!-- tab bar -->
-      <FilterTabs
-        :tabs="[{label:'Sales',value:0},{label:'Conditions',value:1}]"
-        @tab-selected="handleItemConditionTabClick" class="reverse middle hide-bottom-line"
-        :initialActiveTab="0"
-      />
-      <!-- Sales -->
-      <VarBox
-        v-if="itemConditionTabBarStage==0"
-        :tree="itemDetailSalesTree"
-        @enter-from-node="handleEnterFromNodeItemCondition"
-        @input-from-node="handleInputFromNodeItemCondition"
-      ></VarBox>
-      <!-- Conditions -->
-      <VarBox
-        v-else
-        :tree="itemDetailConditionTree"
-        @enter-from-node="handleEnterFromNodeItemCondition"
-        @input-from-node="handleInputFromNodeItemCondition"
+      <h2>Item 详细信息 (使用 ItemConditionKit)</h2>
+      <ItemConditionDetail
+        :kit="itemConditionKit"
+        @save="handleSave"
+        @cancel="handleItemConditionCancel"
+        @validation-failed="handleValidationFailed"
+        @validation-success="handleValidationSuccess"
       >
+        <!-- 传递 pricing elements 的额外按钮 -->
         <template #[`itemDetailConditions-pricingElements--extra-buttons`]>
           <button
-            class = "execute-button table-extra-button item-condition-button"
-            @click="handlePricingElementsAdditionButtonClick"
-            :disabled="onDisplayState"
+            class="execute-button table-extra-button item-condition-button"
+            @click="() => {}"
           >
             New
           </button>
           <button
-            class = "execute-button table-extra-button item-condition-button"
-            @click="handlePricingElementsRemoveButtonClick"
-            :disabled="itemDetailConditionTree.findNodeByPath(['pricingElements'])?.getSelectedChildren().length == 0"
+            class="execute-button table-extra-button item-condition-button"
+            @click="() => {}"
           >
             Delete
           </button>
         </template>
-      </VarBox>
+      </ItemConditionDetail>
     </template>
 
     <template #[`footer-content-right`]>
-      {{ appContentRef?.getCurrentStageName() }}
-      <!-- <button
-        v-if="appContentRef?.currentStage == 0"
-        class="nav-button next-button"
-        @click = "initializeCreation"
-      >
-        Continue
-      </button> -->
-      <template v-if="appContentRef?.currentStage == 2">
-        <button class="cancel-button" @click="cancelItemCondition">{{itemDetailStageCancelButtonLabel}}</button>
-        <button class="save-button" @click="saveItemConditionData" v-if="itemDetailStageExecuteButtonVisible">Save</button>
-      </template>
-      <!-- <button
-        v-if="appContentRef?.currentStage == 0"
-        class="nav-button next-button"
-        @click = "initializeCreationWithRefference"
-      >
-        Continue with Reference
-      </button> -->
+      <div class="app-content-footer-content-right">
+        {{ appContentRef?.getCurrentStageName() }}
+        <!-- ItemConditionDetail 组件会使用 teleport 将按钮显示在这里 -->
+      </div>
     </template>
 
   </AppContent>
