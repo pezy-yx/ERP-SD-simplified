@@ -28,7 +28,7 @@ export const customerSearch:SearchMethod[] = [
   }
 ]
 
-const bpParamSearchStructure = cns('dict', 'dict', 'params', null, false, {}, [
+const bpParamSearchStructure = cns('dict', 'dict', 'params', null, false, {hideLabel:true}, [
   cns('dict','dict','Condition Search',null,false,{},[
     cns('string','leaf','Customer',null,false,{searchMethods:customerSearch},[]),
     cns('string','leaf','City',null,false,{},[]),
@@ -83,6 +83,22 @@ export const bpSearch: SearchMethod[] = [
     name: '业务伙伴搜索',
     paramTree: bpParamSearchTree,
     serviceUrl: '/api/search/business-partner'
+  }
+]
+
+export const GLAccountSearch: SearchMethod[] = [
+  {
+    name: 'G/L Account search',
+    paramTree: null,
+    serviceUrl: '/api/search/gl-account',
+  }
+]
+
+export const CurrencyUnitSearch: SearchMethod[] = [
+  {
+    name: 'Currency Unit search',
+    paramTree: null,
+    serviceUrl: '/api/search/currency-unit',
   }
 ]
 
