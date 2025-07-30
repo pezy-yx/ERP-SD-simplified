@@ -33,10 +33,10 @@ URL: /api/so/search
 Content-Type: application/json
 
 {
-    "so_id": "string", // (可选), 销售订单号
-    "status": "string", // (可选), 整体状态 (例如: 'New', 'Open', 'In progress', 'Completed')
-    "customer_no": "string", // (可选), 售达方客户号
-    "customer_reference": "string" // (可选), 客户参考
+    "so_id": "string", //
+    "status": "string", //
+    "customer_no": "string", //
+    "customer_reference": "string" //原数据库关系没有，需要补充进sales_order_hdr后面
 }
 
 成功响应 (Success Response):
@@ -48,7 +48,7 @@ Content-Type: application/json
     "data": [
         {
             "so_id": "string", // 销售订单号
-            "soldToPartyName": "string", // 售达方名称
+            "soldToPartyName": "string", // 售达方名称，这个先保持和customer_no一致
             "customer_no": "string", // 售达方客户号
             "customer_reference": "string", // 客户参考
             "req_delivery_date": "string", // 请求交货日期 (YYYY-MM-DD)
@@ -103,28 +103,28 @@ Content-Type: application/json
             "so_id": "string", // 销售订单号
             "soldToParty": "string", // 售达方
             "shipToParty": "string", // 送达方
-            "customerReference": "string", // 客户参考
-            "netValue": "string", // 净值
-            "netValueUnit": "string", // 净值单位
-            "customerReferenceDate": "string" // 客户参考日期 (YYYY-MM-DD)
+            "customerReference": "string", //原数据库关系没有，需要补充
+            "netValue": "string", // 净值，同net_value
+            "netValueUnit": "string", // 净值单位，原数据库关系没有，需要补充
+            "customerReferenceDate": "string" // 客户参考日期 (YYYY-MM-DD) //原数据库关系没有，需要补充
         },
         "itemOverview": {
             "reqDelivDate": "string", // 请求交货日期 (YYYY-MM-DD)
             "items": [ // 销售订单项目列表
                 {
-                    "item": "string", // 项目号
-                    "material": "string", // 物料号
-                    "orderQuantity": "string", // 订单数量
-                    "orderQuantityUnit": "string", // 订单数量单位
-                    "description": "string", // 描述
+                    "item": "string", // 项目号，原数据库关系没有
+                    "material": "string", // 物料号，同mat_id
+                    "orderQuantity": "string", // 订单数量，同quantity
+                    "orderQuantityUnit": "string", // 订单数量单位,同su
+                    "description": "string", // 描述,原数据库关系没有
                     "reqDelivDate": "string", // 请求交货日期 (YYYY-MM-DD)
-                    "netValue": "string", // 净值
-                    "netValueUnit": "string", // 净值单位
-                    "taxValue": "string", // 税值
-                    "taxValueUnit": "string", // 税值单位
-                    "pricingDate": "string", // 定价日期 (YYYY-MM-DD)
-                    "orderProbability": "string", // 订单概率
-                    "pricingElements": [ // 定价元素列表
+                    "netValue": "string", // 净值，同net_price
+                    "netValueUnit": "string", // 净值单位，原数据库关系没有
+                    "taxValue": "string", // 税值。原数据库关系没有
+                    "taxValueUnit": "string", // 税值单位，原数据库关系没有
+                    "pricingDate": "string", // 定价日期 ，原数据库关系没有(YYYY-MM-DD)
+                    "orderProbability": "string", // 订单概率，原数据库关系没有
+                    "pricingElements": [ // 定价元素列表，原数据库关系没有，可能需要创建新表
                         {
                             "cnty": "string", // 国家
                             "name": "string", // 条件名称 (例如: "Base Price", "Tax")

@@ -240,6 +240,12 @@ const applications = ref<ApplicationInfo[]>([
           "routePath": "/vartree-&-varinput-tutorial",
           "tags": ["example"]
         },
+        {
+          "applicationName": "ItemConditionKit Test",
+          "lore": "测试新的ItemConditionKit工具类架构",
+          "routePath": "/test/item-condition-kit",
+          "tags": ["test"]
+        },
       ]
 );
 

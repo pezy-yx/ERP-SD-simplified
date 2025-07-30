@@ -50,11 +50,11 @@ JSON
   "message": "查询成功",
   "data": [
     {
-      "customerId": "string", // 业务伙伴ID
+      "customerId": "string", // 业务伙伴ID，跟数据库关系中customer_id相同
       "name": "string",       // 业务伙伴名称
       "city": "string",       // 城市
       "country": "string",    // 国家
-      "bpRole": "string"      // BP角色
+      "bpRole": "string"      // BP角色，同bp_role
     },
     // ...更多业务伙伴对象
   ]
@@ -88,19 +88,19 @@ JSON
   "data": {
     "bpIdAndRoleSection": {
       "customerId": "string",
-      "bpRole": "string" // 例如："Business Partner", "Customer", "FI Customer"
+      "bpRole": "string" //
     },
     "name": {
-      "title": "string", // 例如："Mr.", "Mrs.", "Ms.", "Company"
+      "title": "string", //
       "name": "string"
     },
     "searchTerms": {
-      "searchTerm": "string"
+      "searchTerm": "string" //原数据库关系里没有，需要注意，需要补充在customer表后面
     },
     "address": {
       "country": "string",
       "street": "string",
-      "postalCode": "string",
+      "postalCode": "string", //同postal_code
       "city": "string"
     }
   }
@@ -130,9 +130,9 @@ JSON
 
 {
   "bpIdAndRoleSection": {
-    "customerId": "string", // 修改时包含现有ID，创建时可为空或不传
-    "bpRole": "string",     // 例如："Business Partner", "Customer", "FI Customer"
-    "type": "string"        // 仅前端模拟时使用，后端应根据实际情况判断类型 (e.g., "person", "group", "org")
+    "customerId": "string", 
+    "bpRole": "string",     
+    "type": "string"        //  "person", "group", "org"三种，原数据库关系里没有，需要注意
   },
   "name": {
     "title": "string",

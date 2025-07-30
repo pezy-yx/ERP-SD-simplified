@@ -497,4 +497,101 @@ router.post('/search', (req, res) => {
   }
 });
 
+// 开票凭证物品批量查询/验证 - 重定向到inquiry服务
+router.post('/items-tab-query', (req, res) => {
+  console.log('开票凭证物品批量查询:', req.body);
+
+  const items = req.body;
+  let totalNetValue = 0;
+  let totalExpectOralVal = 0;
+  const breakdowns = [];
+
+  // 处理每个物品
+  items.forEach((item, index) => {
+    // 模拟计算逻辑
+    const basePrice = parseFloat(item.orderQuantity || 0) * 15; // 假设单价15
+    const taxRate = 0.15; // 15%税率
+    const netValue = basePrice;
+    const taxValue = basePrice * taxRate;
+
+    totalNetValue += netValue;
+    totalExpectOralVal += netValue + taxValue;
+
+    // 创建详细的定价元素
+    const pricingElements = [
+      {
+        cnty: 'US',
+        name: 'Base Price',
+        amount: netValue.toFixed(2),
+        city: 'USD',
+        per: '1',
+        uom: item.orderQuantityUnit || 'EA',
+        conditionValue: netValue.toFixed(2),
+        curr: 'USD',
+        status: 'Active',
+        numC: '1',
+        atoMtsComponent: '',
+        oun: '',
+        cconDe: '',
+        un: '',
+        conditionValue2: netValue.toFixed(2),
+        cdCur: 'USD',
+        stat: true
+      },
+      {
+        cnty: 'US',
+        name: 'Tax',
+        amount: taxValue.toFixed(2),
+        city: 'USD',
+        per: '1',
+        uom: item.orderQuantityUnit || 'EA',
+        conditionValue: taxValue.toFixed(2),
+        curr: 'USD',
+        status: 'Active',
+        numC: '2',
+        atoMtsComponent: '',
+        oun: '',
+        cconDe: '',
+        un: '',
+        conditionValue2: taxValue.toFixed(2),
+        cdCur: 'USD',
+        stat: true
+      }
+    ];
+
+    // 构建返回的物品数据
+    const breakdown = {
+      ...item,
+      netValue: netValue.toFixed(2),
+      netValueUnit: 'USD',
+      taxValue: taxValue.toFixed(2),
+      taxValueUnit: 'USD',
+      pricingDate: new Date().toISOString().split('T')[0],
+      orderProbability: '95',
+      pricingElements: pricingElements
+    };
+
+    breakdowns.push(breakdown);
+  });
+
+  // 返回响应
+  res.json({
+    success: true,
+    message: '价格查询成功',
+    data: {
+      result: {
+        allDataLegal: 1, // 1表示所有数据合法，0表示有不合法数据
+        badRecordIndices: [] // 空数组表示没有错误的记录
+      },
+      generalData: {
+        netValue: totalNetValue.toFixed(2),
+        netValueUnit: 'USD',
+        expectOralVal: totalExpectOralVal.toFixed(2),
+        expectOralValUnit: 'USD'
+      },
+      breakdowns: breakdowns
+    }
+  });
+});
+
 module.exports = router;
