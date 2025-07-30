@@ -213,10 +213,21 @@ const routes = [
         component: ChangeBillingDocument,
         meta: { title: 'Change Billing Document' }
       },
+      {
         path: 'material-documents-overview',
         name: 'MaterialDocumentOverview',
         component: MaterialDocumentOverview,
         meta: { title: 'MaterialDocumentOverview' }
+      },{
+        path: 'posting-incoming-payments',
+        name: 'PostingIncomingPayments',
+        component: () => import('@/views/postingIncomingPayments/postingIncomingPayments.vue'),
+        meta: { title: 'Posting Incoming Payments' }
+      },{
+        path: 'display-journal-entry/:id',
+        name: 'DisplayJournalEntry',
+        component: () => import('@/views/postingIncomingPayments/displayJournalEntry.vue'),
+        meta: { title: 'Display Journal Entry' }
       }
     ]
   },
