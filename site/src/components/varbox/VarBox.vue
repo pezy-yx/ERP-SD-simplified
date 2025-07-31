@@ -6,7 +6,7 @@
     :readonly="props.tree.root?.readonly"
     :config="props.tree.root?.config"
     :indentLevel="props.indentLevel"
-    :showLabel="showLabel"
+    :showLabel="props.showLabel ?? true"
     :wrapperStyle="props.wrapperStyle"
     @update="handleUpdate"
     v-bind="$attrs"
@@ -22,14 +22,12 @@
 <script lang="ts" setup>
 import VarInput from '@/components/varbox/VarInput.vue'
 import { VarTree } from '@/utils/VarTree';
-import { computed } from 'vue'
 const props = defineProps<{
   tree: VarTree,
   indentLevel?: number, 
   showLabel?: boolean,
   wrapperStyle?: Record<string, any>
   path?: string[]
-  hideLabel?: boolean
 }>()
 const emit = defineEmits<{
   (e: 'update', payload: any): void
@@ -37,10 +35,4 @@ const emit = defineEmits<{
 function handleUpdate(payload: any) {
   emit('update', payload)
 }
-const showLabel = computed(()=>{
-  if(props.hideLabel == true){
-    return false
-  }
-  return true
-})
 </script>

@@ -110,7 +110,7 @@ async function handleItemsTableClick() {
       child.setSelection(false)
     })
 
-    emit('validation-success', selectedItems.value as VarNode[])
+    emit('validation-success', selectedItems.value)
   } else {
     console.log('No items selected')
     // 没有选中物品时，不应该进入详细信息页面
@@ -192,14 +192,14 @@ function updateItemDetailTrees() {
   isDataReady.value = false
 
   const currentItem = selectedItems.value[currentItemIndex.value]
-  editingNode.value.node = currentItem.clone() as VarNode as any
+  editingNode.value.node = currentItem.clone()
   const node = editingNode.value.node
 
-  console.log('editingNode 初始值:', node!.getValue())
+  console.log('editingNode 初始值:', node.getValue())
 
   // 使用引用传递而不是值拷贝设置
   const setNodeFromItem = (sourcePath: string[], targetPath: string[], targetTree: VarTree) => {
-    const sourceNode = node!.findNodeByPath(sourcePath)
+    const sourceNode = node.findNodeByPath(sourcePath)
     if (sourceNode) {
       // 使用 replaceNodeByPath 让目标树的节点引用源节点
       targetTree.replaceNodeByPath(sourceNode, targetPath)
@@ -257,7 +257,7 @@ async function validateCurrentItemConditionData(): Promise<boolean> {
   }
 
   const nodeList = [editingNode.value.node]
-  const isValid = await validateItems(nodeList as VarNode[])
+  const isValid = await validateItems(nodeList)
 
   if (isValid) {
     console.log('数据验证成功')
@@ -284,7 +284,7 @@ async function validateCurrentItemConditionDataOnly(): Promise<boolean> {
   }
 
   const nodeList = [editingNode.value.node]
-  const isValid = await validateItems(nodeList as VarNode[])
+  const isValid = await validateItems(nodeList)
 
   if (isValid) {
     console.log('数据验证成功（仅验证，未同步）')
@@ -523,14 +523,14 @@ defineExpose({
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['orderQuantityAndDeliveryDate','orderQuantityUnit']"
-          :hideLabel="true"
+          :showLabel="false"
         />
       </template>
       <template #[`itemDetailSales-generalSalesData-netValue--extra`]>
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['generalSalesData','netValueUnit']"
-          :hideLabel="true"
+          :showLabel="false"
         />
       </template>
 
@@ -539,21 +539,21 @@ defineExpose({
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['orderQuantityUnit']"
-          :hideLabel="true"
+          :showLabel="false"
         />
       </template>
       <template #[`itemDetailConditions-netValue--extra`]>
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['netValueUnit']"
-          :hideLabel="true"
+          :showLabel="false"
         />
       </template>
       <template #[`itemDetailConditions-taxValue--extra`]>
         <VarBox
           :tree="currentDetailTree.tree"
           :path="['taxValueUnit']"
-          :hideLabel="true"
+          :showLabel="false"
         />
       </template>
     >
