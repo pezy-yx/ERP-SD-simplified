@@ -26,7 +26,7 @@ import { computed } from 'vue'
 const props = defineProps<{
   tree: VarTree,
   indentLevel?: number, 
-  showLabel?: boolean,
+  // showLabel?: boolean,
   wrapperStyle?: Record<string, any>
   path?: string[]
   hideLabel?: boolean
