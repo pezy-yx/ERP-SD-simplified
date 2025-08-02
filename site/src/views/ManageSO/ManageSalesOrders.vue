@@ -146,7 +146,7 @@ import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFr
 import { bpSearch, quotationIdSearch, salesOrderIdSearch } from '@/utils/searchMethods';
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || '';
+const API_BASE_URL = window.API_BASE_URL || '';
 
 import AppContent from '@/components/applicationContent/AppContent.vue';
 
