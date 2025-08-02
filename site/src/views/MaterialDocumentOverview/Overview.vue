@@ -119,7 +119,7 @@ import VarBox from '@/components/varbox/VarBox.vue';
 import { ref, Ref, computed, nextTick, watch } from 'vue';
 import { createTreeFromConfig, cns } from '@/utils/VarTree';
 import { materialSearch, quotationIdSearch } from '@/utils/searchMethods';
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || '';
+const API_BASE_URL = window.API_BASE_URL || '';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 
 const appContentRef = ref(null) as any;
