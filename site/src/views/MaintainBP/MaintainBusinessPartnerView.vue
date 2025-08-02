@@ -67,7 +67,7 @@ import { bpSearch, relationSearch } from '@/utils/searchMethods';
 
 // 定义一个基础的API URL，你可以根据你的项目配置进行调整
 // 在实际项目中，这通常通过环境变量配置
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || '';
+const API_BASE_URL = window.API_BASE_URL || '';
 
 const customerQueryStructure = cns("dict", "dict", "query", null, false, {hideLabel: true}, [
   cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID")

@@ -229,7 +229,7 @@ interface QuotationNodeStructure extends NodeStructure {
 // ====================================================================
 
 // API 基础 URL，从环境变量获取，如果未设置则为空字符串
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || '';
+const API_BASE_URL = window.API_BASE_URL || '';
 // 对 AppContent 组件的引用，用于调用其内部方法（如 goToStage）
 const appContentRef = ref(null) as Ref<any>; // 明确指定 Ref 的类型为 any，以便访问 AppContent 暴露的方法
 
