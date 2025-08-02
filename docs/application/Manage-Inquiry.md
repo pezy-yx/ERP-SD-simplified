@@ -188,79 +188,11 @@ Inquiry询价单管理系统包含三个主要应用：
 
 ### 4. 物品批量查询 - `/inquiry/items-tab-query`
 
-**请求方法**: POST
+**接口地址：** `/inquiry/items-tab-query`
 
-**功能**: 批量查询物品详细信息，包括定价元素
+**接口描述：** 询价单物品验证服务端点。详细的接口规范和数据结构请参考：[Item组件接口文档](../components/item.md)
 
-**请求参数**:
-```json
-[
-  {
-    "item": "string",
-    "material": "string",
-    "orderQuantity": "string",
-    "orderQuantityUnit": "string",
-    "description": "string",
-    "reqDelivDate": "string",
-    "netValue": "string",
-    "pricingDate": "string",
-    "orderProbability": "string"
-  }
-]
-```
-
-**响应格式**:
-```json
-{
-  "success": true,
-  "message": "批量查询成功",
-  "data": {
-    "summary": {
-      "totalNetValue": 4300.00,
-      "totalExpectOralVal": 4730.00,
-      "currency": "USD"
-    },
-    "breakdowns": [
-      {
-        "item": "1",
-        "material": "MAT-001", 
-        "orderQuantity": "100",
-        "orderQuantityUnit": "EA",
-        "description": "物料描述 1",
-        "reqDelivDate": "2024-02-15",
-        "netValue": 1500.00,
-        "netValueUnit": "USD",
-        "taxValue": 225.00,
-        "taxValueUnit": "USD",
-        "pricingDate": "2024-01-15",
-        "orderProbability": "100",
-        "pricingElements": [
-          {
-            "cnty": "US",
-            "name": "Base Price",
-            "amount": "1500.00",
-            "city": "USD",
-            "per": "1",
-            "uom": "EA",
-            "conditionValue": "1500.00",
-            "curr": "USD",
-            "status": "Active",
-            "numC": "1",
-            "atoMtsComponent": "",
-            "oun": "",
-            "cconDe": "",
-            "un": "",
-            "conditionValue2": "1500.00",
-            "cdCur": "USD",
-            "stat": true
-          }
-        ]
-      }
-    ],
-    "badRecordIndices": []
-  }
-}
-```
+**使用场景：** 询价单中物品信息的实时验证和定价计算
 
 ## 数据字段说明
 
