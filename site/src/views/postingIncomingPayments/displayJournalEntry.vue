@@ -3,7 +3,10 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const API_BASE_URL = window.API_BASE_URL || '';
+let API_BASE_URL = window.API_BASE_URL || '';
+onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || ''
+})
 
 const journalEntryNumber = ref<string | null>(null);
 const journalEntryDetails = ref<JournalEntryDetailData | null>(null); // 明确类型

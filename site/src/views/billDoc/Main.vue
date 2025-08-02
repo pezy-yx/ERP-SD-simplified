@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, Ref, computed} from 'vue'
+import {ref, Ref, computed, onMounted} from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue';
 import AppContent from '@/components/applicationContent/AppContent.vue'
 import {createTreeFromConfig, cns, VarNodeValue, VarNode} from '@/utils/VarTree';
@@ -10,7 +10,10 @@ import {
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
-const API_BASE_URL = window.API_BASE_URL || ''
+let API_BASE_URL = window.API_BASE_URL || ''
+onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || ''
+})
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'
