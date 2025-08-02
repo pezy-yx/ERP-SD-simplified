@@ -51,10 +51,13 @@ JSON
   "data": [
     {
       "customerId": "string", // 业务伙伴ID，跟数据库关系中customer_id相同
-      "name": "string",       // 业务伙伴名称
+      "name": "string",       // org和group类型名称
+      "firstName": "string"  // person类型名称，原数据库关系没有该字段，需要补充
+      "lastName": "string" //原数据库关系没有该字段，需要补充
       "city": "string",       // 城市
       "country": "string",    // 国家
-      "bpRole": "string"      // BP角色，同bp_role
+      "bpRole": "string",      // BP角色，同bp_role
+      "type":  "string" //客户类型，person/group/org，原数据库关系没有该字段，需要补充
     },
     // ...更多业务伙伴对象
   ]
@@ -89,10 +92,13 @@ JSON
     "bpIdAndRoleSection": {
       "customerId": "string",
       "bpRole": "string" //
+      "type":  "string" //客户类型，person/group/org，原数据库关系没有该字段，需要补充
     },
     "name": {
       "title": "string", //
-      "name": "string"
+      "name": "string",
+      "firstName": "string",  // person类型名称，原数据库关系没有该字段，需要补充
+      "lastName": "string" //原数据库关系没有该字段，需要补充
     },
     "searchTerms": {
       "searchTerm": "string" //原数据库关系里没有，需要注意，需要补充在customer表后面
@@ -136,7 +142,9 @@ JSON
   },
   "name": {
     "title": "string",
-    "name": "string"
+    "name": "string",
+    "firstName": "string",  // person类型名称，原数据库关系没有该字段，需要补充
+    "lastName": "string" //原数据库关系没有该字段，需要补充
   },
   "searchTerms": {
     "searchTerm": "string"
