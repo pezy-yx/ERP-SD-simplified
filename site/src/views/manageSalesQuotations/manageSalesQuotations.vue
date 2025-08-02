@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, Ref, computed } from 'vue';
+import { ref, Ref, computed, onMounted } from 'vue';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
 import { bpSearch, quotationIdSearch } from '@/utils/searchMethods';
@@ -146,7 +146,7 @@ const createQuotationFromInquiry = async () => {
 
     try {
         // 调用后端接口创建报价单
-        const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
+        const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000'; // 无需修改
 
         // 请确保这里的URL与您后端新增的接口路径完全一致
         const response = await fetch(`${API_BASE_URL}/api/quotation/create-quotation-from-inquiry`, {
@@ -229,7 +229,10 @@ interface QuotationNodeStructure extends NodeStructure {
 // ====================================================================
 
 // API 基础 URL，从环境变量获取，如果未设置则为空字符串
-const API_BASE_URL = window.API_BASE_URL || '';
+let API_BASE_URL = window.API_BASE_URL || '';
+onMounted(() => {
+    API_BASE_URL = window.API_BASE_URL || '';
+})
 // 对 AppContent 组件的引用，用于调用其内部方法（如 goToStage）
 const appContentRef = ref(null) as Ref<any>; // 明确指定 Ref 的类型为 any，以便访问 AppContent 暴露的方法
 

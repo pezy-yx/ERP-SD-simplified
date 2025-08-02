@@ -1,6 +1,8 @@
 import axios, { AxiosError } from 'axios'; // 导入 AxiosError 类型
 
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
+const getAPIBaseUrl = () => {
+  return window.API_BASE_URL || 'http://localhost:3000'
+}
 
 // // 定义统一的 API 响应类型
 // interface ApiResponse<T> {

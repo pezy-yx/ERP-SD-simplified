@@ -46,7 +46,7 @@ const currentDetailTree = computed(() => {
 })
 
 // API 基础 URL
-const API_BASE_URL = window.API_BASE_URL || ''
+let API_BASE_URL = window.API_BASE_URL || ''
 
 /**
  * 处理 Items 表格的按钮点击事件
@@ -433,6 +433,7 @@ async function initializeComponent() {
 
 // 生命周期钩子
 onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || ''
   nextTick(() => {
     checkTeleportTarget()
     initializeComponent()

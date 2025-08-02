@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, Ref, computed} from 'vue'
+import {ref, Ref, computed, onMounted} from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue';
 import AppContent from '@/components/applicationContent/AppContent.vue'
 import {createTreeFromConfig, createNodeFromConfig, cns, VarTree, VarNode, NodeStructure, isNodeStructure, VarNodeValue} from '@/utils/VarTree';
@@ -8,7 +8,10 @@ import {
   relationSearch
 } from '@/utils/searchMethods'
 
-const API_BASE_URL = window.API_BASE_URL || ''
+let API_BASE_URL = window.API_BASE_URL || ''
+onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || ''
+})
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'

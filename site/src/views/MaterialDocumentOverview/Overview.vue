@@ -116,11 +116,14 @@
 
 <script setup lang="ts">
 import VarBox from '@/components/varbox/VarBox.vue';
-import { ref, Ref, computed, nextTick, watch } from 'vue';
+import { ref, Ref, computed, nextTick, onMounted } from 'vue';
 import { createTreeFromConfig, cns } from '@/utils/VarTree';
 import { materialSearch, quotationIdSearch } from '@/utils/searchMethods';
-const API_BASE_URL = window.API_BASE_URL || '';
 import AppContent from '@/components/applicationContent/AppContent.vue';
+let API_BASE_URL = window.API_BASE_URL || '';
+onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || '';
+});
 
 const appContentRef = ref(null) as any;
 const currentAppStage = computed(() => appContentRef.value?.currentStage || 0);
