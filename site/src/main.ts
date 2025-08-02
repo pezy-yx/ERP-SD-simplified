@@ -17,7 +17,9 @@ declare global {
 }
 
 // 从环境变量读取并设置为全局变量
-window.API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000'
+window.API_BASE_URL = window.API_BASE_URL || 
+                      process.env.VUE_APP_API_BASE_URL || 
+                      'http://localhost:3000'
 
 // 创建Vue应用，把App.vue挂载到index.html的<div id="app">元素上
 // 启动页面渲染
