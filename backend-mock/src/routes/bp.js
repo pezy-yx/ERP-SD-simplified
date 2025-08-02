@@ -5,26 +5,26 @@ const router = express.Router();
 // 模拟的业务伙伴详细数据，与 customerCreateStructure 的结构保持一致
 const mockBusinessPartnersDetail = [ // 使用 let 以便可以修改
   {
-    bpIdAndRoleSection: { customerId: 'BP0001', bpRole: 'Customer' },
-    name: { title: 'Mr.', name: 'John Doe' },
+    bpIdAndRoleSection: { customerId: 'BP0001', bpRole: 'Customer', type: 'person' },
+    name: { title: 'Mr.', firstName: 'John', lastName: 'Doe' },
     searchTerms: { searchTerm: 'JD Holdings' },
     address: { country: 'USA', street: '123 Main St', postalCode: '10001', city: 'New York' }
   },
   {
-    bpIdAndRoleSection: { customerId: 'BP0002', bpRole: 'Business Partner' },
-    name: { title: 'Ms.', name: 'Jane Smith' },
+    bpIdAndRoleSection: { customerId: 'BP0002', bpRole: 'Business Partner', type: 'person' },
+    name: { title: 'Ms.', firstName: 'Jane', lastName: 'Smith' },
     searchTerms: { searchTerm: 'Smith Co' },
     address: { country: 'CAN', street: '456 Oak Ave', postalCode: 'V6B 1K4', city: 'Vancouver' }
   },
   {
-    bpIdAndRoleSection: { customerId: 'BP0003', bpRole: 'FI Customer' },
+    bpIdAndRoleSection: { customerId: 'BP0003', bpRole: 'FI Customer', type: 'org' },
     name: { title: 'Company', name: 'Global Corp' },
     searchTerms: { searchTerm: 'GC Services' },
     address: { country: 'DEU', street: '789 Pine Ln', postalCode: '10115', city: 'Berlin' }
   },
   {
-    bpIdAndRoleSection: { customerId: 'BP0004', bpRole: 'Customer' },
-    name: { title: 'Mr.', name: 'Alice Brown' },
+    bpIdAndRoleSection: { customerId: 'BP0004', bpRole: 'Customer', type: 'group' },
+    name: { title: 'Company', name: 'Alice Brown Group' },
     searchTerms: { searchTerm: 'AB Consulting' },
     address: { country: 'FRA', street: '10 Rue de la Paix', postalCode: '75001', city: 'Paris' }
   }
@@ -32,12 +32,16 @@ const mockBusinessPartnersDetail = [ // 使用 let 以便可以修改
 
 // Helper function: Transforms mock data to the format expected by the frontend search results list
 const transformBpDataForSearch = (data) => {
+  // 修改了这里，确保返回的数据结构包含了 firstName 和 name 字段
   return {
     customerId: data.bpIdAndRoleSection.customerId,
-    name: data.name.name,
+    name: data.name.name, // 组织和团体的名字
+    firstName: data.name.firstName, // 个人的名字
+    lastName: data.name.lastName,
     city: data.address.city,
     country: data.address.country,
-    bpRole: data.bpIdAndRoleSection.bpRole
+    bpRole: data.bpIdAndRoleSection.bpRole,
+    type: data.bpIdAndRoleSection.type
   };
 };
 
@@ -119,7 +123,7 @@ router.post('/create', (req, res) => {
 
     // 简单模拟成功创建，返回一个模拟的业务伙伴 ID
     const newCustomerId = `BP${(mockBusinessPartnersDetail.length + 1).toString().padStart(4, '0')}`;
-    // 确保新数据包含 customerId
+    // 确保新数据包含 customerId 和 type
     const createdBp = {
       ...newBpData,
       bpIdAndRoleSection: {
