@@ -400,6 +400,14 @@
 - `data.content.basicInfo`: 开票凭证基本信息
 - `data.content.itemOverview`: 项目概览信息，包含完整的items和定价元素
 
+### 4. 开票凭证物品验证接口
+
+**接口地址：** `POST /api/app/billing/items-tab-query`
+
+**接口描述：** 开票凭证物品验证服务端点。详细的接口规范和数据结构请参考：[Item组件接口文档](../components/item.md)
+
+**使用场景：** 开票凭证中物品信息的实时验证和定价计算
+
 ## 搜索接口集成
 
 ### 1. 售达方搜索接口

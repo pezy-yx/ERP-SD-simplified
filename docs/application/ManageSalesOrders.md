@@ -21,8 +21,9 @@
 }
 
 接口详情
+
 1. 销售订单搜索 (Search Sales Orders)
-URL: /api/so/search
+   URL: /api/so/search
 
 方法: POST
 
@@ -72,7 +73,7 @@ Content-Type: application/json
 }
 
 2. 获取销售订单详情 (Get Sales Order Details)
-URL: /api/so/get/{so_id}
+   URL: /api/so/get/{so_id}
 
 方法: GET (前端代码中实际是 POST，但 RESTful API 通常用 GET 获取详情，这里以前端实际调用为准，但建议后端改为 GET)
 
@@ -161,7 +162,7 @@ Content-Type: application/json
 }
 
 3. 创建销售订单 (Create Sales Order)
-URL: /api/so/create
+   URL: /api/so/create
 
 方法: POST
 
@@ -230,7 +231,7 @@ Content-Type: application/json
 }
 
 4. 修改销售订单 (Edit Sales Order)
-URL: /api/so/edit
+   URL: /api/so/edit
 
 方法: POST
 
@@ -296,7 +297,7 @@ Content-Type: application/json
 }
 
 5. 获取报价单详情 (Get Quotation Details for Creation)
-URL: /api/quotation/details
+   URL: /api/quotation/details
 
 方法: POST
 
@@ -365,119 +366,9 @@ Content-Type: application/json
 }
 
 6. 物品条件批量查询/验证 (Items Tab Query)
-URL: /api/app/inquiry/items-tab-query
 
-方法: POST
+**接口地址：** `api/so/items-tab-query`
 
-用途: 批量查询，用于获取或验证一组物品的净值、预期口头值以及详细的定价元素。此接口通常在物品详情页（或主表单中物品列表有修改时）调用，用于实时计算和验证。
+**接口描述：** 销售订单物品验证服务端点。详细的接口规范和数据结构请参考：[Item组件接口文档](../components/item.md)
 
-请求体 (Request Body):
-
-Content-Type: application/json
-
-[
-    {
-        "item": "string", // 项目号
-        "material": "string", // 物料
-        "orderQuantity": "string", // 订单数量
-        "orderQuantityUnit": "string", // 订单数量单位
-        "description": "string", // 描述
-        "reqDelivDate": "string", // 请求交货日期 (YYYY-MM-DD)
-        "netValue": "string", // 初始净值 (前端传入，后端用于计算)
-        "netValueUnit": "string", // 初始净值单位
-        "taxValue": "string", // 初始税值
-        "taxValueUnit": "string", // 初始税值单位
-        "pricingDate": "string", // 定价日期 (YYYY-MM-DD)
-        "orderProbability": "string", // 订单概率
-        "pricingElements": [ // 可选，如果前端有初始的定价元素
-            {
-                "cnty": "string",
-                "name": "string",
-                "amount": "string",
-                "city": "string",
-                "per": "string",
-                "uom": "string",
-                "conditionValue": "string",
-                "curr": "string",
-                "status": "string",
-                "numC": "string",
-                "atoMtsComponent": "string",
-                "oun": "string",
-                "cconDe": "string",
-                "un": "string",
-                "conditionValue2": "string",
-                "cdCur": "string",
-                "stat": "boolean"
-            }
-        ]
-    }
-    // ... 更多物品对象
-]
-
-成功响应 (Success Response):
-
-Content-Type: application/json
-
-{
-    "success": true,
-    "message": "价格查询成功",
-    "data": {
-        "result": {
-            "allDataLegal": 1, // number (1表示所有数据合法，0表示存在不合法数据)
-            "badRecordIndices": [] // number[], 存在不合法数据的物品索引列表 (从0开始，如果 allDataLegal 为 0 则有值)
-        },
-        "generalData": { // 整体数据概览
-            "netValue": "string", // 总净值
-            "netValueUnit": "string", // 总净值单位
-            "expectOralVal": "string", // 总预期口头值
-            "expectOralValUnit": "string" // 总预期口头值单位
-        },
-        "breakdowns": [ // 每个物品的详细信息，包含计算后的值
-            {
-                "item": "string", // 项目号
-                "material": "string", // 物料
-                "orderQuantity": "string", // 订单数量
-                "orderQuantityUnit": "string", // 订单数量单位
-                "description": "string", // 描述
-                "reqDelivDate": "string", // 请求交货日期 (YYYY-MM-DD)
-                "netValue": "number", // 计算后的净值
-                "netValueUnit": "string", // 计算后的净值单位
-                "taxValue": "number", // 计算后的税值
-                "taxValueUnit": "string", // 计算后的税值单位
-                "pricingDate": "string", // 定价日期 (YYYY-MM-DD)
-                "orderProbability": "string", // 订单概率
-                "pricingElements": [ // 计算后的定价元素列表
-                    {
-                        "cnty": "string",
-                        "name": "string",
-                        "amount": "string",
-                        "city": "string",
-                        "per": "string",
-                        "uom": "string",
-                        "conditionValue": "string",
-                        "curr": "string",
-                        "status": "string",
-                        "numC": "string",
-                        "atoMtsComponent": "string",
-                        "oun": "string",
-                        "cconDe": "string",
-                        "un": "string",
-                        "conditionValue2": "string",
-                        "cdCur": "string",
-                        "stat": "boolean"
-                    }
-                ]
-            }
-            // ... 更多物品的详细信息
-        ]
-    }
-}
-
-错误响应 (Error Response):
-
-Content-Type: application/json
-
-{
-    "success": false,
-    "message": "Batch query failed." // 或其他错误信息
-}
+**使用场景：** 销售订单中物品信息的实时验证和定价计算
