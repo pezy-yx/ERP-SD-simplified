@@ -146,8 +146,7 @@ const createQuotationFromInquiry = async () => {
 
     try {
         // 调用后端接口创建报价单
-        // 注意：API_BASE_URL 需要您在项目中定义
-        const API_BASE_URL = 'http://localhost:3000'; // 替换为您的后端地址
+        const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
 
         // 请确保这里的URL与您后端新增的接口路径完全一致
         const response = await fetch(`${API_BASE_URL}/api/quotation/create-quotation-from-inquiry`, {
