@@ -1,6 +1,8 @@
 import { SearchMethod } from '@/utils/VarTree'
 
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000'
+const getAPIBaseUrl = () => {
+  return window.API_BASE_URL || 'http://localhost:3000'
+}
 
 // 搜索响应接口
 export interface SearchResponse {
@@ -30,12 +32,12 @@ export class SearchService {
   static async executeSearch(method: SearchMethod, params: any): Promise<SearchResponse> {
     try {
       console.log('发送搜索请求:', {
-        url: `${API_BASE_URL}${method.serviceUrl}`,
+        url: `${getAPIBaseUrl()}${method.serviceUrl}`,
         method: method.name,
         params
       })
 
-      const response = await fetch(`${API_BASE_URL}${method.serviceUrl}`, {
+      const response = await fetch(`${getAPIBaseUrl()}${method.serviceUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

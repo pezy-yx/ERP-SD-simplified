@@ -8,7 +8,10 @@ import {
   customerSearch
 } from '@/utils/searchMethods'
 
-const API_BASE_URL = window.API_BASE_URL || ''
+let API_BASE_URL = window.API_BASE_URL || ''
+onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || ''
+})
 const appContentRef = ref(null) as any
 
 defineExpose({

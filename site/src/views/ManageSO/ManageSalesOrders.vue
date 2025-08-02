@@ -141,12 +141,15 @@
 <script setup lang="ts">
 import VarBox from '@/components/varbox/VarBox.vue';
 // FilterTabs 不再需要，ItemConditionDetail 内部处理标签页
-import { ref, Ref, computed, nextTick } from 'vue';
+import { ref, Ref, computed, nextTick, onMounted } from 'vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
 import { bpSearch, quotationIdSearch, salesOrderIdSearch } from '@/utils/searchMethods';
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
-const API_BASE_URL = window.API_BASE_URL || '';
+let API_BASE_URL = window.API_BASE_URL || '';
+onMounted(() => {
+  API_BASE_URL = window.API_BASE_URL || '';
+})
 
 import AppContent from '@/components/applicationContent/AppContent.vue';
 
