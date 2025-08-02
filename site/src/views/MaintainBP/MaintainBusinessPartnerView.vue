@@ -23,7 +23,7 @@
             </div>
             <div v-for="bp in businessPartnerResults" :key="bp.customerId" class="business-partner-row" @click="viewBusinessPartnerDetail(bp.customerId)">
               <span class="row-item customer-id">{{ bp.customerId }}</span>
-              <span class="row-item name">{{ bp.name }}</span>
+              <span class="row-item name">{{ bp.type === 'person' ? bp.firstName + " " + bp.lastName : bp.name }}</span>
               <span class="row-item city">{{ bp.city }}</span>
               <span class="row-item country">{{ bp.country }}</span>
               <span class="row-item bp-role">{{ bp.bpRole }}</span>
@@ -44,7 +44,7 @@
           <button class="back-button" @click="backToSearchResults">← Back to Search Results</button>
         </div>
         <VarBox
-          :tree="activeContentKey === 'sales_and_dist' && showDetailView ? customerDetailTree : customerCreateTree"
+          :tree="currentVarTree"
           class="bp-detail-var-input"
           :key="customerVarBoxKey"
         />
@@ -73,28 +73,33 @@ const customerQueryStructure = cns("dict", "dict", "query", null, false, {hideLa
   cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID")
 ]);
 
-// customerCreateStructure 定义了业务伙伴的完整详情结构
-// 这将用于创建和显示详情页
-const customerCreateStructure = cns("dict","dict","customer",null,false,{hideLabel:true},[ // 顶层 'customer' 字典
-  cns("dict","dict","bpIdAndRoleSection",null,false,{hideLabel:true},[
-    cns("string","leaf","customerId",null,true,{},[],"Business Partner:"),
-    cns("selection","leaf","bpRole",'',false,{options:['Business Partner','Customer','FI Customer']},[],"Create in BP role:"),
-  ],""),
+// 封装成一个函数，用于根据类型创建不同的表单结构
+function createCustomerTreeStructure(type = 'org') {
+  const isPerson = type === 'person';
+  return cns("dict","dict","customer",null,false,{hideLabel:true},[
+    cns("dict","dict","bpIdAndRoleSection",null,false,{hideLabel:true},[
+      cns("string","leaf","customerId",null,true,{},[],"Business Partner:"),
+      cns("selection","leaf","bpRole",'',false,{options:['Business Partner','Customer','FI Customer']},[],"Create in BP role:"),
+      cns("string","leaf","type",type,true,{hideSelf:true},[],"BP Type:"),
+    ],""),
 
-  cns("dict","dict","name",null,false,{},[
-    cns("selection","leaf","title",null,false,{options:['Mr.','Mrs.','Ms.','Company']},[],"Title:"),
-    cns("string","leaf","name",null,false,{},[],"Name:"),
-  ],"Name"),
-  cns("dict","dict","searchTerms",null,false,{},[
-    cns("string","leaf","searchTerm",null,false,{},[],"Search Term:"),
-  ],"Search Terms"),
-  cns("dict","dict","address",null,false,{},[
-    cns("string","leaf","country","",false,{searchMethods:bpSearch},[]),
-    cns("string","leaf","street",null,false,{},[],"Street:"),
-    cns("string","leaf","postalCode",null,false,{},[],"Postal Code:"),
-    cns("string","leaf","city",null,false,{},[],"City:"),
-  ],"Address"),
-]);
+    cns("dict","dict","name",null,false,{},[
+      cns("selection","leaf","title",null,false,{options:['Mr.','Mrs.','Ms.','Company']},[],"Title:"),
+      cns("string","leaf","name",null,false,{hideSelf: isPerson},[],"Name:"),
+      cns("string","leaf","firstName",null,false,{hideSelf: !isPerson},[],"First Name:"),
+      cns("string","leaf","lastName",null,false,{hideSelf: !isPerson},[],"Last Name:"),
+    ],"Name"),
+    cns("dict","dict","searchTerms",null,false,{},[
+      cns("string","leaf","searchTerm",null,false,{},[],"Search Term:"),
+    ],"Search Terms"),
+    cns("dict","dict","address",null,false,{},[
+      cns("string","leaf","country","",false,{searchMethods:bpSearch},[],"Country:"),
+      cns("string","leaf","street",null,false,{},[],"Street:"),
+      cns("string","leaf","postalCode",null,false,{},[],"Postal Code:"),
+      cns("string","leaf","city",null,false,{},[],"City:"),
+    ],"Address"),
+  ]);
+}
 
 
 export default {
@@ -113,36 +118,59 @@ export default {
         { label: 'org', value: 'org' },
       ],
       customerQueryTree: createTreeFromConfig(customerQueryStructure),
-      customerCreateTree: createTreeFromConfig(customerCreateStructure),
-      customerDetailTree: createTreeFromConfig(customerCreateStructure), // 用于详情页的树，结构与创建页相同
-      businessPartnerResults: [], // 存储搜索结果（简要信息）
-      searchPerformed: false, // 标记是否已执行搜索
-      showDetailView: false, // 控制是否显示详情页
-      selectedBusinessPartnerId: null, // 存储当前选中的业务伙伴ID
-      customerVarBoxKey: 0, // 用于强制刷新 VarBox
+      customerCreateTree: null, // 将其初始化为null
+      customerDetailTree: null, // 将其初始化为null
+      businessPartnerResults: [],
+      searchPerformed: false,
+      showDetailView: false,
+      selectedBusinessPartnerId: null,
+      customerVarBoxKey: 0,
     };
   },
   computed: {
     actionButtonText() {
       if (['person', 'group', 'org'].includes(this.activeContentKey)) {
-        return 'Save'; // 创建/编辑模式下的保存
+        return 'Save';
       }
       if (this.activeContentKey === 'sales_and_dist' && this.showDetailView) {
-        return 'Save'; // 详情页的保存
+        return 'Save';
       }
-      return 'Execute'; // 查询页的执行
+      return 'Execute';
+    },
+    // 根据当前状态动态返回要显示的VarTree
+    currentVarTree() {
+      if (['person', 'group', 'org'].includes(this.activeContentKey)) {
+        return this.customerCreateTree;
+      }
+      if (this.activeContentKey === 'sales_and_dist' && this.showDetailView) {
+        return this.customerDetailTree;
+      }
+      return this.customerQueryTree; // 默认返回查询树，以防万一
     }
+  },
+  watch: {
+    // 监听 activeContentKey 的变化，动态创建树
+    activeContentKey(newKey) {
+      if (['person', 'group', 'org'].includes(newKey)) {
+        this.customerCreateTree = createTreeFromConfig(createCustomerTreeStructure(newKey));
+        this.customerVarBoxKey++;
+      }
+    }
+  },
+  created() {
+    // 组件创建时，初始化创建表单的树（默认一个类型）
+    this.customerCreateTree = createTreeFromConfig(createCustomerTreeStructure('person'));
   },
   methods: {
     handleTabSelected(selectedTabValue) {
       this.activeContentKey = selectedTabValue;
-      this.showDetailView = false; // 切换标签时隐藏详情页
-      this.searchPerformed = false; // 重置搜索状态
-      this.businessPartnerResults = []; // 清空搜索结果
-      this.customerCreateTree.root?.forceSetValue({}); // 清空创建表单数据
-      this.customerDetailTree.root?.forceSetValue({}); // 清空详情页数据
-      this.selectedBusinessPartnerId = null; // 清空选中ID
-      this.customerVarBoxKey++; // 强制刷新 VarBox
+      this.showDetailView = false;
+      this.searchPerformed = false;
+      this.businessPartnerResults = [];
+      // 切换标签时重置详情树，为下一次查询做准备
+      this.customerDetailTree = null;
+      this.selectedBusinessPartnerId = null;
+      this.customerVarBoxKey++;
       console.log('Tab selected:', selectedTabValue);
     },
     async handleActionButtonClick() {
@@ -151,13 +179,10 @@ export default {
       console.log('是否显示详情页 (showDetailView):', this.showDetailView);
 
       if (this.activeContentKey === 'sales_and_dist' && !this.showDetailView) {
-        // 如果是查询页面且不是详情页，执行查询操作
         await this.performBusinessPartnerSearch();
       } else if (['person', 'group', 'org'].includes(this.activeContentKey)) {
-        // 如果是创建页面，执行创建操作
         await this.createBusinessPartner(this.activeContentKey);
       } else if (this.activeContentKey === 'sales_and_dist' && this.showDetailView) {
-        // 如果是详情页，执行保存操作
         await this.saveBusinessPartnerDetail();
       }
       console.log('--- 操作流程结束 ---');
@@ -165,19 +190,18 @@ export default {
     async performBusinessPartnerSearch() {
       console.log('执行业务伙伴查询...');
       this.searchPerformed = true;
-      this.businessPartnerResults = []; // 清空之前的搜索结果
+      this.businessPartnerResults = [];
 
       const queryData = this.customerQueryTree.root?.getValue();
       console.log('提交的查询数据结构:', JSON.stringify(queryData, null, 2));
 
       try {
-        // 模拟调用 /api/bp/search 接口
         const response = await fetch(`${API_BASE_URL}/api/bp/search`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(queryData),
         });
-        const result = await response.json(); // 解析 JSON 响应
+        const result = await response.json();
 
         if (result.success && Array.isArray(result.data)) {
           this.businessPartnerResults = result.data;
@@ -196,29 +220,32 @@ export default {
       console.log(`进入业务伙伴详情页，ID: ${customerId}`);
       this.selectedBusinessPartnerId = customerId;
       this.showDetailView = true;
-      this.customerVarBoxKey++; // 强制刷新 VarBox
-
+      this.customerVarBoxKey++;
       await this.fetchBusinessPartnerDetail(customerId);
     },
     async fetchBusinessPartnerDetail(customerId) {
       console.log(`获取业务伙伴 ${customerId} 的详情数据...`);
       try {
-        // 模拟调用 /api/bp/get/:customerId 接口
         const response = await fetch(`${API_BASE_URL}/api/bp/get/${customerId}`);
-        const result = await response.json(); // 解析 JSON 响应
+        const result = await response.json();
 
         if (result.success && result.data) {
-          // 使用 forceSetValue 来填充 VarTree，因为返回的数据结构与树定义一致
+          // 1. 根据返回的数据类型，动态生成对应的 VarTree 结构
+          const bpType = result.data.bpIdAndRoleSection?.type || 'org'; // 假设类型存在于此，如果不存在则使用默认值
+          console.log(`获取到业务伙伴类型: ${bpType}`);
+          this.customerDetailTree = createTreeFromConfig(createCustomerTreeStructure(bpType));
+
+          // 2. 将数据填充到新生成的树中
           this.customerDetailTree.root?.forceSetValue(result.data);
           console.log('业务伙伴详情数据加载成功:', result.data);
         } else {
           console.error('获取业务伙伴详情失败:', result.message || 'API返回数据异常');
-          this.showDetailView = false; // 加载失败则返回列表
+          this.showDetailView = false;
           alert('获取业务伙伴详情失败: ' + (result.message || '未知错误'));
         }
       } catch (error) {
         console.error('获取业务伙伴详情发生错误:', error);
-        this.showDetailView = false; // 错误则返回列表
+        this.showDetailView = false;
         alert('获取业务伙伴详情失败: ' + (error.message || '网络错误'));
       }
     },
@@ -226,28 +253,23 @@ export default {
       console.log('返回搜索结果列表');
       this.showDetailView = false;
       this.selectedBusinessPartnerId = null;
-      this.customerDetailTree.root?.forceSetValue({}); // 清空详情页数据
-      this.customerVarBoxKey++; // 强制刷新 VarBox
+      this.customerDetailTree = null; // 清空详情页数据树
+      this.customerVarBoxKey++;
     },
     async createBusinessPartner(type) {
       console.log(`执行创建 ${type} 业务伙伴...`);
       const createData = this.customerCreateTree.root?.getValue();
 
-      // 在模拟数据中添加类型字段，如果需要区分 person/group/org
-      // 注意：customerCreateStructure 本身没有 'type' 字段，如果需要在后端区分，这里需要自行处理
-      // 这里的 'type' 只是为了演示区分，实际应根据 customerCreateStructure 调整
       if (createData) {
-        // 确保 bpIdAndRoleSection 存在，并在其下添加一个虚拟的 type 字段用于模拟区分
         if (!createData.bpIdAndRoleSection) {
           createData.bpIdAndRoleSection = {};
         }
-        createData.bpIdAndRoleSection.type = type; // 模拟添加类型信息
+        createData.bpIdAndRoleSection.type = type;
       }
 
       console.log('提交的创建数据:', JSON.stringify(createData, null, 2));
 
       try {
-        // 模拟调用 /api/bp/create 接口
         const response = await fetch(`${API_BASE_URL}/api/bp/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -257,9 +279,8 @@ export default {
 
         if (result.success) {
           alert(result.message + ' New Customer ID: ' + result.data.customerId);
-          this.customerCreateTree.root?.forceSetValue({}); // 清空表单
-          this.customerVarBoxKey++; // 强制刷新 VarBox
-          // 创建成功后可以考虑导航到详情页或者返回列表页
+          this.customerCreateTree.root?.forceSetValue({});
+          this.customerVarBoxKey++;
         } else {
           alert('创建失败: ' + (result.message || '未知错误'));
         }
@@ -272,12 +293,10 @@ export default {
       console.log(`执行保存业务伙伴 ${this.selectedBusinessPartnerId} 的详情...`);
       const detailData = this.customerDetailTree.root?.getValue();
 
-      // 确保有 customerId 进行保存
       if (!this.selectedBusinessPartnerId) {
         alert('无法保存：未选择业务伙伴ID。');
         return;
       }
-      // 将选中的 ID 放入数据中，以便后端识别要更新哪个业务伙伴
       if (detailData && detailData.bpIdAndRoleSection) {
         detailData.bpIdAndRoleSection.customerId = this.selectedBusinessPartnerId;
       } else {
@@ -288,9 +307,8 @@ export default {
       console.log('提交的详情数据进行保存:', JSON.stringify(detailData, null, 2));
 
       try {
-        // 模拟调用 /api/bp/edit 接口
         const response = await fetch(`${API_BASE_URL}/api/bp/edit`, {
-          method: 'POST', // 或者 PUT，根据后端约定
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(detailData),
         });
@@ -298,7 +316,7 @@ export default {
 
         if (result.success) {
           alert(result.message);
-          this.backToSearchResults(); // 保存成功后返回搜索列表
+          this.backToSearchResults();
         } else {
           alert('保存失败: ' + (result.message || '未知错误'));
         }
@@ -319,9 +337,9 @@ export default {
 .maintain-business-partner-view {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: #25484C;
-  width:100%
+  height: 100vh; /* 使用 100vh 确保全屏高度 */
+  background-color: var(--theme-color-dark);
+  width:100%;
 }
 
 .bp-page-content {
@@ -333,6 +351,8 @@ export default {
   flex-direction: column;
   align-items: center;
   margin: 20px;
+  overflow-y: auto; /* 允许内容区域垂直滚动 */
+  padding-bottom: 80px; /* 为固定的底部操作栏留出空间，这个值应略大于底部栏的高度 */
 }
 
 .business-partner-search label {
@@ -351,10 +371,18 @@ export default {
   margin-right: 10px;
 }
 
+/* 修改后的底部操作栏样式 */
 .bottom-actions {
-  padding: 40px 20px;
+  position: fixed; /* 固定定位 */
+  bottom: 0; /* 固定在底部 */
+  left: 0; /* 固定在左侧 */
+  width: 100%; /* 宽度占满 */
+  padding: 20px; /* 增加内边距 */
   display: flex;
   justify-content: flex-end;
+  background-color: var(--theme-color-dark); /* 设置背景色以防内容透出 */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  z-index: 100; /* 确保它位于其他内容之上 */
 }
 
 .search-enter-button {
@@ -443,7 +471,6 @@ export default {
 .detail-page-actions {
   padding-bottom: 15px;
   border-bottom: 2px solid #555;
-  margin-bottom: 20px;
 }
 
 .back-button {
@@ -459,4 +486,9 @@ export default {
 .back-button:hover {
   background-color: #5a6268;
 }
+
+:deep(.customer-address-country--wrapper){
+  max-width: 150px;
+}
+
 </style>
