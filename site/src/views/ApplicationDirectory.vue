@@ -223,6 +223,12 @@ const applications = ref<ApplicationInfo[]>([
           "tags": ["financial management"]
         },
         {
+          "applicationName": "Display Stock",
+          "lore": "",
+          "routePath": "/display-stock",
+          "tags": ["stock management"]
+        },
+        {
           "applicationName": "AppContent Component Test",
           "lore": "测试AppContent组件的stage管理功能",
           "routePath": "/test/app-content",
@@ -281,6 +287,7 @@ const getTagDisplayName = (tag: string): string => {
     'order management': '订单管理',
     'delivery management': '交付管理',
     'financial management': '财务管理',
+    'stock management': '存货管理',
     'chore': '其他',
     'test': '测试',
     'example': '示例'
