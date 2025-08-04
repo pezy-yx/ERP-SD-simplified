@@ -21,13 +21,16 @@ const generalParamSearchStructure = cns('dict','dict','Search',null,false,{hideL
 
 const generalParamSearchTree = createTreeFromConfig(generalParamSearchStructure);
 
-export const generalSearch = (type: string) => {
+type generalSearchType = 
+| 'plantName' //原数据库关系没有
+| 'materialDescription' 
+| 'material'
+export const generalSearch = (type: generalSearchType) => {
   return [
     {
       name: '通用搜索',
       paramTree: generalParamSearchTree,
       serviceUrl: `/api/search/general/${type}`,
-      //已有Type:plantName(原数据库关系没有)，materialDescription，material
     }
   ];
 };
