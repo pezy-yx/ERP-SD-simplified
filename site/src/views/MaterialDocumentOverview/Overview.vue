@@ -118,7 +118,7 @@
 import VarBox from '@/components/varbox/VarBox.vue';
 import { ref, Ref, computed, nextTick, onMounted } from 'vue';
 import { createTreeFromConfig, cns } from '@/utils/VarTree';
-import { materialSearch, quotationIdSearch } from '@/utils/searchMethods';
+import { materialSearch, quotationIdSearch, materialDocumentSearch, plantSearch } from '@/utils/searchMethods';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 let API_BASE_URL = window.API_BASE_URL || '';
 onMounted(() => {
@@ -132,8 +132,8 @@ const showAppContent = ref(false);
 const materialQueryStructure = cns(
   "dict", "dict", "materialQuery", null, false, { hideLabel: true },
   [
-    cns("string", "leaf", "materialDocument", '', false, {searchMethods: materialSearch}, [], "Material Document:"),
-    cns("string", "leaf", "plant", '', false, {searchMethods: quotationIdSearch}, [], "Plant:"),
+    cns("string", "leaf", "materialDocument", '', false, {searchMethods: materialDocumentSearch}, [], "Material Document:"),
+    cns("string", "leaf", "plant", '', false, {searchMethods: plantSearch}, [], "Plant:"),
     cns("date", "leaf", "materialDocumentYear", '', false, {}, [], "Material Document Year:"),
     cns("string", "leaf", "material", '', false, {searchMethods: materialSearch}, [], "Material:"),
     cns("date", "leaf", "postingDate", '', false, {}, [], "Posting Date:"),

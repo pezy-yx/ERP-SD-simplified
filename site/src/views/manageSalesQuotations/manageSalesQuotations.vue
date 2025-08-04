@@ -117,7 +117,7 @@
 import { ref, Ref, computed, onMounted } from 'vue';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
-import { bpSearch, quotationIdSearch } from '@/utils/searchMethods';
+import { bpSearch, quotationIdSearch, soldToPartySearch } from '@/utils/searchMethods';
 import {
     cns,                   // 用于创建 NodeStructure 的辅助函数
     createTreeFromConfig,  // 用于从配置创建 VarTree 实例
@@ -303,7 +303,7 @@ const writableTrees = [quotationDataTree];
 const initialSearchTree = createTreeFromConfig(
     cns('dict', 'dict', 'query', {}, false, {}, [
         cns('number','leaf','salesQuotation','', false, {searchMethods: quotationIdSearch}, [], 'Sales Quotation:'),
-        cns('string', 'leaf', 'soldToParty', '', false, {searchMethods: bpSearch}, [], 'Sold-To Party:'),
+        cns('string', 'leaf', 'soldToParty', '', false, {searchMethods: soldToPartySearch}, [], 'Sold-To Party:'),
         cns('string', 'leaf', 'customerReference', '', false, {}, [], 'Customer Reference:'),
         cns('selection', 'leaf', 'overallStatus', '', false, {
             options: [
@@ -322,8 +322,8 @@ const initialCreationTree = createTreeFromConfig(
         ]),
         cns('dict','dict','basicInfo',{},false,{hideLabel:true},[ // 基本信息
             cns('string','leaf','quotation','',true,{searchMethods:quotationIdSearch},[],"Quotation ID:"),
-            cns('string','leaf','soldToParty','',false,{searchMethods: bpSearch},[],"Sold-To Party:"),
-            cns('string','leaf','shipToParty','',false,{searchMethods: bpSearch},[],"Ship-To Party:"),
+            cns('string','leaf','soldToParty','',false,{searchMethods: soldToPartySearch},[],"Sold-To Party:"),
+            cns('string','leaf','shipToParty','',false,{searchMethods: soldToPartySearch},[],"Ship-To Party:"),
             cns('string','leaf','customerReference','',false,{},[],"Cust. Reference:"),
             cns('string','leaf','netValue','0.0',true,{},[],"Net Value:"),
             cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),

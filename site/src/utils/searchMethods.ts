@@ -1,6 +1,6 @@
 import { VarTree,SearchMethod, SearchResultHandler, createTreeFromConfig, cns } from '@/utils/VarTree'
 
-const customerIdParamSearchStructure = cns('dict','dict','Search',null,false,{},[
+const generalParamSearchStructure = cns('dict','dict','Search',null,false,{hideLabel:true},[
   cns('dict','dict','include',null,false,{},[
     cns('number','leaf','contains',null,false,{},[]),
     cns('number','leaf','equal to',null,false,{},[]),
@@ -17,7 +17,57 @@ const customerIdParamSearchStructure = cns('dict','dict','Search',null,false,{},
     cns('number','leaf','less than',null,false,{},[]),
     cns('number','leaf','greater than',null,false,{},[]),
   ]),
-])
+]);
+
+const generalParamSearchTree = createTreeFromConfig(generalParamSearchStructure);
+
+export const generalSearch = (type: string) => {
+  return [
+    {
+      name: '通用搜索',
+      paramTree: generalParamSearchTree,
+      serviceUrl: `/api/search/general/${type}`,
+      //已有Type:plantName(原数据库关系没有)，materialDescription，material
+    }
+  ];
+};
+
+const countryParamSearchStructure = cns('dict','dict','Search',null,false,{hideLabel:true},[
+  cns('dict','dict','Country Name Search',null,false,{},[
+    cns('string','leaf','country name',null,false,{},[]),
+  ]),
+]);
+
+const countryParamSearchTree = createTreeFromConfig(countryParamSearchStructure);
+
+export const countrySearch:SearchMethod[] = [
+  {
+    name: '国家搜索',
+    paramTree: countryParamSearchTree,
+    serviceUrl: '/api/search/country',
+  }
+]
+
+//下面这个结构写的太宽了，已经弄到general search里面了@Pezy
+const customerIdParamSearchStructure = cns('dict','dict','Search',null,false,{hideLabel:true},[
+  cns('dict','dict','include',null,false,{},[
+    cns('number','leaf','contains',null,false,{},[]),
+    cns('number','leaf','equal to',null,false,{},[]),
+    cns('number','leaf','starts with',null,false,{},[]),
+    cns('number','leaf','ends with',null,false,{},[]),
+    cns('number','leaf','less than',null,false,{},[]),
+    cns('number','leaf','greater than',null,false,{},[]),
+  ]),
+  cns('dict','dict','exclude',null,false,{},[
+    cns('number','leaf','contains',null,false,{},[]),
+    cns('number','leaf','equal to',null,false,{},[]),
+    cns('number','leaf','starts with',null,false,{},[]),
+    cns('number','leaf','ends with',null,false,{},[]),
+    cns('number','leaf','less than',null,false,{},[]),
+    cns('number','leaf','greater than',null,false,{},[]),
+  ]),
+]);
+
 const customerIdParamSearchTree = createTreeFromConfig(customerIdParamSearchStructure);
 
 export const customerSearch:SearchMethod[] = [
@@ -28,12 +78,12 @@ export const customerSearch:SearchMethod[] = [
   }
 ]
 
-const bpParamSearchStructure = cns('dict', 'dict', 'params', null, false, {hideLabel:true}, [
+const bpParamSearchStructure = cns('dict', 'dict', 'Search', null, false, {hideLabel:true}, [
   cns('dict','dict','Condition Search',null,false,{},[
     cns('string','leaf','Customer',null,false,{searchMethods:customerSearch},[]),
     cns('string','leaf','City',null,false,{},[]),
     cns('string','leaf','Name',null,false,{},[]),
-    cns('string','leaf','Country Key',null,false,{},[]),
+    cns('string','leaf','Country Key',null,false,{searchMethods:countrySearch},[]),
     cns('string','leaf','Postal Code',null,false,{},[]),
   ],),
   cns('dict','dict','ID Search',null,false,{},[
@@ -55,9 +105,10 @@ const bpParamSearchStructure = cns('dict', 'dict', 'params', null, false, {hideL
     ]),
   ])
 ],"");
+
 const bpParamSearchTree = createTreeFromConfig(bpParamSearchStructure);
 
-const quotationIdParamSearchStructure = cns('dict','dict','Search',null,false,{},[
+const quotationIdParamSearchStructure = cns('dict','dict','Search',null,false,{hideLabel:true},[
   cns('dict','dict','include',null,false,{},[
     cns('number','leaf','contains',null,false,{},[]),
     cns('number','leaf','equal to',null,false,{},[]),
@@ -75,8 +126,8 @@ const quotationIdParamSearchStructure = cns('dict','dict','Search',null,false,{}
     cns('number','leaf','greater than',null,false,{},[]),
   ]),
 ]);
-const quotationIdParamSearchTree = createTreeFromConfig(quotationIdParamSearchStructure);
 
+const quotationIdParamSearchTree = createTreeFromConfig(quotationIdParamSearchStructure);
 
 export const bpSearch: SearchMethod[] = [
   {
@@ -158,18 +209,39 @@ export const deliveryIdSearch: SearchMethod[] = [
   }
 ]
 
+const materialSearchStructure  = cns('dict', 'dict', 'Search', null, false, {hideLabel:true}, [
+  cns('string', 'leaf', 'material', '', false,{searchMethods: generalSearch('material')},[],'Material'),
+  cns('string','leaf','materialDescription','',false,{searchMethods: generalSearch('materialDescription')},[],'Material Description'),
+]);
+
+const materialSearchTree = createTreeFromConfig(materialSearchStructure);
+
 export const materialSearch: SearchMethod[] = [
   {
     name: '物料搜索',
-    paramTree: null,
+    paramTree: materialSearchTree,
     serviceUrl: '/api/search/material'
   }
 ]
 
+export const materialDocumentSearch: SearchMethod[] = [
+  {
+    name: '物料文档搜索',
+    paramTree: generalParamSearchTree,
+    serviceUrl: '/api/search/material-description'
+  }
+]
+
+const plantSearchStructure  = cns('dict', 'dict', 'Search', null, false, {hideLabel:true}, [
+  cns('string', 'leaf', 'plantName', '', false,{searchMethods: generalSearch('plantName')},[],'Plant Name'),
+]);
+
+const plantSearchTree = createTreeFromConfig(plantSearchStructure);
+
 export const plantSearch: SearchMethod[] = [
   {
     name: '工厂搜索',
-    paramTree: null,
+    paramTree: plantSearchTree,
     serviceUrl: '/api/search/plant'
   }
 ]
@@ -190,21 +262,6 @@ export const quotationIdSearch: SearchMethod[] = [
   }
 ]
 
-const soParamSearchStructure  = cns('dict', 'dict', 'params', null, false, {}, [
-  cns('string', 'leaf', 'quotation_id', '', false,{searchMethods:quotationIdSearch}),
-  cns('string','leaf','soldToParty','',false,{searchMethods: bpSearch}),
-  cns('string','leaf','soldToParty','',false,{searchMethods:bpSearch}),
-  cns('string','leaf',"search_term",'',false),
-]);
-const soParamSearchTree = createTreeFromConfig(soParamSearchStructure);
-
-export const salesOrderIdSearch: SearchMethod[] = [
-  {
-    name: '销售订单搜索',
-    paramTree: soParamSearchTree,
-    serviceUrl: '/api/search/salesOrder-id'
-  }
-]
 export const billingDocumentIdSearch: SearchMethod[] = [
   {
     name: '开票凭证搜索',
@@ -229,6 +286,23 @@ export const soldToPartySearch: SearchMethod[] = [
       'city': '城市',
       'country': '国家'
     }
+  }
+]
+
+const soParamSearchStructure  = cns('dict', 'dict', 'Search', null, false, {hideLabel: true}, [
+  cns('string', 'leaf', 'quotation_id', '', false,{searchMethods:quotationIdSearch}),
+  cns('string','leaf','soldToParty','',false,{searchMethods: soldToPartySearch}),
+  cns('string','leaf','shipToParty','',false,{searchMethods:soldToPartySearch}),
+  cns('string','leaf',"search_term",'',false),
+]);
+
+const soParamSearchTree = createTreeFromConfig(soParamSearchStructure);
+
+export const salesOrderIdSearch: SearchMethod[] = [
+  {
+    name: '销售订单搜索',
+    paramTree: soParamSearchTree,
+    serviceUrl: '/api/search/salesOrder-id'
   }
 ]
 

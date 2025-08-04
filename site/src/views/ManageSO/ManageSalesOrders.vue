@@ -143,7 +143,7 @@ import VarBox from '@/components/varbox/VarBox.vue';
 // FilterTabs 不再需要，ItemConditionDetail 内部处理标签页
 import { ref, Ref, computed, nextTick, onMounted } from 'vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
-import { bpSearch, quotationIdSearch, salesOrderIdSearch } from '@/utils/searchMethods';
+import { bpSearch, quotationIdSearch, salesOrderIdSearch, soldToPartySearch } from '@/utils/searchMethods';
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 let API_BASE_URL = window.API_BASE_URL || '';
@@ -220,7 +220,7 @@ const salesOrderQueryStructure = cns(
   [
     cns("string", "leaf", "so_id", '', false, { searchMethods: salesOrderIdSearch }, [], "Sales Order:"),
     cns("selection", "leaf", "status", '', false, {options:['New','Open','In progress','Completed']}, [], "Overall Status:"),
-    cns("string", "leaf", "customer_no", '', false, { searchMethods: bpSearch }, [], "Sold-To Party:"),
+    cns("string", "leaf", "customer_no", '', false, { searchMethods: soldToPartySearch }, [], "Sold-To Party:"),
     cns("string", "leaf", "customer_reference", '', false, {}, [], "Customer Reference:"),
   ]
 );
@@ -233,8 +233,8 @@ const salesOrderDataTree = createTreeFromConfig(
      cns('dict','dict','basicInfo',{},false,{hideLabel:true},[
        cns('string','leaf','quotation_id','',false,{searchMethods: quotationIdSearch},[],"Quotation:"),
        cns('string','leaf','so_id','',true,{},[],"Sales Order:"),
-       cns('string','leaf','soldToParty','',false,{},[],"Sold-To Party:"),
-       cns('string','leaf','shipToParty','',false,{},[],"Ship-To Party:"),
+       cns('string','leaf','soldToParty','',false,{searchMethods: soldToPartySearch},[],"Sold-To Party:"),
+       cns('string','leaf','shipToParty','',false,{searchMethods: soldToPartySearch},[],"Ship-To Party:"),
        cns('string','leaf','customerReference','',false,{},[],"Cust. Reference:"),
        cns('string','leaf','netValue','0.0',true,{},[],"Net Value:"),
        cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),

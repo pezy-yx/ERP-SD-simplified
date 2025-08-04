@@ -63,7 +63,7 @@
 import FilterTabs from '@/components/FilterTabs.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
-import { bpSearch, relationSearch } from '@/utils/searchMethods';
+import { bpSearch, countrySearch, relationSearch } from '@/utils/searchMethods';
 
 // 定义一个基础的API URL，你可以根据你的项目配置进行调整
 // 在实际项目中，这通常通过环境变量配置
@@ -93,7 +93,7 @@ function createCustomerTreeStructure(type = 'org') {
       cns("string","leaf","searchTerm",null,false,{},[],"Search Term:"),
     ],"Search Terms"),
     cns("dict","dict","address",null,false,{},[
-      cns("string","leaf","country","",false,{searchMethods:bpSearch},[],"Country:"),
+      cns("string","leaf","country","",false,{searchMethods:countrySearch},[],"Country:"),
       cns("string","leaf","street",null,false,{},[],"Street:"),
       cns("string","leaf","postalCode",null,false,{},[],"Postal Code:"),
       cns("string","leaf","city",null,false,{},[],"City:"),
