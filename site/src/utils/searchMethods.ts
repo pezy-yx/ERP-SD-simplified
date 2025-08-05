@@ -156,43 +156,87 @@ export const CurrencyUnitSearch: SearchMethod[] = [
   }
 ]
 
+/**
+ * @description 后端直接返回可用的bp关系
+ * @vakesamahere
+ */
 export const relationSearch: SearchMethod[] = [
   {
     name: '关系搜索',
     paramTree: null,
-    serviceUrl: '/api/search/relation'
+    serviceUrl: '/api/search/relation',
+    resultHeaderDisplay: {
+      result: 'Relation',
+      direction: 'Direction',
+      desription: 'Description',
+    }
   }
 ]
 
+/**
+ * @description 后端直接返回可用的inquiry类型
+ * @vakesamahere
+ */
 export const inquiryTypeSearch: SearchMethod[] = [
   {
     name: '询价类型搜索',
     paramTree: null,
-    serviceUrl: '/api/search/inquiry-type'
+    serviceUrl: '/api/search/inquiry-type',
+    resultHeaderDisplay:{
+      result: 'SaTy',
+      description: 'Description'
+    }
   }
 ]
 
+/**
+ * @description 后端直接返回可用的销售组织
+ * @vakesamahere
+ */
 export const salesOrgSearch: SearchMethod[] = [
   {
     name: '销售组织搜索',
     paramTree: null,
-    serviceUrl: '/api/search/sales-org'
+    serviceUrl: '/api/search/sales-org',
+    resultHeaderDisplay: {
+      result: 'SOrg.',
+      description: 'Name',
+    }
   }
 ]
 
+/**
+ * @description 后端直接返回可用的渠道
+ * @vakesamahere
+ */
 export const distributionChannelSearch: SearchMethod[] = [
   {
     name: '分销渠道搜索',
     paramTree: null,
-    serviceUrl: '/api/search/distribution-channel'
+    serviceUrl: '/api/search/distribution-channel',
+    resultHeaderDisplay: {
+      result: 'SOrg.',
+      dchl: 'DChl',
+      description: 'Name',
+    }
   }
 ]
 
+/**
+ * @description 后端直接返回可用的部门
+ * @vakesamahere
+ */
 export const divisionSearch: SearchMethod[] = [
   {
     name: '部门搜索',
     paramTree: null,
-    serviceUrl: '/api/search/division'
+    serviceUrl: '/api/search/division',
+    resultHeaderDisplay: {
+      result: 'SOrg.',
+      dchl: 'DChl',
+      dv: 'Dv',
+      description: 'Name',
+    }
   }
 ]
 

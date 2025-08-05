@@ -1009,4 +1009,92 @@ router.post('/payer-party', (req, res) => {
   }
 });
 
+
+/**
+ * @description 可用的bp关系
+ * @vakesamahere
+ */
+router.post('/relation', (req, res) => {
+  const mockRes = [
+    {result: 'BBP002', direction: '->', description: 'Has the Invoicing Party'},
+    {result: 'BUR001', direction: '->', description: 'Has Contact Person'},
+    {result: 'BUR004', direction: '<->', description: 'Is Married To'},
+  ]
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `${mockRes.length} results found`
+  });
+});
+
+/**
+ * @description 可用的inquiry type
+ * @vakesamahere
+ */
+router.post('/inquiry-type', (req, res) => {
+  const mockRes = [
+    {result: 'IN', description: 'Inquiry'},
+    {result: 'RAF', description: 'Stock Inquiry'},
+  ]
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `${mockRes.length} results found`
+  });
+});
+
+/**
+ * @description 可用的销售组织
+ * @vakesamahere
+ */
+router.post('/sales-org', (req, res) => {
+  const mockRes = [
+    {result: 'DN00', description: 'Germany North'},
+    {result: 'UE00', description: 'US East'},
+  ]
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `${mockRes.length} results found`
+  });
+});
+
+/**
+ * @description 可用的分销渠道
+ * @vakesamahere
+ */
+router.post('/distribution-channel', (req, res) => {
+  const mockRes = [
+    {result: 'DN00', dchl: 'IN', description: 'Internet'},
+    {result: 'UE00', dchl: 'WH', description: 'Wholesale'},
+  ]
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `${mockRes.length} results found`
+  });
+});
+
+/**
+ * @description 可用的部门
+ * @vakesamahere
+ */
+router.post('/division', (req, res) => {
+  const mockRes = [
+    {result: 'DN00', dchl: 'IN', dv: 'AS', description: 'Accessories'},
+    {result: 'UE00', dchl: 'WH', dv: 'AS', description: 'Accessories'},
+    {result: 'UE00', dchl: 'WH', dv: 'BI', description: 'Bicycles'},
+  ]
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `${mockRes.length} results found`
+  });
+});
+
 module.exports = router;
