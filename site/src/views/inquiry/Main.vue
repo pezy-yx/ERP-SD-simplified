@@ -10,6 +10,7 @@ import {
   distributionChannelSearch,
   divisionSearch,
   inquiryIdSearch,
+  customerSearch,
 } from '@/utils/searchMethods'
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
@@ -144,8 +145,8 @@ const inquiryDataTree = createTreeFromConfig(
     ]),
     cns('dict','dict','basicInfo',{},false,{hideLabel:true},[
       cns('string','leaf','inquiry','',false,{},[],"Inquiry:"),
-      cns('string','leaf','soldToParty','',false,{},[],"Sold-To Party:"),
-      cns('string','leaf','shipToParty','',false,{},[],"Ship-To Party:"),
+      cns('string','leaf','soldToParty','',false,{searchMethods:customerSearch},[],"Sold-To Party:"),
+      cns('string','leaf','shipToParty','',false,{searchMethods:customerSearch},[],"Ship-To Party:"),
       cns('string','leaf','customerReference','',false,{},[],"Cust. Reference:"),
       cns('string','leaf','netValue','0.0',true,{},[],"Net Value:"),
       cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),
