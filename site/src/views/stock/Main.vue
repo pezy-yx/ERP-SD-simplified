@@ -4,6 +4,7 @@
     :footer-config="[
       {nextText:'/hide'}
     ]"
+    ref="appContentRef"
   >
     <template #[`stage-display`]>
       <VarBox
@@ -27,6 +28,25 @@
             :onclick="showDetailModal"
           >
             Display Detail
+          </button>
+        </template>
+        <template
+          v-for="index in stockDisplayTree.findNodeByPath(['stockTree'])?.children?.length || 0"
+          #[`stock-stockTree-${index-1}-level--wrapper`]="{ currentNode, allProps }"
+        >
+          <button
+            class="details-button"
+            @click="handleDetailButtonClick(currentNode, index-1)"
+          >
+            <div class="level-text-container">
+              <input type="text" :value="(()=>{
+                const node = stockDisplayTree.findNodeByPath(['stockTree'])!.children![index-1]
+                if(!node.config.data || node.config.data.tree.depth==undefined ||node.config.data.collapse == undefined ) return ''
+                const prefix = '\t'.repeat(node.config.data.tree.depth)
+                const mark = node.config.data.collapse? '>':'v' 
+                return `${prefix}${mark} ${(node.getValue()! as {level:string}).level}`
+              })()" :readonly="true">
+            </div>
           </button>
         </template>
       </VarBox>
@@ -58,7 +78,7 @@
   </AppContent>
 </template>
 <script lang="ts" setup>
-import { createTreeFromConfig, cns } from '@/utils/VarTree';
+import { createTreeFromConfig, cns, VarNode } from '@/utils/VarTree';
 import { computed, onMounted, ref, watch } from 'vue';
 import VarBox from '@/components/varbox/VarBox.vue';
 import AppContent from '@/components/applicationContent/AppContent.vue'
@@ -67,6 +87,7 @@ onMounted(async ()=>{
   await initializeTrees()
 })
 
+const appContentRef = ref(null) as any
 /**
  * @description 向后端获取stock的合法阶段，给stockStages和stockLevelString赋值
  */
@@ -158,14 +179,72 @@ async function handleSearch() {
     const tree: StockTree = data.data.content
     const content = tree.map((item)=>{
       const data = item.data
-      const prefix = "\t".repeat(item.depth)
-      data.level = `${prefix}> ${data.level}`
       return data
     })
     stockDisplayTree.findNodeByPath(['stockTree'])!.forceSetValue(content)
-    stockDisplayTree.forceUpdate()
-    console.log(stockDisplayTree.getValue())
+    const preOrderWalk = stockDisplayTree.findNodeByPath(['stockTree'])!.children!
+    let parent: VarNode | null = null
+    let parentDepth = -1
+    const depthArray = tree.map((item)=>item.depth)
+    for (let i = 0; i < preOrderWalk.length; i++) {
+      const node = preOrderWalk[i];
+      const depth = depthArray[i]
+      node.config.data = {
+        ...(node.config.data??{}),
+        collapse: true,
+        tree: {
+          depth: depth
+        }
+      }
+      // node.config.data.tree.chilren = []
+      // let times = 0
+      // while(parent && (depth - parentDepth == 1) && times++ < preOrderWalk.length) {
+      //   parent = (parent as VarNode)?.config.data.tree.parent ?? null
+      //   parentDepth = parent?.config.data.tree.depth ?? -1
+      // }
+      // node.config.data.tree.parent = parent ?? null
+      // if(parent) {
+      //   (parent.config.data.tree.chilren as VarNode[]).push(node)
+      // }
+    }
+    // if(appContentRef.value) {
+    //   appContentRef.value?.forceUpdate()
+    // } else {
+    //   stockDetailTree.forceUpdate()
+    // }
+    updateStockTreeDisplay()
   }
+}
+
+function handleDetailButtonClick(_node:VarNode, index: number) {
+  const node = stockDisplayTree.findNodeByPath(['stockTree'])!.children![index]
+  node.config.data.collapse = !node.config.data.collapse
+  updateStockTreeDisplay()
+}
+
+function updateStockTreeDisplay() {
+  const preOrderWalk = stockDisplayTree.findNodeByPath(['stockTree'])!.children!
+  preOrderWalk.forEach(item => {
+    item.config.hideSelf=false
+  });
+  let currentDepth = 0
+  let next = 0
+  for (let i = 0; i < preOrderWalk.length-1; i++) {
+    if(next > i) continue
+    const item = preOrderWalk[i];
+    if(item.config.data.collapse) {
+      currentDepth = preOrderWalk.length+1
+      next = i+1
+      let childNode = preOrderWalk[next]
+      while(childNode.config.data.tree.depth>item.config.data.tree.depth) {
+        childNode.config.hideSelf = true
+        if(++next>=preOrderWalk.length) break
+        childNode = preOrderWalk[next]
+      }
+    }
+  }
+  // console.log(`collapse/display: ${preOrderWalk.map((item)=>{return `\n${item.config.data.collapse}; ${!item.config.hideSelf}`})}`)
+  appContentRef.value?.forceUpdate()
 }
 
 const showDetailModalFlag = ref(false)
@@ -293,5 +372,13 @@ watch(stockLevelString, (newValue) => {
   height: 100%;
   background-color: rgba(0,0,0,0.5);
   z-index: 50;
+}
+.level-text-container {
+  display: flex;
+  justify-content: start;
+  width: 100%;
+}
+.details-button {
+  width: 100%;
 }
 </style>
