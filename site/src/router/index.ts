@@ -13,6 +13,7 @@ import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
 import ManageSalesOrders from "@/views/ManageSO/ManageSalesOrders.vue";
+import DisplayStock from '@/views/stock/Main.vue'
 
 // 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
@@ -219,6 +220,12 @@ const routes = [
         name: 'ChangeBillingDocument',
         component: ChangeBillingDocument,
         meta: { title: 'Change Billing Document' }
+      },
+      {
+        path: 'display-stock',
+        name: 'DisplayStock',
+        component: DisplayStock,
+        meta: { title: 'Display Stock' }
       },
       {
         path: 'material-documents-overview',

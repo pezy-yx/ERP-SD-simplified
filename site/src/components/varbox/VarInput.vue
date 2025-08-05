@@ -259,55 +259,57 @@
                   </thead>
                   <tbody>
                     <tr v-for="(child, index) in listItems" :key="`${child.name}_${child.index}_${index}`" :class="`list-row ${baseClassPrefix}--list-row`">
-                      <td :class="`select-cell ${baseClassPrefix}--select-cell`">
-                        <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
-                          <input
-                            type="checkbox"
-                            :checked="selectedRows.has(index)"
-                            @change="toggleRowSelection(index)"
-                            :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
-                          />
-                          <span class="checkmark"></span>
-                        </label>
-                      </td>
-                      <!-- 如果子项是dict，则每个字段占一列 -->
-                      <template v-if="child.nodeType === 'dict'">
-                        <td v-for="(dictChild, dictIndex) in child.children.filter(child => isChildDisplay(child))" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
+                      <template v-if="child.config.hideSelf===undefined?true:!child.config.hideSelf">
+                        <td :class="`select-cell ${baseClassPrefix}--select-cell`">
+                          <label :class="`var-checkbox ${baseClassPrefix}--var-checkbox`">
+                            <input
+                              type="checkbox"
+                              :checked="selectedRows.has(index)"
+                              @change="toggleRowSelection(index)"
+                              :class="`row-select-checkbox ${baseClassPrefix}--row-select-checkbox`"
+                            />
+                            <span class="checkmark"></span>
+                          </label>
+                        </td>
+                        <!-- 如果子项是dict，则每个字段占一列 -->
+                        <template v-if="child.nodeType === 'dict'">
+                          <td v-for="(dictChild, dictIndex) in child.children.filter(child => isChildDisplay(child))" :key="dictIndex" :class="`list-cell ${baseClassPrefix}--list-cell`">
+                            <VarInput
+                              :varTree="varTree"
+                              :nodePath="[...nodePath, index.toString(), dictChild.name]"
+                              :readonly="effectiveReadonly ?? false"
+                              :config="getChildConfig(dictChild)"
+                              :showLabel="false"
+                              :componentConfig="getChildComponentConfig(child)"
+                              @update="handleChildUpdate"
+                              v-bind="$attrs"
+                            >
+                              <!-- 透传插槽 -->
+                              <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+                                <slot :name="slotName" v-bind="slotProps"></slot>
+                              </template>
+                            </VarInput>
+                          </td>
+                        </template>
+                        <!-- 如果子项不是dict，则整个子项占一列 -->
+                        <td v-else :class="`list-cell ${baseClassPrefix}--list-cell`">
                           <VarInput
                             :varTree="varTree"
-                            :nodePath="[...nodePath, index.toString(), dictChild.name]"
+                            :nodePath="[...nodePath, index.toString()]"
                             :readonly="effectiveReadonly ?? false"
-                            :config="getChildConfig(dictChild)"
-                            :showLabel="false"
+                            :config="getChildConfig(child)"
+                            :showLabel="true"
                             :componentConfig="getChildComponentConfig(child)"
                             @update="handleChildUpdate"
                             v-bind="$attrs"
                           >
-                            <!-- 透传插槽 -->
-                            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
-                              <slot :name="slotName" v-bind="slotProps"></slot>
-                            </template>
+                              <!-- 透传插槽 -->
+                              <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+                                <slot :name="slotName" v-bind="slotProps"></slot>
+                              </template>
                           </VarInput>
                         </td>
                       </template>
-                      <!-- 如果子项不是dict，则整个子项占一列 -->
-                      <td v-else :class="`list-cell ${baseClassPrefix}--list-cell`">
-                        <VarInput
-                          :varTree="varTree"
-                          :nodePath="[...nodePath, index.toString()]"
-                          :readonly="effectiveReadonly ?? false"
-                          :config="getChildConfig(child)"
-                          :showLabel="true"
-                          :componentConfig="getChildComponentConfig(child)"
-                          @update="handleChildUpdate"
-                          v-bind="$attrs"
-                        >
-                            <!-- 透传插槽 -->
-                            <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
-                              <slot :name="slotName" v-bind="slotProps"></slot>
-                            </template>
-                        </VarInput>
-                      </td>
                     </tr>
                   </tbody>
                   </table>
