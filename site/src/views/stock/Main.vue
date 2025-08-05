@@ -125,7 +125,12 @@ async function initializeTrees() {
 
 /** @description 搜索并展示material基本信息 */
 const materialInfoTree = createTreeFromConfig(cns("dict","dict","materialInfo",null,false,{hideLabel:true},[
-  cns("string","leaf","id","",false,{},[],"Material ID: ")
+  cns("string","leaf","id","",false,{},[],"Material ID: "),
+  cns("dict","dict","info","",true,{},[
+    cns("string","leaf","name","",false,{},[],"Name: "),
+    cns("string","leaf","materialType","",false,{},[],"Material Type: "),
+    cns("string","leaf","unit","",false,{},[],"Unit Of Measure: "),
+  ],"Info")
 ]))
 /** @description 展示material库存信息 */
 const stockDisplayTree = createTreeFromConfig(cns("dict","dict","stock",null,false,{hideLabel:true},[
@@ -153,6 +158,22 @@ const stockDetailTree = createTreeFromConfig(cns("dict","dict","stockDetail",nul
  * @description 搜索材料库存
  */
 async function handleSearch() {
+  const info = await fetch(`${window.API_BASE_URL}/api/stock/materialInfo`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(materialInfoTree.getValue())
+  }).then(response => {
+    return response.json()
+  }).catch(error => {
+    return {success: false}
+  })
+  if(!info.success) return
+  materialInfoTree.findNodeByPath(['info'])!.forceSetValue(info.data)
+  appContentRef.value?.forceUpdate()
+  materialInfoTree.forceUpdate()
+
   const data = await fetch(`${window.API_BASE_URL}/api/stock/searchStock`, {
     method: 'POST',
     headers: {

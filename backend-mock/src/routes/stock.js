@@ -44,4 +44,16 @@ router.post('/searchStock', (req, res) => {
   });
 })
 
+router.post('/materialInfo', (req, res) => {
+  res.json({
+    success: true,
+    data:{ 
+      name: "Deluxe Touring Bike (black)",
+      materialType: "FERT",
+      unit: "EA"
+    },
+    message: 'success'
+  });
+})
+
 module.exports = router;
