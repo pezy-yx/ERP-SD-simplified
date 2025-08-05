@@ -196,7 +196,7 @@ router.post('/postOpenItems', (req, res) => {
             success: true,
             message: '未清项提交成功',
             data: {
-                mockJournalEntry: mockJournalEntry // 返回模拟的过账数据
+                JournalEntry: mockJournalEntry // 返回模拟的过账数据
             }
         });
     }, 500); // 模拟500毫秒的网络延迟

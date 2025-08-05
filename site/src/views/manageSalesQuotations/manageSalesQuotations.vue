@@ -210,7 +210,7 @@ const onSearchState = computed(() => state.value === 'search');
 
 // 定义报价单数据的接口
 interface QuotationData {
-    salesQuotation: number;    // 销售报价单号
+    salesQuotation: string;    // 销售报价单号
     soldToParty: string;       // 售达方
     customerReference: string; // 客户参考
     overallStatus: string;     // 整体状态
@@ -479,7 +479,7 @@ const quotationDetailNextButtonLabel = computed(() => {
  * @param id 报价单的 ID
  * @returns 成功时返回响应数据，失败时返回 null
  */
-async function fetchQuotationDetails(id: number) {
+async function fetchQuotationDetails(id: string) {
     try {
         const response = await fetch(`${API_BASE_URL}/api/quotation/details`, {
             method: 'POST',

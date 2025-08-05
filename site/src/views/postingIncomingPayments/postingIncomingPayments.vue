@@ -260,20 +260,20 @@ const postedJournalEntryNumber = ref('');
 const inputTree = createTreeFromConfig(
     cns('dict','dict','payment',null,false,{},[
         cns('dict','dict','generalInformation',null,false,{},[
-            cns('string','leaf','Company Code',null,false,{searchMethods:bpSearch},[]),
-            cns('date','leaf','Posting Date',null,false,{},[]),
-            cns('date','leaf','Journal Entry Date',null,false,{},[]),
-            cns('selection','leaf','Journal Entry Type',null,false,{
+            cns('string','leaf','companyCode',null,false,{searchMethods:bpSearch},[],'Company Code'),
+            cns('date','leaf','postingDate',null,false,{},[],'Posting Date'),
+            cns('date','leaf','journalEntryDate',null,false,{},[],'Journal Entry Date'),
+            cns('selection','leaf','journalEntryType',null,false,{
                 options:journalEntryTypeOptions
-            },[]),
-            cns('string','leaf','Period',null,false,{},[]),
+            },[],'Journal Entry Type'),
+            cns('string','leaf','period',null,false,{},[],'Period'),
         ],'General Information'),
         cns('dict','dict','bankData',null,false,{},[
-            cns('number','leaf','G/L Account',null,false,{searchMethods:GLAccountSearch},[]),
+            cns('number','leaf','G/LAccount',null,false,{searchMethods:GLAccountSearch},[],'G/L Account'),
             cns('dict','dict','amount',null,false,{hideLabel:true},[
-                cns('number','leaf','amount',null,false,{},[]),
-                cns('string','leaf','unit','EUR',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[]),
-            ])
+                cns('number','leaf','amount',null,false,{},[],'Amount'),
+                cns('string','leaf','unit','EUR',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[],'Unit'),
+            ],'Amount')
         ],'Bank Data'),
         cns('dict','dict','openItemSelection',null,false,{},[
             cns('selection','leaf','accountType',null,false,{
@@ -418,7 +418,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
                 const result = await response.json();
 
                 if (result.success) {
-                    postedJournalEntryNumber.value = result.data.mockJournalEntry.journalEntryId || 'N/A'; // 获取过账后的 Journal Entry Number
+                    postedJournalEntryNumber.value = result.data.JournalEntry.journalEntryId || 'N/A'; // 获取过账后的 Journal Entry Number
                     showPostSuccessModal.value = true; // 显示过账成功的模态框
                     appContentRef.value.footerMessage = ''; // 提供反馈
                     console.log('过账成功:', result);
