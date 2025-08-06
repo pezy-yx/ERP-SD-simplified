@@ -4,7 +4,7 @@ const router = express.Router();
 // 模拟业务伙伴数据
 const mockBusinessPartners = [
   {
-    id: 'BP001',
+    id: 'BSO001',
     companyName: '华为技术有限公司',
     bpType: '客户',
     contactPerson: '张经理',
@@ -15,7 +15,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BP002', 
+    id: 'BSO002', 
     companyName: '腾讯科技有限公司',
     bpType: '客户',
     contactPerson: '李总监',
@@ -26,7 +26,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BP003',
+    id: 'BSO003',
     companyName: '富士康科技集团',
     bpType: '供应商',
     contactPerson: '王主管',
@@ -37,7 +37,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BP004',
+    id: 'BSO004',
     companyName: '比亚迪股份有限公司',
     bpType: '合作伙伴',
     contactPerson: '赵副总',
@@ -48,7 +48,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BP005',
+    id: 'BSO005',
     companyName: '中兴通讯股份有限公司',
     bpType: '客户',
     contactPerson: '刘经理',
@@ -460,14 +460,14 @@ router.post('/mock/employee', (req, res) => {
     console.log('员工搜索参数:', req.body);
 
     const mockEmployees = [
-      { id: 'EMP001', name: '张三', position: '技术总监', department: '技术部', level: '管理' },
-      { id: 'EMP002', name: '李四', position: '产品总监', department: '产品部', level: '管理' },
-      { id: 'EMP003', name: '王五', position: '市场总监', department: '市场部', level: '管理' },
-      { id: 'EMP004', name: '赵六', position: '人事经理', department: '人事部', level: '管理' },
-      { id: 'EMP005', name: '钱七', position: '财务经理', department: '财务部', level: '管理' },
-      { id: 'EMP006', name: '孙八', position: '运营经理', department: '运营部', level: '管理' },
-      { id: 'EMP007', name: '周九', position: '高级前端工程师', department: '技术部', level: '高级' },
-      { id: 'EMP008', name: '吴十', position: '高级后端工程师', department: '技术部', level: '高级' },
+      { id: 'EMSO001', name: '张三', position: '技术总监', department: '技术部', level: '管理' },
+      { id: 'EMSO002', name: '李四', position: '产品总监', department: '产品部', level: '管理' },
+      { id: 'EMSO003', name: '王五', position: '市场总监', department: '市场部', level: '管理' },
+      { id: 'EMSO004', name: '赵六', position: '人事经理', department: '人事部', level: '管理' },
+      { id: 'EMSO005', name: '钱七', position: '财务经理', department: '财务部', level: '管理' },
+      { id: 'EMSO006', name: '孙八', position: '运营经理', department: '运营部', level: '管理' },
+      { id: 'EMSO007', name: '周九', position: '高级前端工程师', department: '技术部', level: '高级' },
+      { id: 'EMSO008', name: '吴十', position: '高级后端工程师', department: '技术部', level: '高级' },
     ];
 
     let results = [...mockEmployees];
@@ -591,15 +591,15 @@ router.post('/mock/company', (req, res) => {
     console.log('公司搜索参数:', req.body);
 
     const mockCompanies = [
-      { id: 'COMP001', name: '腾讯科技', industry: '互联网', scale: '跨国公司', description: '中国领先的互联网公司' },
-      { id: 'COMP002', name: '阿里巴巴', industry: '互联网', scale: '跨国公司', description: '电商和云计算巨头' },
-      { id: 'COMP003', name: '华为技术', industry: '互联网', scale: '跨国公司', description: '全球领先的通信设备供应商' },
-      { id: 'COMP004', name: '招商银行', industry: '金融', scale: '大型企业', description: '中国领先的商业银行' },
-      { id: 'COMP005', name: '中国平安', industry: '金融', scale: '大型企业', description: '综合金融服务集团' },
-      { id: 'COMP006', name: '比亚迪', industry: '制造业', scale: '大型企业', description: '新能源汽车制造商' },
-      { id: 'COMP007', name: '富士康', industry: '制造业', scale: '跨国公司', description: '全球最大的电子制造服务商' },
-      { id: 'COMP008', name: '新东方', industry: '教育', scale: '大型企业', description: '知名教育培训机构' },
-      { id: 'COMP009', name: '好未来', industry: '教育', scale: '大型企业', description: '在线教育平台' },
+      { id: 'COMSO001', name: '腾讯科技', industry: '互联网', scale: '跨国公司', description: '中国领先的互联网公司' },
+      { id: 'COMSO002', name: '阿里巴巴', industry: '互联网', scale: '跨国公司', description: '电商和云计算巨头' },
+      { id: 'COMSO003', name: '华为技术', industry: '互联网', scale: '跨国公司', description: '全球领先的通信设备供应商' },
+      { id: 'COMSO004', name: '招商银行', industry: '金融', scale: '大型企业', description: '中国领先的商业银行' },
+      { id: 'COMSO005', name: '中国平安', industry: '金融', scale: '大型企业', description: '综合金融服务集团' },
+      { id: 'COMSO006', name: '比亚迪', industry: '制造业', scale: '大型企业', description: '新能源汽车制造商' },
+      { id: 'COMSO007', name: '富士康', industry: '制造业', scale: '跨国公司', description: '全球最大的电子制造服务商' },
+      { id: 'COMSO008', name: '新东方', industry: '教育', scale: '大型企业', description: '知名教育培训机构' },
+      { id: 'COMSO009', name: '好未来', industry: '教育', scale: '大型企业', description: '在线教育平台' },
       { id: 'COMP010', name: '字节跳动', industry: '互联网', scale: '大型企业', description: '抖音、今日头条母公司' },
     ];
 
@@ -695,19 +695,16 @@ router.post('/customer', (req, res) => {
 
     const mockCustomers = [
       {
-        id: 'CUST-12345',
-        result: 'CUST-12345',
-        description: '北京科技有限公司'
+        result: 'BSO0001',
+        name: '北京科技有限公司'
       },
       {
-        id: 'CUST-67890',
-        result: 'CUST-67890',
-        description: '上海贸易公司'
+        result: 'BSO0002',
+        name: '上海贸易公司'
       },
       {
-        id: 'CUST-11111',
-        result: 'CUST-11111',
-        description: '深圳制造企业'
+        result: 'BSO0003',
+        name: '深圳制造企业'
       }
     ];
 
@@ -735,19 +732,53 @@ router.post('/material', (req, res) => {
 
     const mockMaterials = [
       {
-        id: 'MAT-001',
         result: 'MAT-001',
-        description: '笔记本电脑 - ThinkPad X1'
+        matDesc: '笔记本电脑 - ThinkPad X1'
       },
       {
-        id: 'MAT-002',
         result: 'MAT-002',
-        description: '无线鼠标 - 罗技MX Master'
+        matDesc: '无线鼠标 - 罗技MX Master'
       },
       {
-        id: 'MAT-003',
         result: 'MAT-003',
-        description: '机械键盘 - Cherry MX'
+        matDesc: '机械键盘 - Cherry MX'
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: mockMaterials,
+      total: mockMaterials.length,
+      message: `找到 ${mockMaterials.length} 个物料`
+    });
+
+  } catch (error) {
+    console.error('物料搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
+
+// 物料文档搜索 - Mock API
+router.post('/material-description', (req, res) => {
+  try {
+    console.log('物料搜索参数:', req.body);
+
+    const mockMaterials = [
+      {
+        result: 'MD001',
+        materialDocumentYear: '2025'
+      },
+      {
+        result: 'MD002',
+        materialDocumentYear: '2025'
+      },
+      {
+        result: 'MD003',
+        materialDocumentYear: '2025'
       }
     ];
 
@@ -775,19 +806,19 @@ router.post('/plant', (req, res) => {
 
     const mockPlants = [
       {
-        id: '1000',
         result: '1000',
-        description: '北京工厂'
+        plantName: '北京工厂',
+        city: 'BEIJING',
       },
       {
-        id: '2000',
         result: '2000',
-        description: '上海工厂'
+        plantName: '上海工厂',
+        city: 'SHANGHAI',
       },
       {
-        id: '3000',
         result: '3000',
-        description: '深圳工厂'
+        plantName: '深圳工厂',
+        city: 'SHENZHEN',
       }
     ];
 
@@ -975,11 +1006,11 @@ router.post('/payer-party', (req, res) => {
     const { query } = req.body;
     
     const mockPayerParties = [
-      { id: 'P001', result: 'P001 - ABC Company Treasury', city: 'New York', country: 'US' },
-      { id: 'P002', result: 'P002 - XYZ Corp Payment', city: 'London', country: 'UK' },
-      { id: 'P003', result: 'P003 - DEF Ltd Treasury', city: 'Tokyo', country: 'JP' },
-      { id: 'P004', result: 'P004 - GHI Inc Payment', city: 'Berlin', country: 'DE' },
-      { id: 'P005', result: 'P005 - JKL Corp Treasury', city: 'Paris', country: 'FR' }
+      { id: 'SO001', result: 'SO001 - ABC Company Treasury', city: 'New York', country: 'US' },
+      { id: 'SO002', result: 'SO002 - XYZ Corp Payment', city: 'London', country: 'UK' },
+      { id: 'SO003', result: 'SO003 - DEF Ltd Treasury', city: 'Tokyo', country: 'JP' },
+      { id: 'SO004', result: 'SO004 - GHI Inc Payment', city: 'Berlin', country: 'DE' },
+      { id: 'SO005', result: 'SO005 - JKL Corp Treasury', city: 'Paris', country: 'FR' }
     ];
 
     let filteredResults = mockPayerParties;
@@ -1009,6 +1040,45 @@ router.post('/payer-party', (req, res) => {
   }
 });
 
+// 销售订单搜索
+router.post('/salesOrder-id', (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    const mockSO = [
+      {result: 'SO001', soldToParty: 'TEST', netValue: 'TEST', customerReference: 'TEST' },
+      { result: 'SO002', soldToParty: 'TEST', netValue: 'TEST', customerReference: 'TEST' },
+      { result: 'SO003', soldToParty: 'TEST', netValue: 'TEST', customerReference: 'TEST' },
+      { result: 'SO004', soldToParty: 'TEST', netValue: 'TEST', customerReference: 'TEST' },
+      { result: 'SO005', soldToParty: 'TEST', netValue: 'TEST', customerReference: 'TEST' }
+    ];
+
+    let filteredResults = mockSO;
+    
+    if (query && query.trim()) {
+      filteredResults = mockSO.filter(party => 
+        party.name.toLowerCase().includes(query.toLowerCase()) ||
+        party.city.toLowerCase().includes(query.toLowerCase()) ||
+        party.country.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    res.json({
+      success: true,
+      data: filteredResults,
+      total: filteredResults.length,
+      message: `找到 ${filteredResults.length} 个销售订单`
+    });
+
+  } catch (error) {
+    console.error('销售订单搜索错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '搜索失败，请稍后重试',
+      error: error.message
+    });
+  }
+});
 
 /**
  * @description 可用的bp关系
@@ -1016,9 +1086,27 @@ router.post('/payer-party', (req, res) => {
  */
 router.post('/relation', (req, res) => {
   const mockRes = [
-    {result: 'BBP002', direction: '->', description: 'Has the Invoicing Party'},
+    {result: 'BBSO002', direction: '->', description: 'Has the Invoicing Party'},
     {result: 'BUR001', direction: '->', description: 'Has Contact Person'},
     {result: 'BUR004', direction: '<->', description: 'Is Married To'},
+  ]
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `${mockRes.length} results found`
+  });
+});
+
+/**
+ * @description 可用的customer
+ * @leopold
+ */
+router.post('/business-partner', (req, res) => {
+  const mockRes = [
+    {result: 'BSO0001', name:'T1', companyCode:'001'},
+    {result: 'BSO0002', name:'TT', companyCode:'002'},
+    {result: 'BSO0003', name:'T3', companyCode:'003'},
   ]
   res.json({
     success: true,
