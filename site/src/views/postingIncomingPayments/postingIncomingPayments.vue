@@ -165,7 +165,9 @@ import {createTreeFromConfig, cns, VarNode, VarTree, NodeStructure} from '@/util
 import {
     bpSearch,
     GLAccountSearch,
-    CurrencyUnitSearch
+    CurrencyUnitSearch,
+    companyCodeSearch,
+    customerSearch
 } from '@/utils/searchMethods'
 import router from '@/router';
 
@@ -260,7 +262,7 @@ const postedJournalEntryNumber = ref('');
 const inputTree = createTreeFromConfig(
     cns('dict','dict','payment',null,false,{},[
         cns('dict','dict','generalInformation',null,false,{},[
-            cns('string','leaf','companyCode',null,false,{searchMethods:bpSearch},[],'Company Code'),
+            cns('string','leaf','companyCode',null,false,{searchMethods:companyCodeSearch},[],'Company Code'),
             cns('date','leaf','postingDate',null,false,{},[],'Posting Date'),
             cns('date','leaf','journalEntryDate',null,false,{},[],'Journal Entry Date'),
             cns('selection','leaf','journalEntryType',null,false,{
@@ -279,7 +281,7 @@ const inputTree = createTreeFromConfig(
             cns('selection','leaf','accountType',null,false,{
                 options:['Customer','Vendor']
             },[],'Account Type'),
-            cns('number','leaf','accountId',null,false,{searchMethods:bpSearch,hideLabel:true},[],'Account ID'),
+            cns('number','leaf','accountId',null,false,{searchMethods:customerSearch,hideLabel:true},[],'Account ID'),
         ],'Open Item Selection'),
     ],'Payment'),
 )

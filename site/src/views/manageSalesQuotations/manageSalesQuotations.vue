@@ -117,7 +117,7 @@
 import { ref, Ref, computed, onMounted } from 'vue';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
-import { bpSearch, quotationIdSearch, soldToPartySearch } from '@/utils/searchMethods';
+import { bpSearch, quotationIdSearch, soldToPartySearch,generalSearch } from '@/utils/searchMethods';
 import {
     cns,                   // 用于创建 NodeStructure 的辅助函数
     createTreeFromConfig,  // 用于从配置创建 VarTree 实例

@@ -25,6 +25,7 @@ type generalSearchType =
 | 'plantName' //原数据库关系没有
 | 'materialDescription' 
 | 'material'
+| 'countryKey'
 export const generalSearch = (type: generalSearchType) => {
   return [
     {
@@ -34,6 +35,33 @@ export const generalSearch = (type: generalSearchType) => {
     }
   ];
 };
+
+const companyCodeSearchStructure  = cns('dict', 'dict', 'Search', null, false, {hideLabel:true}, [
+  cns('string', 'leaf', 'companyCode', '', false,{},[],'Company Code'),
+  cns('string','leaf','city','',false,{},[],'City'),
+  cns('string','leaf','companyName','',false,{},[],'Company Name'),
+  cns('string','leaf','currency','',false,{},[],'Currency'),
+]);
+
+const companyCodeParamSearchTree = createTreeFromConfig(companyCodeSearchStructure);
+
+/**
+ * @description 后端直接返回可用的company code
+ * @pezy
+ */
+export const companyCodeSearch: SearchMethod[] = [
+  {
+    name: '公司代码搜索',
+    paramTree: companyCodeParamSearchTree,
+    serviceUrl: '/api/search/company-code',
+    resultHeaderDisplay:{
+      result: 'companyCode',
+      name: 'companyName',
+      city: 'city',
+      currency: 'currency',
+    }
+  }
+]
 
 const countryParamSearchStructure = cns('dict','dict','Search',null,false,{hideLabel:true},[
   cns('dict','dict','Country Name Search',null,false,{},[
@@ -80,14 +108,25 @@ const customerIdParamSearchStructure = cns('dict','dict','Search',null,false,{hi
 
 const customerIdParamSearchTree = createTreeFromConfig(customerIdParamSearchStructure);
 
+const customerSearchStructure = cns('dict', 'dict', 'Search', null, false, {hideLabel:true}, [
+  cns('string', 'leaf', 'customer', '', false, {},[],'Customer'),
+  cns('string', 'leaf', 'postalCode', '', false, {},[],'Postal Code'),
+  cns('string', 'leaf', 'companyCode', '', false, {searchMethods:companyCodeSearch},[],'Company Code'),
+  cns('string', 'leaf', 'city', '', false, {},[],'City'),
+  cns('string', 'leaf', 'searchTerm', '', false, {},[],'Search Term'),
+  cns('string', 'leaf', 'customerName', '', false, {},[],'Customer Name'),
+]);
+
+const customerSearchTree = createTreeFromConfig(customerSearchStructure);
+
 /**
  * @description 后端直接返回可用的customer二级搜索
- * @leopold
+ * @leopold  & @pezy
  */
 export const customerSearch:SearchMethod[] = [
   {
     name: '顾客搜索',
-    paramTree: generalParamSearchTree,
+    paramTree: customerSearchTree,
     serviceUrl: '/api/search/customer',
     resultHeaderDisplay:{
       result: 'customerId',
@@ -164,11 +203,32 @@ export const bpSearch: SearchMethod[] = [
   }
 ]
 
+const glAccountParamSearchStructure = cns('dict','dict','Search',null,false,{hideLabel:true},[
+  cns('string','leaf','glAccount','',false,{},[],'G/L Account'),
+  cns('string','leaf','chartOfAccounts','',false,{},[],'Chart of Accounts'),
+  cns('string','leaf','shortText','',false,{},[],'Short Text'),
+  cns('string','leaf','companyCode','',false,{searchMethods:companyCodeSearch},[],'Company Code'),
+  cns('string','leaf','longText','',false,{},[],'Long Text'),
+]);
+
+const glAccountParamSearchTree = createTreeFromConfig(glAccountParamSearchStructure);
+
+/**
+ * @description 后端直接返回可用的GL Account
+ * @pezy
+ */
 export const GLAccountSearch: SearchMethod[] = [
   {
     name: 'G/L Account search',
-    paramTree: null,
+    paramTree: glAccountParamSearchTree,
     serviceUrl: '/api/search/gl-account',
+    resultHeaderDisplay:{
+      result: 'glAccount',
+      chartOfAccounts: 'chartOfAccounts',
+      shortText: 'shortText',
+      companyCode: 'companyCode',
+      longText:'longText'
+    }
   }
 ]
 
@@ -372,10 +432,24 @@ export const billingDocumentIdSearch: SearchMethod[] = [
   }
 ]
 
+const soldToPartySearchStructure  = cns('dict', 'dict', 'Search', null, false, {hideLabel: true}, [
+  cns('string','leaf','customer','',false,{},[],'Customer'),
+  cns('string','leaf','city','',false,{},[],'City'),
+  cns('string','leaf','name','',false,{},[],'Name'),
+  cns('string','leaf','countryKey','',false,{searchMethods:generalSearch('countryKey')},[],'Country Key'),
+  cns('string','leaf','postalCode','',false,{},[],'Postal Code'),
+]);
+
+const soldToPartySearchTree = createTreeFromConfig(soldToPartySearchStructure);
+
+/**
+ * @description 后端直接返回可用的售达方
+ * @pezy
+ */
 export const soldToPartySearch: SearchMethod[] = [
   {
     name: '售达方搜索',
-    paramTree: null,
+    paramTree: soldToPartySearchTree,
     serviceUrl: '/api/search/sold-to-party',
     resultHeaderDisplay: {
       'result': '售达方',
