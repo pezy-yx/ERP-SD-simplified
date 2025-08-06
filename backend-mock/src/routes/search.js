@@ -4,7 +4,7 @@ const router = express.Router();
 // 模拟业务伙伴数据
 const mockBusinessPartners = [
   {
-    id: 'BSO001',
+    id: 'BP0001',
     companyName: '华为技术有限公司',
     bpType: '客户',
     contactPerson: '张经理',
@@ -15,7 +15,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BSO002', 
+    id: 'BP0002', 
     companyName: '腾讯科技有限公司',
     bpType: '客户',
     contactPerson: '李总监',
@@ -26,7 +26,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BSO003',
+    id: 'BP0003',
     companyName: '富士康科技集团',
     bpType: '供应商',
     contactPerson: '王主管',
@@ -37,7 +37,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BSO004',
+    id: 'BP0004',
     companyName: '比亚迪股份有限公司',
     bpType: '合作伙伴',
     contactPerson: '赵副总',
@@ -48,7 +48,7 @@ const mockBusinessPartners = [
     status: '活跃'
   },
   {
-    id: 'BSO005',
+    id: 'BP0005',
     companyName: '中兴通讯股份有限公司',
     bpType: '客户',
     contactPerson: '刘经理',
@@ -695,15 +695,15 @@ router.post('/customer', (req, res) => {
 
     const mockCustomers = [
       {
-        result: 'BSO0001',
+        result: 'BP0001',
         name: '北京科技有限公司'
       },
       {
-        result: 'BSO0002',
+        result: 'BP0002',
         name: '上海贸易公司'
       },
       {
-        result: 'BSO0003',
+        result: 'BP0003',
         name: '深圳制造企业'
       }
     ];
@@ -1086,7 +1086,7 @@ router.post('/salesOrder-id', (req, res) => {
  */
 router.post('/relation', (req, res) => {
   const mockRes = [
-    {result: 'BBSO002', direction: '->', description: 'Has the Invoicing Party'},
+    {result: 'BUR002', direction: '->', description: 'Has the Invoicing Party'},
     {result: 'BUR001', direction: '->', description: 'Has Contact Person'},
     {result: 'BUR004', direction: '<->', description: 'Is Married To'},
   ]
@@ -1104,9 +1104,9 @@ router.post('/relation', (req, res) => {
  */
 router.post('/business-partner', (req, res) => {
   const mockRes = [
-    {result: 'BSO0001', name:'T1', companyCode:'001'},
-    {result: 'BSO0002', name:'TT', companyCode:'002'},
-    {result: 'BSO0003', name:'T3', companyCode:'003'},
+    {result: 'BP0001', name:'T1', companyCode:'001'},
+    {result: 'BP0002', name:'TT', companyCode:'002'},
+    {result: 'BP0003', name:'T3', companyCode:'003'},
   ]
   res.json({
     success: true,
