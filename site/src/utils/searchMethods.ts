@@ -240,19 +240,84 @@ export const divisionSearch: SearchMethod[] = [
   }
 ]
 
-export const inquiryIdSearch: SearchMethod[] = [
+/**
+ * @description 后端返回可用的存储位置
+ * @vakesamahere
+ */
+export const storageLocationSearch: SearchMethod[] = [
   {
-    name: '询价单搜索',
+    name: '存储位置搜索',
     paramTree: null,
-    serviceUrl: '/api/search/inquiry-id'
+    serviceUrl: '/api/search/storage-location',
+    resultHeaderDisplay: {
+      result: "Location",
+      description: "Description"
+    }
   }
 ]
 
+/**
+ * @description diliveryId搜索
+ * @vakesamahere
+ */
+
 export const deliveryIdSearch: SearchMethod[] = [
   {
-    name: '交货单搜索',
-    paramTree: null,
-    serviceUrl: '/api/search/delivery-id'
+    name: 'delivery-id搜索',
+    paramTree: createTreeFromConfig(cns('dict','dict','searchInput',{},false,{hideLabel:true},[
+      cns('selection','leaf','state','All',false,{options:['All','GI Not Posted','GI Posted']},[],'Outbound Delivery: '),
+      cns('string','leaf','shippingPoint','',false,{searchMethods:storageLocationSearch},[],'Shipping Point: '),
+      cns('string','leaf','shipToParty','',false,{searchMethods:customerSearch},[],'Ship to Party: '),
+      cns('date','leaf','pickingDate','',false,{},[],'Picking Date: '),
+      cns('date','leaf','loadingDate','',false,{},[],'Loading Date: '),
+      cns('date','leaf','plannedGIDate','',false,{},[],'Planned GI Date: '),
+      cns('date','leaf','deliveryDate','',false,{},[],'Delivery Date: '),
+      cns('dynamiclist','list','containPickingStatus',[
+        {status:'Not Relevant'},
+        {status:'Not Yet Processed'},
+        {status:'Partially Processed'},
+        {status:'Completely Processed'},
+      ],false,{
+        rowProvided:4,
+        childTemplate: cns('dict','dict','row',{},false,{},[
+          cns('selection','leaf','status','',false,{options:['Not Relevant','Not Yet Processed','Partially Processed','Completely Processed']},)
+        ])
+      },[],'Picking Status: '),
+    ])),
+    serviceUrl: '/api/search/delivery-id',
+    resultHeaderDisplay: {
+      result: 'ID',
+      description: 'Description',
+      shippingPoint: 'Shipping Point',
+      shipToParty: 'Ship-To Party',
+      pickingDate: 'Picking Date',
+      loadingDate: 'Loading Date',
+      plannedGIDate: 'Planned GI Date',
+      deliveryDate: 'Delivery Date',
+      pickingStatus: 'Picking Status Name',
+    }
+  }
+]
+
+/**
+ * @description billdocId搜索
+ * @vakesamahere
+ */
+export const billingDocumentIdSearch: SearchMethod[] = [
+  {
+    name: '开票凭证搜索',
+    paramTree: createTreeFromConfig(cns('dict','dict','searchInput',{},false,{hideLabel:true},[
+      cns('string','leaf','soldToParty','',false,{searchMethods:customerSearch},[],'Sold-To Party: '),
+      cns('date','leaf','billingDate','',false,{},[],'Billing Date: '),     
+    ])),
+    serviceUrl: '/api/search/billing-document-id',
+    resultHeaderDisplay: {
+      result: 'ID',
+      soldToParty: 'Sold-To Party: ',
+      netValue: 'Net Value',
+      billingDate:'Billing Date',
+      currency: 'Currency'
+    }
   }
 ]
 
@@ -293,14 +358,6 @@ export const plantSearch: SearchMethod[] = [
   }
 ]
 
-export const storageLocationSearch: SearchMethod[] = [
-  {
-    name: '存储位置搜索',
-    paramTree: null,
-    serviceUrl: '/api/search/storage-location'
-  }
-]
-
 export const quotationIdSearch: SearchMethod[] = [
   {
     name: '报价单搜索',
@@ -309,16 +366,79 @@ export const quotationIdSearch: SearchMethod[] = [
   }
 ]
 
-export const billingDocumentIdSearch: SearchMethod[] = [
+/**
+ * @description inquiry-id
+ * @vakesamahere
+ */
+export const inquiryIdSearch: SearchMethod[] = [
   {
-    name: '开票凭证搜索',
-    paramTree: null,
-    serviceUrl: '/api/search/billing-document-id',
+    name: '询价单搜索',
+    paramTree: createTreeFromConfig(cns('dict','dict','searchInput',{},false,{hideLabel:true},[
+      cns('string','leaf','purchaseOrderNumber','',false,{searchMethods:customerSearch},[],'Purchase Order No.: '),
+      cns('string','leaf','soldToParty','',false,{searchMethods:customerSearch},[],'Sold-To Party: '),
+      cns('string','leaf','shipToParty','',false,{searchMethods:customerSearch},[],'Ship-To Party: '),
+      cns('string','leaf','customerRef','',false,{},[],'Cust. Reference: '),
+      cns('date','leaf','customerRefDate','',false,{},[],'Cust. Ref. Date: '),
+      cns('dynamiclist','list','containMaterials','',false,{
+        childTemplate: cns('dict','dict','row',null,false,{},[
+          cns('string','leaf','id','',false,{searchMethods:materialSearch},[],'ID')
+        ])
+      },[],'Materials: '),
+    ])),
+    serviceUrl: '/api/search/inquiry-id',
     resultHeaderDisplay: {
-      'result': '开票凭证号',
-      'soldToParty': '售达方',
-      'netValue': '净值',
-      'currency': '货币'
+      result: 'Inquiry ID',
+      purchaseOrderNumber: 'Purchase Order Number',
+      soldToParty: 'Sold-To Party',
+      shipToParty: 'Ship-To Party',
+      customerRef: 'Customer Reference',
+      customerRefDate: 'Customer Reference Date'
+    }
+  }
+]
+
+/**
+ * @description realtion-id
+ * @vakesamahere
+ */
+export const relationIdSearch: SearchMethod[] = [
+  {
+    name: 'Relation Search',
+    paramTree: createTreeFromConfig(cns('dict','dict','searchInput',{},false,{hideLabel:true},[
+      cns('string','leaf','BP1','',false,{searchMethods:customerSearch},[],'Sold-To Party: '),
+      cns('string','leaf','BP2','',false,{searchMethods:customerSearch},[],'Ship-To Party: '),
+      cns('string','leaf','validFrom','',false,{},[],'Valid From: '),
+      cns('date','leaf','validTo','',false,{},[],'Valid To: '),
+      cns('dynamiclist','list','containCategory','',false,{
+        childTemplate: cns('dict','dict','row',null,false,{},[
+          cns('string','leaf','relation','',false,{searchMethods:relationSearch},[],'Relation Category')
+        ])
+      },[],'Relation Category: '),
+    ])),
+    serviceUrl: '/api/search/relation-id',
+    resultHeaderDisplay: {
+      result: 'Relation ID',
+      BP1: 'Sold-To Party',
+      BP2: 'Ship-To Party',
+      validFrom: 'Valid From',
+      validTo: 'Valid To',
+      relation: 'Relation Category'
+    }
+  }
+]
+
+/**
+ * @description material-unit，直接返回
+ * @vakesamahere
+ */
+export const materialUnitSearch: SearchMethod[] = [
+  {
+    name: '统计单位搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/material-unit',
+    resultHeaderDisplay: {
+      result: 'Unit Name',
+      description: 'Description',
     }
   }
 ]

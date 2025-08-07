@@ -648,46 +648,6 @@ router.post('/mock/company', (req, res) => {
   }
 });
 
-// 交货单搜索 - Mock API
-router.post('/delivery-id', (req, res) => {
-  try {
-    console.log('交货单搜索参数:', req.body);
-
-    const mockDeliveries = [
-      {
-        id: 'DEL-2024-001',
-        result: 'DEL-2024-001',
-        description: '出库交货单 - 客户CUST-12345'
-      },
-      {
-        id: 'DEL-2024-002',
-        result: 'DEL-2024-002',
-        description: '出库交货单 - 客户CUST-67890'
-      },
-      {
-        id: 'DEL-2024-003',
-        result: 'DEL-2024-003',
-        description: '出库交货单 - 客户CUST-11111'
-      }
-    ];
-
-    res.json({
-      success: true,
-      data: mockDeliveries,
-      total: mockDeliveries.length,
-      message: `找到 ${mockDeliveries.length} 个交货单`
-    });
-
-  } catch (error) {
-    console.error('交货单搜索错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '搜索失败，请稍后重试',
-      error: error.message
-    });
-  }
-});
-
 // 客户搜索 - Mock API
 router.post('/customer', (req, res) => {
   try {
@@ -800,85 +760,6 @@ router.post('/plant', (req, res) => {
 
   } catch (error) {
     console.error('工厂搜索错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '搜索失败，请稍后重试',
-      error: error.message
-    });
-  }
-});
-
-// 存储位置搜索 - Mock API
-router.post('/storage-location', (req, res) => {
-  try {
-    console.log('存储位置搜索参数:', req.body);
-
-    const mockStorageLocations = [
-      {
-        id: '0001',
-        result: '0001',
-        description: '主仓库A区'
-      },
-      {
-        id: '0002',
-        result: '0002',
-        description: '主仓库B区'
-      },
-      {
-        id: '0003',
-        result: '0003',
-        description: '备用仓库'
-      }
-    ];
-
-    res.json({
-      success: true,
-      data: mockStorageLocations,
-      total: mockStorageLocations.length,
-      message: `找到 ${mockStorageLocations.length} 个存储位置`
-    });
-
-  } catch (error) {
-    console.error('存储位置搜索错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '搜索失败，请稍后重试',
-      error: error.message
-    });
-  }
-});
-
-// 开票凭证搜索
-router.post('/billing-document-id', (req, res) => {
-  try {
-    const { query } = req.body;
-    
-    const mockBillingDocuments = [
-      { id: 'BD001', result: 'BD001', soldToParty: 'C001 - ABC Company', netValue: '1500.00', currency: 'USD' },
-      { id: 'BD002', result: 'BD002', soldToParty: 'C002 - XYZ Corp', netValue: '2500.00', currency: 'EUR' },
-      { id: 'BD003', result: 'BD003', soldToParty: 'C003 - DEF Ltd', netValue: '3000.00', currency: 'USD' },
-      { id: 'BD004', result: 'BD004', soldToParty: 'C004 - GHI Inc', netValue: '1800.00', currency: 'EUR' },
-      { id: 'BD005', result: 'BD005', soldToParty: 'C005 - JKL Corp', netValue: '2200.00', currency: 'USD' }
-    ];
-
-    let filteredResults = mockBillingDocuments;
-    
-    if (query && query.trim()) {
-      filteredResults = mockBillingDocuments.filter(doc => 
-        doc.billingDocument.toLowerCase().includes(query.toLowerCase()) ||
-        doc.soldToParty.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-
-    res.json({
-      success: true,
-      data: filteredResults,
-      total: filteredResults.length,
-      message: `找到 ${filteredResults.length} 个开票凭证`
-    });
-
-  } catch (error) {
-    console.error('开票凭证搜索错误:', error);
     res.status(500).json({
       success: false,
       message: '搜索失败，请稍后重试',
@@ -1094,6 +975,229 @@ router.post('/division', (req, res) => {
     data: mockRes,
     total: mockRes.length,
     message: `${mockRes.length} results found`
+  });
+});
+
+/**
+ * @description 存储位置
+ * @vakesamahere
+ */
+router.post('/storage-location', (req, res) => {
+  const mockStorageLocations = [
+    {
+      result: '0001',
+      description: '主仓库A区'
+    },
+    {
+      result: '0002',
+      description: '主仓库B区'
+    },
+    {
+      result: '0003',
+      description: '备用仓库'
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: mockStorageLocations,
+    total: mockStorageLocations.length,
+    message: `找到 ${mockStorageLocations.length} 个存储位置`
+  });
+});
+
+/**
+ * @description delivery-id
+ * @vakesamahere
+ */
+router.post('/delivery-id', (req, res) => {
+  const mockDeliveries = [
+    {
+      result: 'DEL-2024-001',
+      description: '出库交货单 - 客户CUST-12345',
+      shippingPoint: 'SD00',
+      shipToParty: '123',
+      pickingDate: '2004-03-07',
+      loadingDate: '2004-03-07',
+      plannedGIDate: '2004-03-07',
+      deliveryDate: '2004-03-07',
+      pickingStatus: 'Not Yet Processed',
+    },
+    {
+      result: 'DEL-2024-002',
+      description: '出库交货单 - 客户CUST-67890',
+      shippingPoint: 'SD00',
+      shipToParty: '123',
+      pickingDate: '2004-03-07',
+      loadingDate: '2004-03-07',
+      plannedGIDate: '2004-03-07',
+      deliveryDate: '2004-03-07',
+      pickingStatus: 'Not Yet Processed',
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: mockDeliveries,
+    total: mockDeliveries.length,
+    message: `找到 ${mockDeliveries.length} 个交货单`
+  });
+});
+
+/**
+ * @description relation-id
+ * @vakesamahere
+ */
+router.post('/relation-id', (req, res) => {
+  const mockRes = [
+    {
+      result: 'REL-2024-001',
+      BP1: 'C001 - Sold-To Party',
+      BP2: 'S001 - Ship-To Party',
+      validFrom: '2024-06-01',
+      validTo: '2024-12-31',
+      relation: 'Has Ship-To Party'
+    },
+    {
+      result: 'REL-2024-002',
+      BP1: 'C002 - Sold-To Party',
+      BP2: 'S002 - Ship-To Party',
+      validFrom: '2024-07-01',
+      validTo: '2024-12-31',
+      relation: 'Has Ship-To Party'
+    },
+    {
+      result: 'REL-2024-003',
+      BP1: 'C003 - Sold-To Party',
+      BP2: 'S003 - Ship-To Party',
+      validFrom: '2024-08-01',
+      validTo: '2024-12-31',
+      relation: 'Has Ship-To Party'
+    },
+    {
+      result: 'REL-2024-004',
+      BP1: 'C004 - Sold-To Party',
+      BP2: 'S004 - Ship-To Party',
+      validFrom: '2024-09-01',
+      validTo: '2024-12-31',
+      relation: 'Has Ship-To Party'
+    },
+    {
+      result: 'REL-2024-005',
+      BP1: 'C005 - Sold-To Party',
+      BP2: 'S005 - Ship-To Party',
+      validFrom: '2024-10-01',
+      validTo: '2024-12-31',
+      relation: 'Has Ship-To Party'
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `找到 ${mockRes.length} 个结果`
+  });
+});
+
+/**
+ * @description inquiry-id
+ * @vakesamahere
+ */
+router.post('/inquiry-id', (req, res) => {
+  const mockRes = [
+    {
+      result: 'INQ-2024-001',
+      purchaseOrderNumber: 'PO-10001',
+      soldToParty: 'C001 - ABC Company',
+      shipToParty: 'S001 - ABC Ship',
+      customerRef: 'REF-001',
+      customerRefDate: '2024-06-01'
+    },
+    {
+      result: 'INQ-2024-002',
+      purchaseOrderNumber: 'PO-10002',
+      soldToParty: 'C002 - XYZ Corp',
+      shipToParty: 'S002 - XYZ Ship',
+      customerRef: 'REF-002',
+      customerRefDate: '2024-06-02'
+    },
+    {
+      result: 'INQ-2024-003',
+      purchaseOrderNumber: 'PO-10003',
+      soldToParty: 'C003 - DEF Ltd',
+      shipToParty: 'S003 - DEF Ship',
+      customerRef: 'REF-003',
+      customerRefDate: '2024-06-03'
+    },
+    {
+      result: 'INQ-2024-004',
+      purchaseOrderNumber: 'PO-10004',
+      soldToParty: 'C004 - GHI Inc',
+      shipToParty: 'S004 - GHI Ship',
+      customerRef: 'REF-004',
+      customerRefDate: '2024-06-04'
+    },
+    {
+      result: 'INQ-2024-005',
+      purchaseOrderNumber: 'PO-10005',
+      soldToParty: 'C005 - JKL Corp',
+      shipToParty: 'S005 - JKL Ship',
+      customerRef: 'REF-005',
+      customerRefDate: '2024-06-05'
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: mockRes,
+    total: mockRes.length,
+    message: `找到 ${mockRes.length} 个结果`
+  });
+});
+
+/**
+ * @description billdoc-id
+ * @vakesamahere
+ */
+router.post('/billing-document-id', (req, res) => {
+  const mockBillingDocuments = [
+    { result: 'BD001', soldToParty: 'C001 - ABC Company', billingDate:'2026-12-06', netValue: '1500.00', currency: 'USD' },
+    { result: 'BD002', soldToParty: 'C002 - XYZ Corp', billingDate:'2026-12-06', netValue: '2500.00', currency: 'EUR' },
+    { result: 'BD003', soldToParty: 'C003 - DEF Ltd', billingDate:'2026-12-06', netValue: '3000.00', currency: 'USD' },
+    { result: 'BD004', soldToParty: 'C004 - GHI Inc', billingDate:'2026-12-06', netValue: '1800.00', currency: 'EUR' },
+    { result: 'BD005', soldToParty: 'C005 - JKL Corp', billingDate:'2026-12-06', netValue: '2200.00', currency: 'USD' }
+  ];
+
+  res.json({
+    success: true,
+    data: mockBillingDocuments,
+    total: mockBillingDocuments.length,
+    message: `找到 ${mockBillingDocuments.length} 个开票凭证`
+  });
+});
+
+/**
+ * @description material-unit
+ * @vakesamahere
+ */
+router.post('/material-unit', (req, res) => {
+  // 模拟物料单位数据
+  const mockMaterialUnits = [
+    { result: 'EA', description: 'Each (单件)' },
+    { result: 'KG', description: 'Kilogram (千克)' },
+    { result: 'BOX', description: 'Box (盒)' },
+    { result: 'SET', description: 'Set (套)' },
+    { result: 'L', description: 'Liter (升)' },
+    { result: 'M', description: 'Meter (米)' },
+    { result: 'PCS', description: 'Pieces (件)' }
+  ];
+
+  res.json({
+    success: true,
+    data: mockMaterialUnits,
+    total: mockMaterialUnits.length,
+    message: `找到 ${mockMaterialUnits.length} 个物料单位`
   });
 });
 
