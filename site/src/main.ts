@@ -22,6 +22,10 @@ window.API_BASE_URL = window.API_BASE_URL ||
                       process.env.VUE_APP_API_BASE_URL || 
                       'http://localhost:3000'
 window.getAPIBaseUrl = () => {
+  const customUrl = localStorage.getItem('CUSTOM_API_BASE_URL')
+  if(customUrl && customUrl != '') {
+    return customUrl
+  }
   return window.API_BASE_URL
 }
 

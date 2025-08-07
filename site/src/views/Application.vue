@@ -32,10 +32,33 @@
         class="side-zone-content-container"
         @click.stop
       >
+        <div class="side-zone-header">
+          <a href="#" class="setting-button" :onclick="handleSettingButonClick">
+            <img src="../assets/home.png" alt="Home" class="nav-icon" />
+          </a>
+        </div>
         <RecentApplications
           @navigate="handleSideZoneNavigate"
           :key="sideZoneKey"
         />
+        <div v-if="showSettingModalFlag">
+          <Teleport to="body">
+            <div class="settingModal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--theme-color-page);padding:32px 24px;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:999;">
+              <h3 style="margin-bottom:16px;">自定义 API 地址</h3>
+              <input
+                type="text"
+                v-model="customApiBaseUrl"
+                placeholder="输入 API 地址"
+                style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;"
+              />
+              <p>{{`(Template: http://ip:port)`}}</p>
+              <div style="display:flex;justify-content:flex-end;gap:12px;">
+                <button @click="hideSettingModal" style="padding:6px 18px;border:none;background:#eee;border-radius:4px;cursor:pointer;">取消</button>
+                <button @click="saveCustomApiBaseUrl" style="padding:6px 18px;border:none;background:var(--theme-color-dark);color:#fff;border-radius:4px;cursor:pointer;">保存</button>
+              </div>
+            </div>
+          </Teleport>
+        </div>
       </div>
     </div>
   </div>
@@ -112,8 +135,31 @@ const handleKeyDown = (event: KeyboardEvent): void => {
   }
 };
 
+const showSettingModalFlag = ref(false)
+function handleSettingButonClick() {
+  showSettingModal()
+}
+function showSettingModal() {
+  showSettingModalFlag.value = true
+}
+function hideSettingModal() {
+  showSettingModalFlag.value = false
+}
+
+const customApiBaseUrl = ref<string>('');
+
+// 保存 API 地址到 localStorage
+function saveCustomApiBaseUrl() {
+  localStorage.setItem('CUSTOM_API_BASE_URL', customApiBaseUrl.value);
+  hideSettingModal();
+}
+
 // 生命周期
 onMounted(() => {
+  const savedUrl = localStorage.getItem('CUSTOM_API_BASE_URL');
+  if (savedUrl) {
+    customApiBaseUrl.value = savedUrl;
+  }
   // 根据当前路由设置初始标题
   updateTitleFromRoute();
 
@@ -245,6 +291,44 @@ watch(route, () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.side-zone-header {
+  padding-top: 20px;
+}
+
+.setting-button {
+  display: inline-block;
+  text-decoration: none;
+  overflow: hidden;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 50px;
+  height: 50px;
+}
+.setting-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 保持图片比例并填充容器 */
+  display: block; /* 移除图片底部的小空隙 */
+  transition: filter 0.2s ease; /* 图片变色过渡效果 */
+}
+
+/* 悬浮效果：放大、阴影加深、图片变暗 */
+.setting-button:hover {
+  transform: translateY(-2px); /* 向上移动，增加悬浮感 */
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* 阴影加深 */
+}
+
+.setting-button:hover img {
+  filter: brightness(0.9); /* 鼠标悬浮时，图片亮度降低 */
+}
+
+/* 点击效果：收缩、阴影变小 */
+.setting-button:active {
+  transform: translateY(0); /* 恢复到原位 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影变小，模拟按下的效果 */
 }
 
 :deep(.page-content) {
