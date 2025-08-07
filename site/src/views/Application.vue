@@ -34,7 +34,7 @@
       >
         <div class="side-zone-header">
           <a href="#" class="setting-button" :onclick="handleSettingButonClick">
-            <img src="../assets/home.png" alt="Home" class="nav-icon" />
+            <img src="../assets/settings.png" alt="Home" class="nav-icon" />
           </a>
         </div>
         <RecentApplications
