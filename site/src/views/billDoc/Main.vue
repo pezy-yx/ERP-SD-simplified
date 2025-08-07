@@ -5,7 +5,7 @@ import AppContent from '@/components/applicationContent/AppContent.vue'
 import {createTreeFromConfig, cns, VarNodeValue, VarNode} from '@/utils/VarTree';
 import {
   billingDocumentIdSearch,
-  soldToPartySearch,
+  customerSearch,
 } from '@/utils/searchMethods'
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
@@ -85,7 +85,7 @@ const initialCreationTree = createTreeFromConfig(
   cns('dict','dict','initialScreen',{},false,{hideLabel:true},[
     cns('dict','dict','billingDueList',{},false,{hideLabel:true},[
       cns('date','leaf','billingDate','',false,{},[],"Billing Date:"),
-      cns('string','leaf','soldToParty','',false,{searchMethods:soldToPartySearch},[],"Sold-To Party:"),
+      cns('string','leaf','soldToParty','',false,{searchMethods:customerSearch},[],"Sold-To Party:"),
     ]),
   ])
 )

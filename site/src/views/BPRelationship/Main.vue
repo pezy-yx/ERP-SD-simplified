@@ -5,7 +5,8 @@ import AppContent from '@/components/applicationContent/AppContent.vue'
 import {createTreeFromConfig, createNodeFromConfig, cns, VarTree, VarNode, NodeStructure, isNodeStructure, VarNodeValue} from '@/utils/VarTree';
 import {
   bpSearch,
-  relationSearch
+  relationSearch,
+  relationIdSearch,
 } from '@/utils/searchMethods'
 
 let API_BASE_URL = window.API_BASE_URL || ''
@@ -53,7 +54,7 @@ const initialCreationTree = createTreeFromConfig(
  */
 const initialSearchTree = createTreeFromConfig(
   cns('dict','dict','initialScreen',{},false,{hideLabel:true},[
-    cns('string','leaf','relationshipId','',false,{},[],"Relationship ID:"),
+    cns('string','leaf','relationshipId','',false,{searchMethods:relationIdSearch},[],"Relationship ID:"),
   ])
 )
 

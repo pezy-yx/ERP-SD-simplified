@@ -118,7 +118,7 @@
 import VarBox from '@/components/varbox/VarBox.vue';
 import { ref, Ref, computed, nextTick, onMounted } from 'vue';
 import { createTreeFromConfig, cns } from '@/utils/VarTree';
-import { materialSearch, quotationIdSearch, materialDocumentSearch, plantSearch } from '@/utils/searchMethods';
+import { materialSearch, quotationIdSearch, materialDocumentSearch, plantSearch, materialUnitSearch } from '@/utils/searchMethods';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 let API_BASE_URL = window.API_BASE_URL || '';
 onMounted(() => {
@@ -157,7 +157,7 @@ childTemplate:cns('dict','dict','item',null,false,{},[
 cns('string','leaf','item','',true,{},[],"Item"),
 cns('string','leaf','material','',true,{},[],"Material"),
 cns('string','leaf','orderQuantity','',true,{},[],"Order Quantity"),
-cns('string','leaf','orderQuantityUnit','',true,{hideLabel:true},[],"SU"),
+cns('string','leaf','orderQuantityUnit','',true,{hideLabel:true,searchMethods:materialUnitSearch},[],"SU"),
 ]),
 },[],"Items"),
 
