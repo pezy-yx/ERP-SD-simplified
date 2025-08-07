@@ -14,10 +14,6 @@ import {
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'
@@ -180,7 +176,7 @@ const initializeResult = ref(false)
  * @description 创建-初始化
  */
 async function initializeByCreation() {
-  const data = await fetch(`${API_BASE_URL}/api/app/inquiry/initialize`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/initialize`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -210,7 +206,7 @@ async function initializeByCreation() {
  * @description 查询/修改-初始化
  */
 async function initializeByGet() {
-  const data = await fetch(`${API_BASE_URL}/api/app/inquiry/get`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/get`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -250,7 +246,7 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
   // 提取每个VarNode的值
   const itemValues = itemNodes.map(node => node.getValue())
 
-  const data = await fetch(`${API_BASE_URL}/api/app/inquiry/items-tab-query`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/items-tab-query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -448,7 +444,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     if (onCreateState.value || onChangeState.value) {
       console.log(inquiryDataTree.getValue())
       // 向后端发送stage 1的所有树，创建inquiry
-      const data = await fetch(`${API_BASE_URL}/api/app/inquiry/edit`, {
+      const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/edit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,10 +3,6 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-let API_BASE_URL = window.API_BASE_URL || '';
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 
 const journalEntryNumber = ref<string | null>(null);
 const journalEntryDetails = ref<JournalEntryDetailData | null>(null); // 明确类型
@@ -50,7 +46,7 @@ onMounted(async () => {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/finance/journalEntryDetails`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/finance/journalEntryDetails`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

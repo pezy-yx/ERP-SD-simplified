@@ -6,11 +6,6 @@ import {createTreeFromConfig, createNodeFromConfig, cns, VarTree, VarNode, NodeS
 import {
   customerSearch
 } from '@/utils/searchMethods'
-
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 
 defineExpose({})
@@ -50,7 +45,7 @@ const salesOrdersTree = createTreeFromConfig(
  * @description 获取销售订单列表
  */
 async function loadSalesOrders() {
-  const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/get-sales-orders`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/get-sales-orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -96,7 +91,7 @@ async function handleExecuteClick() {
     // 提取选中订单的值
     const orderValues = selectedOrders.map(order => order.getValue())
 
-    const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/create-from-orders`, {
+    const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/create-from-orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

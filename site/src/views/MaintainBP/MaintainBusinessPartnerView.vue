@@ -65,10 +65,6 @@ import VarBox from '@/components/varbox/VarBox.vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
 import { bpSearch, relationSearch } from '@/utils/searchMethods';
 
-// 定义一个基础的API URL，你可以根据你的项目配置进行调整
-// 在实际项目中，这通常通过环境变量配置
-let API_BASE_URL = window.API_BASE_URL || ''
-
 const customerQueryStructure = cns("dict", "dict", "query", null, false, {hideLabel: true}, [
   cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID")
 ]);
@@ -196,7 +192,7 @@ export default {
       console.log('提交的查询数据结构:', JSON.stringify(queryData, null, 2));
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/bp/search`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/search`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(queryData),
@@ -226,7 +222,7 @@ export default {
     async fetchBusinessPartnerDetail(customerId) {
       console.log(`获取业务伙伴 ${customerId} 的详情数据...`);
       try {
-        const response = await fetch(`${API_BASE_URL}/api/bp/get/${customerId}`);
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/get/${customerId}`);
         const result = await response.json();
 
         if (result.success && result.data) {
@@ -270,7 +266,7 @@ export default {
       console.log('提交的创建数据:', JSON.stringify(createData, null, 2));
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/bp/create`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(createData),
@@ -307,7 +303,7 @@ export default {
       console.log('提交的详情数据进行保存:', JSON.stringify(detailData, null, 2));
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/bp/edit`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/edit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(detailData),
@@ -325,9 +321,6 @@ export default {
         alert('保存业务伙伴详情失败: ' + (error.message || '网络错误'));
       }
     }
-  },
-  mounted() {
-    API_BASE_URL = window.API_BASE_URL || '';
   }
 };
 </script>

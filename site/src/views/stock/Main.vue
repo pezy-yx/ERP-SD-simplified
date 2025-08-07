@@ -92,7 +92,7 @@ const appContentRef = ref(null) as any
  * @description 向后端获取stock的合法阶段，给stockStages和stockLevelString赋值
  */
 async function initializeTrees() {
-  const stagesRes = await fetch(`${window.API_BASE_URL}/api/stock/getStockStages`, {
+  const stagesRes = await fetch(`${window.getAPIBaseUrl()}/api/stock/getStockStages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ async function initializeTrees() {
   const stagesResJson = await stagesRes.json()
   stockStages.value = stagesResJson.data ?? []
 
-  const levelsRes = await fetch(`${window.API_BASE_URL}/api/stock/getStockLevels`, {
+  const levelsRes = await fetch(`${window.getAPIBaseUrl()}/api/stock/getStockLevels`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ const stockDetailTree = createTreeFromConfig(cns("dict","dict","stockDetail",nul
  * @description 搜索材料库存
  */
 async function handleSearch() {
-  const info = await fetch(`${window.API_BASE_URL}/api/stock/materialInfo`, {
+  const info = await fetch(`${window.getAPIBaseUrl()}/api/stock/materialInfo`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ async function handleSearch() {
   appContentRef.value?.forceUpdate()
   materialInfoTree.forceUpdate()
 
-  const data = await fetch(`${window.API_BASE_URL}/api/stock/searchStock`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/stock/searchStock`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

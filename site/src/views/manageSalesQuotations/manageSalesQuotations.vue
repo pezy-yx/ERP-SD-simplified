@@ -145,11 +145,8 @@ const createQuotationFromInquiry = async () => {
     }
 
     try {
-        // 调用后端接口创建报价单
-        const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000'; // 无需修改
-
         // 请确保这里的URL与您后端新增的接口路径完全一致
-        const response = await fetch(`${API_BASE_URL}/api/quotation/create-quotation-from-inquiry`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/create-quotation-from-inquiry`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -228,11 +225,6 @@ interface QuotationNodeStructure extends NodeStructure {
 // 3. 响应式变量和引用
 // ====================================================================
 
-// API 基础 URL，从环境变量获取，如果未设置则为空字符串
-let API_BASE_URL = window.API_BASE_URL || '';
-onMounted(() => {
-    API_BASE_URL = window.API_BASE_URL || '';
-})
 // 对 AppContent 组件的引用，用于调用其内部方法（如 goToStage）
 const appContentRef = ref(null) as Ref<any>; // 明确指定 Ref 的类型为 any，以便访问 AppContent 暴露的方法
 
@@ -481,7 +473,7 @@ const quotationDetailNextButtonLabel = computed(() => {
  */
 async function fetchQuotationDetails(id: number) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/quotation/details`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/details`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({salesQuotationId:id}),
@@ -533,7 +525,7 @@ async function handleSearch() {
     const queryData = initialSearchTree.root?.currentValue; 
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/quotation/search`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/search`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(queryData),
@@ -614,7 +606,7 @@ async function handleExecute(currentStage: number, targetStage: number): Promise
             const body = {
                 quotation: toRaw(quotationDataTree.root?.currentValue) // 获取原始数据以发送到后端
             };
-            const res = await fetch(`${API_BASE_URL}/api/quotation/update`, { // 假设这是更新 API
+            const res = await fetch(`${window.getAPIBaseUrl()}/api/quotation/update`, { // 假设这是更新 API
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -635,7 +627,7 @@ async function handleExecute(currentStage: number, targetStage: number): Promise
             const body = {
                 quotation: toRaw(quotationDataTree.root?.currentValue) // 获取原始数据以发送到后端
             };
-            const res = await fetch(`${API_BASE_URL}/api/quotation/create`, { // 假设这是创建 API
+            const res = await fetch(`${window.getAPIBaseUrl()}/api/quotation/create`, { // 假设这是创建 API
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -769,7 +761,7 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
     // 提取每个VarNode的值
     const itemValues = itemNodes.map(node => node.getValue())
 
-    const data = await fetch(`${API_BASE_URL}/api/quotation/items-tab-query`, {
+    const data = await fetch(`${window.getAPIBaseUrl()}/api/quotation/items-tab-query`, {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',

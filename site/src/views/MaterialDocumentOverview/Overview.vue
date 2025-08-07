@@ -120,10 +120,6 @@ import { ref, Ref, computed, nextTick, onMounted } from 'vue';
 import { createTreeFromConfig, cns } from '@/utils/VarTree';
 import { materialSearch, quotationIdSearch } from '@/utils/searchMethods';
 import AppContent from '@/components/applicationContent/AppContent.vue';
-let API_BASE_URL = window.API_BASE_URL || '';
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || '';
-});
 
 const appContentRef = ref(null) as any;
 const currentAppStage = computed(() => appContentRef.value?.currentStage || 0);
@@ -201,7 +197,7 @@ const materialDocumentResult: Ref<MaterialDocumentResult[]> = ref([]);
 const searchPerformed = ref(false);
 
 const performMaterialDocumentSearch = async () => {
-  const fullUrl = `${API_BASE_URL}/api/material/search`;
+  const fullUrl = `${window.getAPIBaseUrl()}/api/material/search`;
   const queryData = materialQueryTree.root?.getValue();
 
   searchPerformed.value = true;
@@ -260,7 +256,7 @@ const viewMaterialDocumentDetail = async (materialDocumentId: string) => {
 
       appContentRef.value.footerMessage = 'Fetching material document details...';
       try {
-        const response = await fetch(`${API_BASE_URL}/api/material/get/${materialDocumentId}`);
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/material/get/${materialDocumentId}`);
         const result = await response.json();
         if (result.success && result.data) {
           materialDocumentDataTree.root?.forceSetValue(result.data);

@@ -9,11 +9,6 @@ import {
 } from '@/utils/searchMethods'
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
-
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'
@@ -152,7 +147,7 @@ const initializeResult = ref(false)
  * @description 创建-初始化开票到期清单
  */
 async function initializeByCreation() {
-  const data = await fetch(`${API_BASE_URL}/api/app/billing/initialize`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/billing/initialize`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -182,7 +177,7 @@ async function initializeByCreation() {
  * @description 查询/修改-初始化
  */
 async function initializeByGet() {
-  const data = await fetch(`${API_BASE_URL}/api/app/billing/get`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/billing/get`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -257,7 +252,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     if (onCreateState.value || onChangeState.value) {
       console.log(billingDataTree.getValue())
       // 向后端发送stage 1的所有树，创建/保存开票凭证
-      const data = await fetch(`${API_BASE_URL}/api/app/billing/edit`, {
+      const data = await fetch(`${window.getAPIBaseUrl()}/api/app/billing/edit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -5,10 +5,6 @@ import AppContent from '@/components/applicationContent/AppContent.vue'
 import PickMain from './PickMain.vue'
 import {createTreeFromConfig, createNodeFromConfig, cns, VarTree, VarNode, NodeStructure, isNodeStructure, VarNodeValue} from '@/utils/VarTree';
 
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 
 defineExpose({})
@@ -79,7 +75,7 @@ const deliveriesTree = createTreeFromConfig(
  * @description 获取出库交货单列表
  */
 async function loadDeliveries() {
-  const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/get-deliveries-summary`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/get-deliveries-summary`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -134,7 +130,7 @@ async function handlePostGIs() {
   const selectedNodes = deliveriesTree.findNodeByPath(['deliveryList'])?.getSelectedChildren() || []
   const deliveryIds = selectedNodes.map(node => node.findNodeByPath(['outboundDelivery'])?.getValue() as string)
 
-  const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/post-gis-by-id`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/post-gis-by-id`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
