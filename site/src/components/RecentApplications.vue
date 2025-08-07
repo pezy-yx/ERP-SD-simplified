@@ -7,16 +7,16 @@
           v-if="recentApps.length > 0"
           @click="clearHistory"
           class="clear-btn"
-          title="清除历史记录"
+          title="Clear"
         >
-          清除
+          Clear
         </button>
         <button
           @click="handleLogout"
           class="logout-btn"
-          title="登出"
+          title="Sign Out"
         >
-          登出
+          Sign Out
         </button>
       </div>
     </div>

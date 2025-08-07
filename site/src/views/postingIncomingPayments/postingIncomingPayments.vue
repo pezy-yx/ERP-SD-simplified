@@ -189,10 +189,6 @@ const journalEntryTypeOptions = ['AA(Asset Posting)','AB(Accounting Document)','
 
 const balance = ref(0 as number) // 用于存储余额
 const balanceUnit = ref('EUR') // 用于存储余额单位
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-    API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 interface OpenItem {
     companyCode: string;
@@ -348,7 +344,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
                 openItemSelection: inputData.openItemSelection
             };
 
-            const response = await fetch(`${API_BASE_URL}/api/finance/searchOpenItems`, {
+            const response = await fetch(`${window.getAPIBaseUrl()}/api/finance/searchOpenItems`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -409,7 +405,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
             return false;
         } else {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/finance/postOpenItems`, {
+                const response = await fetch(`${window.getAPIBaseUrl()}/api/finance/postOpenItems`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(itemsToPost)

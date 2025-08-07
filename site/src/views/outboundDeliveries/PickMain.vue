@@ -8,10 +8,6 @@ import {
   customerSearch
 } from '@/utils/searchMethods'
 
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 
 defineExpose({
@@ -287,7 +283,7 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
   // 提取每个VarNode的值
   const itemValues = itemNodes.map(node => node.getValue())
 
-  const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/items-tab-query`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/items-tab-query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -379,7 +375,7 @@ async function handleGoClick() {
   }
   appContentRef.value.footerMessage = ''
 
-  const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/get-detail`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/get-detail`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -428,7 +424,7 @@ async function handlePostGIs() {
   // 形成单元素列表作为post GIs的输入
   const postData = [allData]
 
-  const data = await fetch(`${API_BASE_URL}/api/app/outbound-delivery/post-gis`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/outbound-delivery/post-gis`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -45,9 +45,6 @@ const currentDetailTree = computed(() => {
   return config.value.detailTrees[0]
 })
 
-// API 基础 URL
-let API_BASE_URL = window.API_BASE_URL || ''
-
 /**
  * 处理 Items 表格的按钮点击事件
  */
@@ -125,7 +122,7 @@ async function validateItems(itemNodes: VarNode[]): Promise<boolean> {
   const itemValues = itemNodes.map(node => node.getValue())
 
   try {
-    const response = await fetch(`${API_BASE_URL}${config.value.validationEndpoint}`, {
+    const response = await fetch(`${window.getAPIBaseUrl()}${config.value.validationEndpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -433,7 +430,6 @@ async function initializeComponent() {
 
 // 生命周期钩子
 onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
   nextTick(() => {
     checkTeleportTarget()
     initializeComponent()

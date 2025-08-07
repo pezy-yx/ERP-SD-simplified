@@ -13,6 +13,7 @@ import './assets/styles/_base.css'
 declare global {
   interface Window {
     API_BASE_URL: string;
+    getAPIBaseUrl: () => string;
   }
 }
 
@@ -20,6 +21,13 @@ declare global {
 window.API_BASE_URL = window.API_BASE_URL || 
                       process.env.VUE_APP_API_BASE_URL || 
                       'http://localhost:3000'
+window.getAPIBaseUrl = () => {
+  const customUrl = localStorage.getItem('CUSTOM_API_BASE_URL')
+  if(customUrl && customUrl != '') {
+    return customUrl
+  }
+  return window.API_BASE_URL
+}
 
 // 创建Vue应用，把App.vue挂载到index.html的<div id="app">元素上
 // 启动页面渲染

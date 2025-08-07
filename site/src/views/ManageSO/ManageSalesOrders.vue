@@ -146,11 +146,6 @@ import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFr
 import { bpSearch, quotationIdSearch, salesOrderIdSearch } from '@/utils/searchMethods';
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
-let API_BASE_URL = window.API_BASE_URL || '';
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || '';
-})
-
 import AppContent from '@/components/applicationContent/AppContent.vue';
 
 // 创建 ItemConditionKit 实例
@@ -260,7 +255,7 @@ itemConditionKit.summonItemsNode(
 
   const performSalesOrderSearch = async () => {
     console.log('Executing sales order query...');
-    const fullUrl = `${API_BASE_URL}/api/so/search`;
+    const fullUrl = `${window.getAPIBaseUrl()}/api/so/search`;
     console.log('Attempting to fetch from URL:', fullUrl);
     const queryData = salesOrderQueryTree.root?.getValue();
     console.log('Submitting query data:', JSON.stringify(queryData, null, 2));
@@ -369,7 +364,7 @@ itemConditionKit.summonItemsNode(
         console.log('Saving/Creating sales order...');
         const dataToSave = salesOrderDataTree.root?.getValue();
 
-        let endpoint = onCreateState.value ? `${API_BASE_URL}/api/so/create` : `${API_BASE_URL}/api/so/edit`;
+        let endpoint = onCreateState.value ? `${window.getAPIBaseUrl()}/api/so/create` : `${window.getAPIBaseUrl()}/api/so/edit`;
         let method = 'POST';
 
         if (onChangeState.value && !(dataToSave as { basicInfo?: { so_id?: string } })?.basicInfo?.so_id) {
@@ -441,7 +436,7 @@ itemConditionKit.summonItemsNode(
 
        appContentRef.value.footerMessage = 'Fetching sales order details...';
        try {
-         const response = await fetch(`${API_BASE_URL}/api/so/get/${soId}`);
+         const response = await fetch(`${window.getAPIBaseUrl()}/api/so/get/${soId}`);
          const result = await response.json();
          if (result.success && result.data) {
            salesOrderDataTree.root?.forceSetValue(result.data);
@@ -484,7 +479,7 @@ itemConditionKit.summonItemsNode(
 
     quotationModalMessage.value = 'Searching for quotation...';
     try {
-      const response = await fetch(`${API_BASE_URL}/api/quotation/details`, {
+      const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/details`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quotation_id: quotationId }),
@@ -613,7 +608,7 @@ itemConditionKit.summonItemsNode(
     // Extract values from each VarNode
     const itemValues = itemNodes.map(node => node.getValue());
 
-    const data = await fetch(`${API_BASE_URL}/api/app/inquiry/items-tab-query`, {
+    const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/items-tab-query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

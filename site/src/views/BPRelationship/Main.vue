@@ -8,10 +8,6 @@ import {
   relationSearch
 } from '@/utils/searchMethods'
 
-let API_BASE_URL = window.API_BASE_URL || ''
-onMounted(() => {
-  API_BASE_URL = window.API_BASE_URL || ''
-})
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'
@@ -100,7 +96,7 @@ const initializeResult = ref(false)
  * @description 创建-初始化
  */
 async function initializeByCreation() {
-  const data = await fetch(`${API_BASE_URL}/api/app/bp-relationship/register`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/bp-relationship/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -134,7 +130,7 @@ async function initializeByCreation() {
  * @description 查询/修改-初始化
  */
 async function initializeByGet() {
-  const data = await fetch(`${API_BASE_URL}/api/app/bp-relationship/get`, {
+  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/bp-relationship/get`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -242,7 +238,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
         bpRelationshipData: bpRelationshipDataTree.getValue(),
         generalData: generalDataTree.getValue(),
       }
-      const data = await fetch(`${API_BASE_URL}/api/app/bp-relationship/edit`, {
+      const data = await fetch(`${window.getAPIBaseUrl()}/api/app/bp-relationship/edit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
