@@ -11,13 +11,6 @@
         >
           Clear
         </button>
-        <button
-          @click="handleLogout"
-          class="logout-btn"
-          title="Sign Out"
-        >
-          Sign Out
-        </button>
       </div>
     </div>
     
@@ -103,22 +96,6 @@ const clearHistory = (): void => {
   }
 };
 
-const handleLogout = (): void => {
-  if (confirm('确定要登出吗？')) {
-    // 清除本地存储的token
-    localStorage.removeItem('token');
-
-    // 可选：清除历史记录
-    // applicationHistoryManager.clearHistory();
-
-    // 跳转到登录页面
-    router.push('/login');
-
-    // 发出事件通知父组件关闭侧栏
-    emit('navigate');
-  }
-};
-
 const formatVisitTime = (visitTime: string): string => {
   const now = new Date();
   const visit = new Date(visitTime);
@@ -189,6 +166,7 @@ onMounted(() => {
   background: none;
   border: 1px solid var(--theme-color-page);
   color: var(--theme-color-page);
+  font-weight: bold;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -198,25 +176,10 @@ onMounted(() => {
 }
 
 .clear-btn:hover {
-  background-color: var(--theme-color-lighter-a);
-  color: var(--theme-color-page);
-}
-
-.logout-btn {
-  background: none;
-  border: 1px solid #ff6b6b;
-  color: #ff6b6b;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.logout-btn:hover {
-  background-color: #ff6b6b;
-  color: white;
+  color: var(--theme-color-darker);
+  background-color: var(--theme-color-lighter);
+  border-color: var(--theme-color);
+  transform: translateY(-1px);
 }
 
 .empty-state {

@@ -33,10 +33,22 @@
         @click.stop
       >
         <div class="side-zone-header">
-          <a href="#" class="setting-button" :onclick="handleSettingButonClick">
-            <img src="../assets/settings.png" alt="Home" class="nav-icon" />
-          </a>
-        </div>
+          <div class="user-info-container">
+              <img src="../assets/user.png" class="user-head"/>
+              <div class="user-details">
+                  <span class="user-name">Administrator</span>
+                  <div class="user-actions">
+                      <a href="#" class="setting-button" :onclick="handleLogout">
+                          <img src="../assets/power-off.png" alt="Sign Out" class="icon"/>
+                          <span>Sign Out</span>
+                      </a>
+                      <a href="#" class="setting-button" :onclick="handleSettingButonClick">
+                          <img src="../assets/settings.png" alt="Settings" class="icon"/>
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
         <RecentApplications
           @navigate="handleSideZoneNavigate"
           :key="sideZoneKey"
@@ -66,7 +78,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import NavigationBar from '@/components/NavigationBar.vue';
 import RecentApplications from '@/components/RecentApplications.vue';
 
@@ -77,6 +89,7 @@ const sideZoneKey = ref<number>(0);
 
 // 路由
 const route = useRoute();
+const router = useRouter();
 
 // 方法
 const handleGlobalSearch = (query: string): void => {
@@ -84,6 +97,10 @@ const handleGlobalSearch = (query: string): void => {
   // 处理全局搜索逻辑
   // 可以通过事件总线或状态管理传递给子组件
 };
+
+const emit = defineEmits<{
+  navigate: []
+}>();
 
 const updatePageTitle = (title: string): void => {
   currentPageTitle.value = title;
@@ -106,6 +123,22 @@ const updateTitleFromRoute = (): void => {
       default:
         currentPageTitle.value = 'Application';
     }
+  }
+};
+
+const handleLogout = (): void => {
+  if (confirm('确定要登出吗？')) {
+    // 清除本地存储的token
+    localStorage.removeItem('token');
+
+    // 可选：清除历史记录
+    // applicationHistoryManager.clearHistory();
+
+    // 跳转到登录页面
+    router.push('/login');
+
+    // 发出事件通知父组件关闭侧栏
+    emit('navigate');
   }
 };
 
@@ -303,9 +336,9 @@ watch(route, () => {
   overflow: hidden;
   border-radius: 10px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 50px;
-  height: 50px;
+  margin-left: 15px;
+  width: 30px;
+  height: 30px;
 }
 .setting-button img {
   width: 100%;
@@ -329,6 +362,43 @@ watch(route, () => {
 .setting-button:active {
   transform: translateY(0); /* 恢复到原位 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影变小，模拟按下的效果 */
+}
+
+.user-head {
+  display: flex;
+  margin-left: 20px;
+  text-decoration: none;
+  overflow: hidden;
+  border-radius: 100px;
+  background-color: grey;
+  align-content: start;
+  width: 100px;
+  height: 100px;
+}
+
+.user-info-container{
+  display: flex; /* 使用Flexbox进行水平布局 */
+  align-items: center; /* 垂直居中对齐 */
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column; /* 垂直排列用户名和操作按钮 */
+    justify-content: center;
+    margin-left: 30px;
+}
+
+.user-name {
+    font-size: 1.8em; /* 用户名大小 */
+    color: var(--theme-color-text);
+    margin-top: 20px;
+    font-weight: bold;
+    margin-bottom: 5px; /* 用户名和操作按钮之间的间距 */
 }
 
 :deep(.page-content) {
