@@ -117,7 +117,7 @@
 import { ref, Ref, computed, onMounted } from 'vue';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
-import { bpSearch, quotationIdSearch } from '@/utils/searchMethods';
+import { bpSearch, materialUnitSearch, quotationIdSearch, soldToPartySearch } from '@/utils/searchMethods';
 import {
     cns,                   // 用于创建 NodeStructure 的辅助函数
     createTreeFromConfig,  // 用于从配置创建 VarTree 实例
@@ -207,7 +207,7 @@ const onSearchState = computed(() => state.value === 'search');
 
 // 定义报价单数据的接口
 interface QuotationData {
-    salesQuotation: number;    // 销售报价单号
+    salesQuotation: string;    // 销售报价单号
     soldToParty: string;       // 售达方
     customerReference: string; // 客户参考
     overallStatus: string;     // 整体状态
@@ -295,7 +295,7 @@ const writableTrees = [quotationDataTree];
 const initialSearchTree = createTreeFromConfig(
     cns('dict', 'dict', 'query', {}, false, {}, [
         cns('number','leaf','salesQuotation','', false, {searchMethods: quotationIdSearch}, [], 'Sales Quotation:'),
-        cns('string', 'leaf', 'soldToParty', '', false, {searchMethods: bpSearch}, [], 'Sold-To Party:'),
+        cns('string', 'leaf', 'soldToParty', '', false, {searchMethods: soldToPartySearch}, [], 'Sold-To Party:'),
         cns('string', 'leaf', 'customerReference', '', false, {}, [], 'Customer Reference:'),
         cns('selection', 'leaf', 'overallStatus', '', false, {
             options: [
@@ -314,8 +314,8 @@ const initialCreationTree = createTreeFromConfig(
         ]),
         cns('dict','dict','basicInfo',{},false,{hideLabel:true},[ // 基本信息
             cns('string','leaf','quotation','',true,{searchMethods:quotationIdSearch},[],"Quotation ID:"),
-            cns('string','leaf','soldToParty','',false,{searchMethods: bpSearch},[],"Sold-To Party:"),
-            cns('string','leaf','shipToParty','',false,{searchMethods: bpSearch},[],"Ship-To Party:"),
+            cns('string','leaf','soldToParty','',false,{searchMethods: soldToPartySearch},[],"Sold-To Party:"),
+            cns('string','leaf','shipToParty','',false,{searchMethods: soldToPartySearch},[],"Ship-To Party:"),
             cns('string','leaf','customerReference','',false,{},[],"Cust. Reference:"),
             cns('string','leaf','netValue','0.0',true,{},[],"Net Value:"),
             cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),
@@ -341,7 +341,7 @@ const initialCreationItemsNode = createNodeFromConfig(
       cns('string','leaf','item','',true,{},[],"Item"),
       cns('string','leaf','material','',false,{},[],"Material"),
       cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
-      cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[],"SU"),
+      cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true, searchMethods:materialUnitSearch},[],"SU"),
       cns('string','leaf','description','',false,{},[],"Description"),
       cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date"),
       cns('string','leaf','netValue','',true,{},[],"Net: "),
@@ -471,7 +471,7 @@ const quotationDetailNextButtonLabel = computed(() => {
  * @param id 报价单的 ID
  * @returns 成功时返回响应数据，失败时返回 null
  */
-async function fetchQuotationDetails(id: number) {
+async function fetchQuotationDetails(id: string) {
     try {
         const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/details`, {
             method: 'POST',

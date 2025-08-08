@@ -651,18 +651,17 @@ function handleSearchModalConfirm(data: any) {
     } catch (error) {
       console.error('自定义搜索结果处理函数执行失败:', error)
     }
-  } else {
-    // 默认处理逻辑：将 firstSelectedResult 的 result 字段赋值给 currentNode
-    if (data.firstSelectedResult && data.firstSelectedResult.result !== undefined) {
-      setNodeValue(data.firstSelectedResult.result)
-    } else if (data.selectedResults && data.selectedResults.length > 0) {
-      // 如果没有 firstSelectedResult，使用第一个选中结果
-      const firstResult = data.selectedResults[0]
-      if (firstResult && firstResult.result !== undefined) {
-        setNodeValue(firstResult.result)
-      }
-    }
   }
+  // 默认处理逻辑：将 firstSelectedResult 的 result 字段赋值给 currentNode
+  if (data.firstSelectedResult && data.firstSelectedResult.result !== undefined) {
+    setNodeValue(data.firstSelectedResult.result)
+  } else if (data.selectedResults && data.selectedResults.length > 0) {
+    // 如果没有 firstSelectedResult，使用第一个选中结果
+    const firstResult = data.selectedResults[0]
+    if (firstResult && firstResult.result !== undefined) {
+      setNodeValue(firstResult.result)
+    }
+  }  
 
   // 触发update事件通知父组件
   emit('update', {

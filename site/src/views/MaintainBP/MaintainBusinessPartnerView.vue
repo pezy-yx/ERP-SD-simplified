@@ -63,7 +63,7 @@
 import FilterTabs from '@/components/FilterTabs.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
 import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFromConfig } from '@/utils/VarTree';
-import { bpSearch, relationSearch } from '@/utils/searchMethods';
+import { bpSearch, countrySearch, relationSearch } from '@/utils/searchMethods';
 
 const customerQueryStructure = cns("dict", "dict", "query", null, false, {hideLabel: true}, [
   cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID")
@@ -89,7 +89,7 @@ function createCustomerTreeStructure(type = 'org') {
       cns("string","leaf","searchTerm",null,false,{},[],"Search Term:"),
     ],"Search Terms"),
     cns("dict","dict","address",null,false,{},[
-      cns("string","leaf","country","",false,{searchMethods:bpSearch},[],"Country:"),
+      cns("string","leaf","country","",false,{searchMethods:countrySearch},[],"Country:"),
       cns("string","leaf","street",null,false,{},[],"Street:"),
       cns("string","leaf","postalCode",null,false,{},[],"Postal Code:"),
       cns("string","leaf","city",null,false,{},[],"City:"),

@@ -1,5 +1,8 @@
 import { VarTree, VarNode, createTreeFromConfig, createNodeFromConfig, cns, type NodeStructure } from '@/utils/VarTree'
 import { ref, computed, type Ref } from 'vue'
+import {
+  materialSearch,
+} from '@/utils/searchMethods'
 
 /**
  * ItemCondition 配套工具类配置
@@ -161,7 +164,7 @@ export class ItemConditionKit {
     // 默认的 item 模板
     const defaultItemTemplate = cns('dict','dict','item',null,false,{},[
       cns('string','leaf','item','',true,{},[],"Item"),
-      cns('string','leaf','material','',false,{},[],"Material"),
+      cns('string','leaf','material','',false,{searchMethods: materialSearch},[],"Material"),
       cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
       cns('string','leaf','orderQuantityUnit','',false,{hideLabel:true},[],"SU"),
       cns('string','leaf','description','',false,{},[],"Description"),

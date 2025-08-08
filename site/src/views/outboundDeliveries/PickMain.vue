@@ -5,7 +5,10 @@ import AppContent from '@/components/applicationContent/AppContent.vue'
 import FilterTabs from '@/components/FilterTabs.vue';
 import {createTreeFromConfig, createNodeFromConfig, cns, VarTree, VarNode, NodeStructure, isNodeStructure, VarNodeValue} from '@/utils/VarTree';
 import {
-  customerSearch
+  customerSearch,
+  deliveryIdSearch,
+  materialUnitSearch,
+  storageLocationSearch
 } from '@/utils/searchMethods'
 
 const appContentRef = ref(null) as any
@@ -40,7 +43,7 @@ onMounted(async () => {
  */ 
 const initialInputTree = createTreeFromConfig(
   cns('dict','dict','initialScreen',{},false,{hideLabel:true},[
-    cns('string','leaf','id','',false,{},[],"Delivery:"),
+    cns('string','leaf','id','',false,{searchMethods: deliveryIdSearch},[],"Delivery:"),
   ])
 )
 
@@ -66,11 +69,11 @@ const deliveryDetailTree = createTreeFromConfig(
     cns('string','leaf','address','',true,{},[],"Address: "), // 1 11
     
     cns('string','leaf','grossWeight','',true,{},[],"Gross Wgt: "), // 2 1
-    cns('string','leaf','grossWeightUnit','',true,{hideLabel:true},[],"Gross Wgt Unit: "), // 3 1
+    cns('string','leaf','grossWeightUnit','',true,{hideLabel:true,searchMethods:materialUnitSearch},[],"Gross Wgt Unit: "), // 3 1
     cns('string','leaf','netWeight','',true,{},[],"Net Wgt: "), // 2 2
-    cns('string','leaf','netWeightUnit','',true,{hideLabel:true},[],"Net Wgt Unit: "), // 3 2
+    cns('string','leaf','netWeightUnit','',true,{hideLabel:true,searchMethods:materialUnitSearch},[],"Net Wgt Unit: "), // 3 2
     cns('string','leaf','volume','',true,{},[],"Volume: "), // 2 3
-    cns('string','leaf','volumeUnit','',true,{hideLabel:true},[],"Volume Unit: "), // 3 3
+    cns('string','leaf','volumeUnit','',true,{hideLabel:true,searchMethods:materialUnitSearch},[],"Volume Unit: "), // 3 3
     cns('string','leaf','priority','',true,{},[],"Priority: "), // 2 4
     cns('string','leaf','shippingPoint','',true,{},[],"Shipping Point: "), // 2 5
   ])
@@ -123,9 +126,9 @@ const deliveryItemsTree = createTreeFromConfig(
         cns('string','leaf','item','',true,{},[],"Item"),
         cns('string','leaf','material','',true,{},[],"Material"),
         cns('string','leaf','deliveryQuantity','',false,{},[],"Delivery Quantity"),
-        cns('string','leaf','deliveryQuantityUnit','',false,{},[]," "),
+        cns('string','leaf','deliveryQuantityUnit','',false,{searchMethods:materialUnitSearch},[]," "),
         cns('string','leaf','pickingQuantity','',true,{},[],"Picking Quantity"),
-        cns('string','leaf','pickingQuantityUnit','',true,{},[]," "),
+        cns('string','leaf','pickingQuantityUnit','',true,{searchMethods:materialUnitSearch},[]," "),
         cns('string','leaf','pickingStatus','',true,{},[],"Picking Status"),
         cns('string','leaf','confirmationStatus','',true,{},[],"Confirmation Status"),
 
@@ -146,7 +149,20 @@ const deliveryItemsTree = createTreeFromConfig(
         cns('string','leaf','netWeight','',true,{},[],"Net Weight: "),
         cns('string','leaf','volume','',true,{},[],"Volume: "),
         cns('string','leaf','plant','',true,{},[],"Plant: "),
-        cns('string','leaf','storageLocation','',false,{},[],"Storage Location: "), // writable
+        cns('string','leaf','storageLocation','',false,{
+          searchMethods: storageLocationSearch,
+          customSearchResultHandler: (data,node)=>{
+            const selecteds = data.selectedResults
+            if(selecteds.length == 0) return
+            const row: {result:string, description:string} = selecteds[0]
+            const description = row.description ?? ""
+            let path = itemDetailTree.findPathToNode(node)?.slice(0,-1)
+            path?.push('storageLocationDescription')
+            if(!path) return  
+            itemDetailTree.findNodeByPath(path)?.forceSetValue(description)
+            itemDetailTree.forceUpdate()
+          }
+        },[],"Storage Location: "), // writable
         cns('string','leaf','storageLocationDescription','',true,{},[]," "),
         cns('string','leaf','storageBin','',true,{},[],"Storage Bin: "),
         cns('date','leaf','materialAvailability','',true,{},[],"Material Availability: "),
