@@ -241,12 +241,20 @@ const routes = [
         name: 'MaterialDocumentOverview',
         component: MaterialDocumentOverview,
         meta: { title: 'MaterialDocumentOverview' }
-      },{
+      },
+      {
+        path: 'kanban',
+        name: 'DashboardKanban',
+        component: () => import('@/views/kanban/Main.vue'),
+        meta: { title: 'Business Dashboard' }
+      },
+      {
         path: 'posting-incoming-payments',
         name: 'PostingIncomingPayments',
         component: () => import('@/views/postingIncomingPayments/postingIncomingPayments.vue'),
         meta: { title: 'Posting Incoming Payments' }
-      },{
+      },
+      {
         path: 'display-journal-entry/:id',
         name: 'DisplayJournalEntry',
         component: () => import('@/views/postingIncomingPayments/displayJournalEntry.vue'),
