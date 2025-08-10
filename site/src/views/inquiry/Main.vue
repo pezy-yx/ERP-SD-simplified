@@ -172,23 +172,6 @@ itemConditionKit.summonItemsNode(
  */
 const writableTrees = [inquiryDataTree]
 
-
-/**
- * 将初始化创建请求从 VarTree 的 getValue 结果转换为文档定义的扁平结构
- * 文档期望: { inquiryType, salesOrganization, distributionChannel, division }
- * VarTree 当前输出: { inquiryType: { inquiryType }, salesOrg: { salesOrganization, distributionChannel, division } }
- */
-function transformInitializePayload(input: any) {
-  const inquiryType = input?.inquiryType?.inquiryType ?? ''
-  const salesOrg = input?.salesOrg ?? {}
-  return {
-    inquiryType,
-    salesOrganization: salesOrg?.salesOrganization ?? '',
-    distributionChannel: salesOrg?.distributionChannel ?? '',
-    division: salesOrg?.division ?? ''
-  }
-}
-
 const initializeResult = ref(false)
 /**
  * @description 创建-初始化
@@ -199,7 +182,7 @@ async function initializeByCreation() {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(transformInitializePayload(initialCreationTree.getValue()))
+    body: JSON.stringify(initialCreationTree.getValue())
   }).then(response => {
     console.log('正常返回', response)
     return response.json()
@@ -257,7 +240,7 @@ async function itemsTabQueryAll() {
 /**
  * @description 询价单批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
  * @description 该方法会更新入参VarNode[]中的数据
- * @param {Array<VarNode>} itemNodes
+ * @param {Array<VarNode>} itemNodes 
  * 同时根据返回的badRecordIndices设置每个VarNode的config.data.validation
  */
 async function itemsTabQuery(itemNodes: VarNode[]) {
@@ -420,13 +403,13 @@ async function handleEnterFromNodeInquiryTree(node: VarNode, value: string, data
 
 /**
  * @description 状态管理的before-prev钩子
- * @param currentStage
- * @param targetStage
+ * @param currentStage 
+ * @param targetStage 
  */
 async function handleCancel(currentStage: number, targetStage: number) {
   if (currentStage === 1) {
     const confirmValue = confirm('Cancel?')
-    if(confirmValue) {
+    if(confirmValue) {    
       appContentRef.value.footerMessage = ''
     }
     return confirmValue
@@ -436,8 +419,8 @@ async function handleCancel(currentStage: number, targetStage: number) {
 
 /**
  * @description 状态管理的before-next钩子
- * @param currentStage
- * @param targetStage
+ * @param currentStage 
+ * @param targetStage 
  */
 async function handleExecute(currentStage: number, targetStage: number) {
   console.log('try: stage change:',currentStage,'->',targetStage)
