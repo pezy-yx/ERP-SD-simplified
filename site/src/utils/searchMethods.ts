@@ -237,9 +237,6 @@ export const CurrencyUnitSearch: SearchMethod[] = [
     name: 'Currency Unit search',
     paramTree: null,
     serviceUrl: '/api/search/currency-unit',
-    resultHeaderDisplay: {
-      result: 'Unit'
-    }
   }
 ]
 
@@ -474,10 +471,7 @@ export const quotationIdSearch: SearchMethod[] = [
   {
     name: '报价单搜索',
     paramTree: quotationIdParamSearchTree,
-    serviceUrl: '/api/search/quotation-id',
-    resultHeaderDisplay: {
-      result: 'ID'
-    }
+    serviceUrl: '/api/search/quotation-id'
   }
 ]
 
