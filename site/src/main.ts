@@ -20,7 +20,7 @@ declare global {
 // 从环境变量读取并设置为全局变量
 window.API_BASE_URL = window.API_BASE_URL || 
                       process.env.VUE_APP_API_BASE_URL || 
-                      'http://124.70.192.112:3003'
+                      'http://localhost:3000'
 window.getAPIBaseUrl = () => {
   const customUrl = localStorage.getItem('CUSTOM_API_BASE_URL')
   if(customUrl && customUrl != '') {
