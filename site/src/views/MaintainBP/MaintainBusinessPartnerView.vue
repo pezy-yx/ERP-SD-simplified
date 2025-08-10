@@ -272,7 +272,7 @@ export default {
       console.log('提交的创建数据:', JSON.stringify(createData, null, 2));
 
       try {
-        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/edit`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(createData),
