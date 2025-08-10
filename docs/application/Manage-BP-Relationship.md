@@ -98,14 +98,19 @@ BP关系管理页面（Main.vue）是一个统一的业务伙伴关系管理界�
   "data": {
     "content": {
       "basicInfo": {
-        "relation": {
-          "relationShipCategory": "string"
+        "meta": {
+          "id": "string"
         },
-        "default": {
-          "businessPartner1": "string",
-          "businessPartner2": "string",
-          "validFrom": "string",
-          "validTo": "string"
+        "basicInfo": {
+          "relation": {
+            "relationShipCategory": "string"
+          },
+          "default": {
+            "businessPartner1": "string",
+            "businessPartner2": "string",
+            "validFrom": "string",
+            "validTo": "string"
+          }
         }
       },
       "generalData": {
@@ -128,7 +133,8 @@ BP关系管理页面（Main.vue）是一个统一的业务伙伴关系管理界�
 **响应字段说明：**
 - `success`: 查询是否成功
 - `message`: 响应消息
-- `data.content.basicInfo`: 基本关系信息
+- `data.content.basicInfo.meta`: 元数据信息，包含关系ID
+- `data.content.basicInfo.basicInfo`: 基本关系信息，包含relation和default字段
 - `data.content.generalData`: 动态表单数据
 - `data.formStruct`: 动态表单结构配置
 

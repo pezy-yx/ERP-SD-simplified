@@ -66,7 +66,7 @@ const allowedCharsRegex = /^[a-zA-Z0-9!@#$%^&*]*$/;
 
 // **定义非法字符的错误提示信息**
 const characterRestrictionMessage = 'Only letters, numbers and special characters like !@#$%^&* are allowed.';
-const passwordLengthMessage = 'Password must be 8 characters or less.'; 
+const passwordLengthMessage = 'Password must be 8 characters or more.'; 
 
 // 监听 props.Type 的变化，同步更新 currentInputType
 watch(() => props.Type, (newType) => {
@@ -101,7 +101,7 @@ function validateAll(value: string): { isValid: boolean; message: string } {
     }
 
     // 2. 次高优先级：密码长度校验
-    if (props.Type === 'password' && value.length > 8) {
+    if (props.Type === 'password' && value.length < 8) {
         return { isValid: false, message: passwordLengthMessage };
     }
     return { isValid: true, message: '' }; // 所有校验都通过
