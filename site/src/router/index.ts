@@ -13,7 +13,7 @@ import Register from '@/views/Register.vue';
 import Home from '@/views/Home.vue';
 import CreateBp from '@/views/BPRelationship/Create.vue';
 import ManageSalesOrders from "@/views/ManageSO/ManageSalesOrders.vue";
-import DisplayStock from '@/views/stock/Main.vue'
+import SearchMethodTest from '@/views/test/SearchMethodsTest.vue'
 
 // 询价单
 import CreateInquiry from "@/views/inquiry/Create.vue";
@@ -34,6 +34,9 @@ import ManageOutboundDeliveries from '@/views/outboundDeliveries/Manage.vue';
 import CreateBillingDocument from '@/views/billDoc/Create.vue';
 import DisplayBillingDocument from '@/views/billDoc/Display.vue';
 import ChangeBillingDocument from '@/views/billDoc/Change.vue';
+
+// 库存管理
+import DisplayStock from '@/views/stock/Main.vue'
 
 import getMyPassBack from '@/views/GetMyPassBack.vue'; // 引入主页组件
 import { title } from "process";
@@ -118,6 +121,12 @@ const routes = [
         name: 'ApplicationItemConditionKitTest',
         component: ItemConditionKitTest,
         meta: { title: 'ItemConditionKit Test' }
+      },
+      {
+        path: 'test/search',
+        name: 'SearchMethods',
+        component: SearchMethodTest,
+        meta: { title: 'Search Methods' }
       },
       {
         path: 'example',
@@ -242,7 +251,7 @@ const routes = [
         name: 'DisplayJournalEntry',
         component: () => import('@/views/postingIncomingPayments/displayJournalEntry.vue'),
         meta: { title: 'Display Journal Entry' }
-      }
+      },
     ]
   },
   { 
