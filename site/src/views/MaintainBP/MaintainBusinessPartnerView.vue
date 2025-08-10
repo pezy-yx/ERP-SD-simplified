@@ -80,7 +80,7 @@ function createCustomerTreeStructure(type = 'org') {
     ],""),
 
     cns("dict","dict","name",null,false,{},[
-      cns("selection","leaf","title",null,false,{options:['MR','MRS','MS','COMP']},[],"Title:"), //后面做title_id到title_name的转换
+      cns("selection","leaf","title",null,false,{options:['Mr.','Mrs.','Ms.','Company']},[],"Title:"),
       cns("string","leaf","name",null,false,{hideSelf: isPerson},[],"Name:"),
       cns("string","leaf","firstName",null,false,{hideSelf: !isPerson},[],"First Name:"),
       cns("string","leaf","lastName",null,false,{hideSelf: !isPerson},[],"Last Name:"),
