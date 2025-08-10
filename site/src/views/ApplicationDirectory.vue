@@ -252,12 +252,6 @@ const applications = ref<ApplicationInfo[]>([
           "routePath": "/test/item-condition-kit",
           "tags": ["test"]
         },
-        {
-          "applicationName": "SearchMethods Test",
-          "lore": "测试SearchMethods",
-          "routePath": "/test/search",
-          "tags": ["test"]
-        },
       ]
 );
 
