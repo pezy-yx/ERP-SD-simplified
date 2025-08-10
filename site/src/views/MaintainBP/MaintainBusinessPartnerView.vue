@@ -66,9 +66,7 @@ import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFr
 import { bpSearch, countrySearch, relationSearch } from '@/utils/searchMethods';
 
 const customerQueryStructure = cns("dict", "dict", "query", null, false, {hideLabel: true}, [
-  cns("dict","dict","query",null,false,{hideLabel:true},[
-  cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID"),
-],""),
+  cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID")
 ]);
 
 // 封装成一个函数，用于根据类型创建不同的表单结构
@@ -259,16 +257,12 @@ export default {
       const createData = this.customerCreateTree.root?.getValue();
 
       if (createData) {
-         if (!createData.bpIdAndRoleSection) {
-           createData.bpIdAndRoleSection = {};
+        if (!createData.bpIdAndRoleSection) {
+          createData.bpIdAndRoleSection = {};
         }
-        if (type === 'person' && createData.name.firstName && createData.name.lastName) {
-          // 自动填充name字段
-          createData.name.name = `${createData.name.firstName} ${createData.name.lastName}`;
-          console.log('自动生成 name 字段:', createData.name.name);
-         }
-         createData.bpIdAndRoleSection.type = type;
-       }
+        createData.bpIdAndRoleSection.type = type;
+      }
+
       console.log('提交的创建数据:', JSON.stringify(createData, null, 2));
 
       try {
