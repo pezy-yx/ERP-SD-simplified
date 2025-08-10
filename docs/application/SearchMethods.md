@@ -8,30 +8,30 @@
 
 | 接口名称 | 接口地址 | 描述 |
 |---------|---------|------|
-| generalSearch | `/api/search/general/${type}` | 根据不同业务对象类型进行通用搜索 ✅|
-| companyCodeSearch | `/api/search/company-code` | 搜索公司代码信息 ✅|
-| countrySearch | `/api/search/country` | 搜索国家信息 ✅|
-| customerSearch | `/api/search/customer` | 搜索客户信息 ✅|
-| bpSearch | `/api/search/business-partner` | 搜索业务伙伴信息 ✅|
-| GLAccountSearch | `/api/search/gl-account` | 搜索总账科目信息 ✅|
-| CurrencyUnitSearch | `/api/search/currency-unit` | 搜索货币单位信息 ✅|
-| relationSearch | `/api/search/relation` | 搜索业务伙伴关系类型 ✅|
-| inquiryTypeSearch | `/api/search/inquiry-type` | 搜索询价类型信息 ✅|
-| salesOrgSearch | `/api/search/sales-org` | 搜索销售组织信息 ✅|
-| distributionChannelSearch | `/api/search/distribution-channel` | 搜索分销渠道信息 ✅|
-| divisionSearch | `/api/search/division` | 搜索部门信息 ✅|
-| inquiryIdSearch | `/api/search/inquiry-id` | 搜索询价单ID ✅|
-| deliveryIdSearch | `/api/search/delivery-id` | 搜索交货单ID ✅|
-| materialSearch | `/api/search/material` | 搜索物料信息 ✅|
-| materialDocumentSearch | `/api/search/material-description` | 搜索物料文档信息 ✅|
-| plantSearch | `/api/search/plant` | 搜索工厂信息 ✅|
-| storageLocationSearch | `/api/search/storage-location` | 搜索存储位置信息 ✅|
-| quotationIdSearch | `/api/search/quotation-id` | 搜索报价单ID ✅|
-| billingDocumentIdSearch | `/api/search/billing-document-id` | 搜索开票凭证信息 ✅|
-| soldToPartySearch | `/api/search/sold-to-party` | 搜索售达方信息 ✅|
-| salesOrderIdSearch | `/api/search/salesOrder-id` | 搜索销售订单信息 ✅|
-| relationIdSearch | `/api/search/relation-id` | 搜索关系ID ✅|
-| materialUnitSearch | `/api/search/material-unit` | 搜索物料单位信息 ✅|
+| generalSearch | `/api/search/general/${type}` | 根据不同业务对象类型进行通用搜索 |
+| companyCodeSearch | `/api/search/company-code` | 搜索公司代码信息 |
+| countrySearch | `/api/search/country` | 搜索国家信息 | 
+| customerSearch | `/api/search/customer` | 搜索客户信息 |
+| bpSearch | `/api/search/business-partner` | 搜索业务伙伴信息 |
+| GLAccountSearch | `/api/search/gl-account` | 搜索总账科目信息 |
+| CurrencyUnitSearch | `/api/search/currency-unit` | 搜索货币单位信息 | 
+| relationSearch | `/api/search/relation` | 搜索业务伙伴关系类型 |
+| inquiryTypeSearch | `/api/search/inquiry-type` | 搜索询价类型信息 |
+| salesOrgSearch | `/api/search/sales-org` | 搜索销售组织信息 | 
+| distributionChannelSearch | `/api/search/distribution-channel` | 搜索分销渠道信息 | 
+| divisionSearch | `/api/search/division` | 搜索部门信息 | 
+| inquiryIdSearch | `/api/search/inquiry-id` | 搜索询价单ID |
+| deliveryIdSearch | `/api/search/delivery-id` | 搜索交货单ID |
+| materialSearch | `/api/search/material` | 搜索物料信息 | 
+| materialDocumentSearch | `/api/search/material-description` | 搜索物料文档信息 |
+| plantSearch | `/api/search/plant` | 搜索工厂信息 | 
+| storageLocationSearch | `/api/search/storage-location` | 搜索存储位置信息 | 
+| quotationIdSearch | `/api/search/quotation-id` | 搜索报价单ID |
+| billingDocumentIdSearch | `/api/search/billing-document-id` | 搜索开票凭证信息 |
+| soldToPartySearch | `/api/search/sold-to-party` | 搜索售达方信息 |
+| salesOrderIdSearch | `/api/search/salesOrder-id` | 搜索销售订单信息 |
+| relationIdSearch | `/api/search/relation-id` | 搜索关系ID |
+| materialUnitSearch | `/api/search/material-unit` | 搜索物料单位信息 |
 
 > **注意**: 以下接口已注释，暂未启用
 > - 开票方搜索: `/api/search/bill-to-party`
