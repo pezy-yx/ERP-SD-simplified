@@ -10,7 +10,7 @@
             <template #stage-initialScreen>
                 <VarBox :tree="initialCreationTree" v-if="onCreateState"></VarBox>
                 <VarBox :tree="initialSearchTree" v-else-if="onSearchState"></VarBox>
-                
+
                 <div v-if="searchResults && searchResults.length > 0 && onSearchState" class="search-results-table-container">
                     <table>
                         <thead>
@@ -47,9 +47,9 @@
                     <p>请点击“search”按钮查询报价单。</p>
                 </div>
             </template>
-            
+
             <template #stage-quotationDetail>
-                <VarBox v-if="quotationDataTree.root" :tree="quotationDataTree" >
+                <VarBox v-if="quotationDataTree.root" :tree="quotationDataTree" @enter-from-node="handleEnterFromNodeQuotationTree">
                     <template #[`quotationData-itemOverview-items--extra-buttons`]>
                         <button
                             class = "execute-button table-extra-button"
@@ -57,7 +57,7 @@
                         >
                             ...
                         </button>
-                    </template> 
+                    </template>
                 </VarBox>
                 <div v-else class="no-data-message">
                     <p>没有找到报价单详情。</p>
@@ -132,6 +132,7 @@ import { toRaw } from 'vue'; // 用于获取非响应式原始数据
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
+
 const cancelInquiryCreation = () => {
     showInquiryModal.value = false;
     inquiryIdInput.value = ''; // 清空输入
@@ -166,7 +167,7 @@ const createQuotationFromInquiry = async () => {
             if (result.data && result.data.quotationData && result.data.quotationData.basicInfo) {
                 // 如果后端返回了新报价单的完整数据
                 quotationDataTree.forceSetValue(result.data.quotationData);
-                
+
                 appContentRef.value.goToStage(1); // 切换到详情页 (阶段 1)
                 appToState('create'); // 设置应用状态为“创建”模式 (可编辑)
             } else {
@@ -264,6 +265,15 @@ const itemConditionKit = createItemConditionKit({
     save: 'Save',
     previous: '← Previous',
     next: 'Next →'
+  }
+})
+// 复用 kit 的校验能力，并在校验成功后更新总计字段
+itemConditionKit.updateConfig({
+  onGeneralData: (generalData: any) => {
+    quotationDataTree.findNodeByPath(['basicInfo','netValue'])?.setValue(generalData?.netValue)
+    quotationDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.setValue(generalData?.netValueUnit)
+    quotationDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.setValue(generalData?.expectOralVal)
+    quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.setValue(generalData?.expectOralValUnit)
   }
 })
 
@@ -505,9 +515,9 @@ async function viewDetails(quotation: QuotationData) {
         const quotationData: VarNodeValue = responseData.data.quotationData;
         // 使用 forceSetValue 更新 quotationDataTree 的数据，使其反映详情数据
         quotationDataTree.forceSetValue(quotationData);
-        
+
         console.log('更新后的 quotationDataTree:', quotationDataTree.root);
-        
+
         // 切换到 AppContent 的第二个阶段 (quotationDetail)
         appContentRef.value.goToStage(1);
         // 设置应用状态为“显示”模式 (只读)
@@ -522,8 +532,8 @@ async function viewDetails(quotation: QuotationData) {
  */
 async function handleSearch() {
     // 从搜索表单树获取查询条件
-    const queryData = initialSearchTree.root?.currentValue; 
-    
+    const queryData = initialSearchTree.root?.currentValue;
+
     try {
         const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/search`, {
             method: 'POST',
@@ -547,10 +557,10 @@ async function handleSearch() {
             } else if (currentValue && typeof currentValue === 'object') {
                 results = [currentValue as QuotationData];
             }
-            
+
             searchResults.value = results; // 更新搜索结果列表，供表格渲染
             searchResultsTree.value = response.data.quotationStruct; // 存储完整的 NodeStructure (备用，当前未直接使用)
-            
+
             alert(`查询成功，共找到 ${results.length} 条报价单！`);
         } else {
             alert('未找到报价单信息!');
@@ -660,7 +670,7 @@ async function handleCancel(currentStage: number, targetStage: number): Promise<
     // 阶段 0 (initialScreen) 的操作
     if (currentStage === 0) {
         // 从初始屏幕返回，通常允许直接返回（例如，回到上一页或关闭应用）
-        return true; 
+        return true;
     }
 
     // 阶段 1 (quotationDetail) 的操作
@@ -718,6 +728,19 @@ const footerConfig = [
 
 // ItemConditionKit 自动处理按钮标签和可见性
 
+/**
+ * @description 报价单变量树的enter-from-node事件处理（对齐 inquiry 行为：当 itemOverview/items 下字段回车时触发批量校验）
+ */
+async function handleEnterFromNodeQuotationTree(node: VarNode, value: string, data: any) {
+  if (data.nodePath.length > 2 && data.nodePath[0] === 'itemOverview' && data.nodePath[1] === 'items') {
+    await (itemConditionKit as any).validateItemsInTree(
+      quotationDataTree,
+      ['itemOverview','items'],
+      { forceUpdateTree: quotationDataTree }
+    )
+  }
+}
+
 // ItemConditionKit 自动处理标签页切换
 
 // ItemConditionKit 自动处理 item detail header
@@ -752,80 +775,8 @@ function handleItemConditionCancel() {
 // ItemConditionKit 自动处理数据验证和同步
 
 /**
- * @description quotation批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
- * @description 该方法会更新入参VarNode[]中的数据
- * @param {Array<VarNode>} itemNodes 
- * 同时根据返回的badRecordIndices设置每个VarNode的config.data.validation
+ * @description 复用统一校验逻辑，移除本地 itemsTabQuery
  */
-async function itemsTabQuery(itemNodes: VarNode[]) {
-    // 提取每个VarNode的值
-    const itemValues = itemNodes.map(node => node.getValue())
-
-    const data = await fetch(`${window.getAPIBaseUrl()}/api/quotation/items-tab-query`, {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itemValues)
-    }).then(response => {
-        console.log('正常返回', response)
-        return response.json()
-    }).catch(error => {
-        console.error('批量查询失败:', error)
-        return { success: false }
-    })
-
-    console.log('返回的数据', data)
-
-    if (data.success) {
-        // 更新总体数据
-        quotationDataTree.findNodeByPath(['basicInfo','netValue'])?.setValue(data.data.generalData?.netValue)
-        quotationDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.setValue(data.data.generalData?.netValueUnit)
-        quotationDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.setValue(data.data.generalData?.expectOralVal)
-        quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.setValue(data.data.generalData?.expectOralValUnit)
-
-        // 更新每个item的详细信息，使用forceSetValue确保完整更新
-        if (data.data.breakdowns && Array.isArray(data.data.breakdowns)) {
-        data.data.breakdowns.forEach((breakdown: any, index: number) => {
-            if (index < itemNodes.length) {
-            // 调试：打印breakdown数据结构
-            console.log('Breakdown data for item', index, ':', breakdown)
-            if (breakdown.pricingElements) {
-                console.log('PricingElements structure:', breakdown.pricingElements)
-            }
-            // 使用forceSetValue确保包括pricingElements在内的所有字段都被正确更新
-            itemNodes[index].forceSetValue(breakdown)
-            }
-        })
-        }
-
-        // 根据badRecordIndices设置validation
-        if (data.data.result && Array.isArray(data.data.result.badRecordIndices)) {
-        // 先重置所有节点的validation
-        itemNodes.forEach(node => {
-            if (!node.config.data) {
-            node.config.data = {}
-            }
-            node.config.data.validation = true
-        })
-
-        // 设置不合法节点的validation
-        data.data.result.badRecordIndices.forEach((badIndex: number) => {
-            if (badIndex < itemNodes.length) {
-            if (!itemNodes[badIndex].config.data) {
-                itemNodes[badIndex].config.data = {}
-            }
-            itemNodes[badIndex].config.data.validation = false
-            }
-        })
-        }
-
-        appContentRef.value.forceUpdate()
-        return data.data.result.allDataLegal === 1
-    }
-
-    return false
-}
 
 // ItemConditionKit 自动处理输入事件
 
@@ -848,7 +799,7 @@ async function handleItemsTableClick() {
 
         if (unvalidatedItems.length > 0) {
             console.log('发现未验证的items，正在验证...');
-            const isValid = await itemsTabQuery(unvalidatedItems);
+            const isValid = await (itemConditionKit as any).validateItems(unvalidatedItems, { forceUpdateTree: quotationDataTree });
             if (!isValid) {
                 console.log('数据验证失败，无法进入详情页面');
                 return;
@@ -885,7 +836,7 @@ defineExpose({
     padding: 5px 10px;
     border: 2px solid transparent; /* 初始透明边框 */
     border-radius: 5px;
-    background-color: var(--btn-default-bg); 
+    background-color: var(--btn-default-bg);
     color:var(--btn-default-text);
     font-size: 16px;
     font-weight: bold;
@@ -923,7 +874,7 @@ defineExpose({
     padding: 5px 10px;
     border: 2px solid transparent; /* 初始透明边框 */
     border-radius: 5px;
-    background-color: transparent; 
+    background-color: transparent;
     color:var(--btn-default-text);
     font-size: 16px;
     text-align: center;
@@ -1217,7 +1168,7 @@ td .status-badge {
     padding: 5px 10px;
     border: 2px solid transparent; /* 初始透明边框 */
     border-radius: 5px;
-    background-color: transparent; 
+    background-color: transparent;
     color:var(--btn-default-text);
     font-size: 16px;
     text-align: center;
@@ -1237,7 +1188,7 @@ td .status-badge {
     padding: 5px 10px;
     border: 2px solid transparent; /* 初始透明边框 */
     border-radius: 5px;
-    background-color: transparent; 
+    background-color: transparent;
     color:var(--btn-default-text);
     font-size: 16px;
     text-align: center;

@@ -15,6 +15,7 @@ import {
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
+
 const appContentRef = ref(null) as any
 
 type State = 'create' | 'change' | 'display'
@@ -30,6 +31,17 @@ const itemConditionKit: ItemConditionKit = createItemConditionKit({
     next: 'Next →'
   }
 })
+// 复用 kit 的校验能力，并在校验成功后更新总计字段
+function validateItemsInTree(itemsPath: string[]) {
+  return (itemConditionKit as any).validateItemsInTree(
+    inquiryDataTree,
+    itemsPath,
+    { forceUpdateTree: inquiryDataTree }
+  )
+}
+function validateItems(nodes: VarNode[]) {
+  return (itemConditionKit as any).validateItems(nodes, { forceUpdateTree: inquiryDataTree })
+}
 /**
  * @description 应用模式-创建/修改/查看
  */
@@ -248,87 +260,17 @@ async function initializeByGet() {
 }
 
 /**
- * @description 封装itemsTabQuery-查询所有
+ * @description 封装itemsTabQuery-查询所有（复用 kit）
  */
 async function itemsTabQueryAll() {
-  const items = inquiryDataTree.findNodeByPath(['itemOverview','items'])?.children || []
-  return await itemsTabQuery(items)
+  return await (itemConditionKit as any).validateItemsInTree(
+    inquiryDataTree,
+    ['itemOverview','items'],
+    { forceUpdateTree: inquiryDataTree }
+  )
 }
-/**
- * @description 询价单批量查询，向后端发送VarNode[]，返回Net Value: 和 Expect. Oral Val: 包括值和单位，还有每个item的详细信息
- * @description 该方法会更新入参VarNode[]中的数据
- * @param {Array<VarNode>} itemNodes
- * 同时根据返回的badRecordIndices设置每个VarNode的config.data.validation
- */
-async function itemsTabQuery(itemNodes: VarNode[]) {
-  // 提取每个VarNode的值
-  const itemValues = itemNodes.map(node => node.getValue())
 
-  const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/items-tab-query`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(itemValues)
-  }).then(response => {
-    console.log('正常返回', response)
-    return response.json()
-  }).catch(error => {
-    console.error('批量查询失败:', error)
-    return { success: false }
-  })
-
-  console.log('返回的数据', data)
-
-  if (data.success) {
-    // 更新总体数据
-    inquiryDataTree.findNodeByPath(['basicInfo','netValue'])?.setValue(data.data.generalData?.netValue)
-    inquiryDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.setValue(data.data.generalData?.netValueUnit)
-    inquiryDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.setValue(data.data.generalData?.expectOralVal)
-    inquiryDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.setValue(data.data.generalData?.expectOralValUnit)
-
-    // 更新每个item的详细信息，使用forceSetValue确保完整更新
-    if (data.data.breakdowns && Array.isArray(data.data.breakdowns)) {
-      data.data.breakdowns.forEach((breakdown: any, index: number) => {
-        if (index < itemNodes.length) {
-          // 调试：打印breakdown数据结构
-          console.log('Breakdown data for item', index, ':', breakdown)
-          if (breakdown.pricingElements) {
-            console.log('PricingElements structure:', breakdown.pricingElements)
-          }
-          // 使用forceSetValue确保包括pricingElements在内的所有字段都被正确更新
-          itemNodes[index].forceSetValue(breakdown)
-        }
-      })
-    }
-
-    // 根据badRecordIndices设置validation
-    if (data.data.result && Array.isArray(data.data.result.badRecordIndices)) {
-      // 先重置所有节点的validation
-      itemNodes.forEach(node => {
-        if (!node.config.data) {
-          node.config.data = {}
-        }
-        node.config.data.validation = true
-      })
-
-      // 设置不合法节点的validation
-      data.data.result.badRecordIndices.forEach((badIndex: number) => {
-        if (badIndex < itemNodes.length) {
-          if (!itemNodes[badIndex].config.data) {
-            itemNodes[badIndex].config.data = {}
-          }
-          itemNodes[badIndex].config.data.validation = false
-        }
-      })
-    }
-
-    writableTrees.map(tree => tree.forceUpdate())
-    return data.data.result.allDataLegal === 1
-  }
-
-  return false
-}
+// 页面层如需对指定 nodes 进行校验，可直接使用 validateItems(itemNodes)
 
 // ItemConditionKit 相关的事件处理函数
 function handleSave() {
@@ -368,7 +310,7 @@ async function handleItemsTableClick() {
     // 如果有未验证的item，先进行验证
     if (itemsWithoutValidation.length > 0) {
       console.log('发现未验证的item，进行验证...')
-      const result = await itemsTabQuery(itemsWithoutValidation as VarNode[])
+      const result = await validateItems(itemsWithoutValidation as VarNode[])
       if (!result) {
         console.log('验证失败，无法继续')
         return // 验证失败，不继续执行

@@ -163,7 +163,7 @@ async function initializeByCreation() {
   console.log('返回的数据',data)
   initializeResult.value = data.success
   if(!data.success) return false
-  
+
   if(data.data.content) {
     billingDataTree.forceSetValue(data.data.content)
   }
@@ -201,6 +201,19 @@ async function initializeByGet() {
 }
 
 /**
+ * @description 开票凭证变量树的enter-from-node事件处理（对齐 inquiry）
+ */
+async function handleEnterFromNodeBillingTree(node: VarNode, value: string, data: any) {
+  if (data.nodePath.length > 2 && data.nodePath[0] === 'itemOverview' && data.nodePath[1] === 'items') {
+    await (itemConditionKit as any).validateItemsInTree(
+      billingDataTree,
+      ['itemOverview','items'],
+      { forceUpdateTree: billingDataTree }
+    )
+  }
+}
+
+/**
  * @description 状态管理的after-next钩子
  */
 async function handleAfterNext(_currentStage: number, _targetStage: number) {
@@ -218,7 +231,7 @@ async function handleAfterPrev(_currentStage: number, _targetStage: number) {
 async function handleCancel(currentStage: number, _targetStage: number) {
   if (currentStage === 1) {
     const confirmValue = confirm('Cancel?')
-    if(confirmValue) {    
+    if(confirmValue) {
       appContentRef.value.footerMessage = ''
     }
     return confirmValue
@@ -358,6 +371,7 @@ async function handleItemsTableClick() {
     <template #[`stage-information`]>
       <VarBox
         :tree="billingDataTree"
+        @enter-from-node="handleEnterFromNodeBillingTree"
       >
         <template #[`billingData-basicInfo-netValue--extra`]>
           <VarBox

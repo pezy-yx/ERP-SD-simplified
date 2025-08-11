@@ -116,62 +116,11 @@ async function handleItemsTableClick() {
 }
 
 /**
- * 验证指定的items
+ * 验证指定的items（改为调用 kit 方法）
  */
 async function validateItems(itemNodes: VarNode[]): Promise<boolean> {
-  const itemValues = itemNodes.map(node => node.getValue())
-
-  try {
-    const response = await fetch(`${window.getAPIBaseUrl()}${config.value.validationEndpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(itemValues)
-    })
-
-    const data = await response.json()
-    console.log('验证返回的数据', data)
-
-    if (data.success) {
-      // 更新每个item的详细信息
-      if (data.data.breakdowns && Array.isArray(data.data.breakdowns)) {
-        data.data.breakdowns.forEach((breakdown: any, index: number) => {
-          if (index < itemNodes.length) {
-            itemNodes[index].forceSetValue(breakdown)
-          }
-        })
-      }
-
-      // 根据badRecordIndices设置validation
-      if (data.data.result && Array.isArray(data.data.result.badRecordIndices)) {
-        // 先重置所有节点的validation
-        itemNodes.forEach(node => {
-          if (!node.config.data) {
-            node.config.data = {}
-          }
-          node.config.data.validation = true
-        })
-
-        // 设置不合法节点的validation
-        data.data.result.badRecordIndices.forEach((badIndex: number) => {
-          if (badIndex < itemNodes.length) {
-            if (!itemNodes[badIndex].config.data) {
-              itemNodes[badIndex].config.data = {}
-            }
-            itemNodes[badIndex].config.data.validation = false
-          }
-        })
-      }
-
-      return data.data.result.allDataLegal === 1
-    }
-
-    return false
-  } catch (error) {
-    console.error('验证失败:', error)
-    return false
-  }
+  // 组件内部只负责当前编辑节点时，不做外部 forceUpdate；页面层会在批量校验时传入
+  return await (props.kit as any).validateItems(itemNodes)
 }
 
 /**
