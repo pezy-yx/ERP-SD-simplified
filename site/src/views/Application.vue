@@ -56,13 +56,30 @@
         <div v-if="showSettingModalFlag">
           <Teleport to="body">
             <div class="settingModal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--theme-color-page);padding:32px 24px;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:999;">
-              <h3 style="margin-bottom:16px;">自定义 API 地址</h3>
-              <input
-                type="text"
-                v-model="customApiBaseUrl"
-                placeholder="输入 API 地址"
-                style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;"
-              />
+                <h3 style="margin-bottom:16px;">自定义 API 地址</h3>
+                <p>选择</p>
+                <select
+                  name="customApiBaseUrl"
+                  @change="(event) => {
+                    if((event?.target as any)?.value !== undefined) {
+                      customApiBaseUrl = (event?.target as any)?.value
+                    }
+                  }"
+                  style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;margin-bottom:8px;"
+                >
+                  <option value="" selected disabled>请选择 API 地址</option>
+                  <option value="">使用默认地址</option>
+                  <option value="http://localhost:8080">本地后端 http://localhost:8080</option>
+                  <option value="http://ztt.aimixtech.com:30003">真实后端 http://ztt.aimixtech.com:30003</option>
+                  <option value="http://124.70.192.112:3000">模拟后端 http://124.70.192.112:3000</option>
+                </select>
+                <p>手动输入</p>
+                <input
+                  v-model="customApiBaseUrl"
+                  type="text"
+                  placeholder="或手动输入 API 地址"
+                  style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;"
+                />
               <p>{{`(Template: http://ip:port)`}}</p>
               <div style="display:flex;justify-content:flex-end;gap:12px;">
                 <button @click="hideSettingModal" style="padding:6px 18px;border:none;background:#eee;border-radius:4px;cursor:pointer;">取消</button>
