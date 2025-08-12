@@ -34,10 +34,10 @@
 Content-Type: application/json
 
 {
-    "so_id": "string", //
-    "status": "string", //
-    "customer_no": "string", //
-    "customer_reference": "string" //原数据库关系没有，需要补充进sales_order_hdr后面
+        "so_id": "string", //
+        "status": "string", //
+        "customer_no": "string", //
+        "customer_reference": "string" //
 }
 
 成功响应 (Success Response):
@@ -48,17 +48,23 @@ Content-Type: application/json
     "success": true,
     "data": [
         {
-            "so_id": "string", // 销售订单号
-            "soldToPartyName": "string", // 售达方名称，这个先保持和customer_no一致
-            "customer_no": "string", // 售达方客户号
-            "customer_reference": "string", // 客户参考
-            "req_delivery_date": "string", // 请求交货日期 (YYYY-MM-DD)
-            "status": "string", // 整体状态 (例如: 'New', 'Open', 'In Progress', 'Completed')
-            "net_value": "string", // 净值
-            "currency": "string", // 货币单位
-            "doc_date": "string" // 单据日期 (YYYY-MM-DD)
-        }
-        // ... 更多 SalesOrderResult 对象
+                "meta": {
+                    "id": "string" // 对应`meta.id`，在成功响应中可能需要新增
+                },
+                "basicInfo": {
+                    "quotation_id": "string", // 在成功响应中可能需要新增
+                    "so_id": "string",
+                    "soldToParty": "string", // 对应`customer_no`
+                    "customerReference": "string", // 对应`customer_reference`
+                    "netValue": "string", // 对应`net_value`
+                    "netValueUnit": "string", // 对应`currency`
+                    "customerReferenceDate": "string",
+                    "status": "string",
+                },
+                "itemOverview": {
+                    "reqDelivDate": "string", // 对应`req_delivery_date`
+                }
+            }
     ]
 }
 
@@ -86,8 +92,6 @@ Content-Type: application/json
 {
     "so_id": "string" // 销售订单号
 }
-
-(注：前端代码中实际是 fetch(${API_BASE_URL}/api/so/get/${soId})，这更符合 GET 请求路径参数的用法，但 fetch 默认是 GET。如果后端实现为 POST 并需要请求体，则需要如上所示。)
 
 成功响应 (Success Response):
 
@@ -296,7 +300,85 @@ Content-Type: application/json
     "message": "Operation failed." // 或其他错误信息
 }
 
-5. 获取报价单详情 (Get Quotation Details for Creation)
+5. 物品条件批量查询/验证 (Items Tab Query)
+   URL: /api/so/items-tab-query
+
+方法: POST
+
+用途: 批量物品查询
+
+请求体 (Request Body):
+
+Content-Type: application/json
+
+{
+    {
+        description:"string"，
+        item:"string",
+        material:"string",
+        netValue:"string",
+        netValueUnit:"string",
+        orderProbability:"string",
+        orderQuantity:"string",
+        orderQuantityUnit:"string",
+        pricingDate:"string",//date
+        pricingElements:[],
+        reqDelivDate:"string",
+        taxValue:"string",
+        taxValueUnit:"string"
+    },
+    ...
+}
+
+成功响应 (Success Response):
+
+Content-Type: application/json
+
+{
+    "success": true,
+    "message": "Quotation data loaded successfully.", // 或其他成功信息
+    "data": {
+        result:{
+            allDataLegal:"int",//1为合法，0为不合法
+            badRecordIndices:[]
+        },
+        generalData:{
+            netValue:"float",
+            netValueUnit:"string",
+            expectedOralVal:"string",
+            expectedOralValUnit:"string"
+        },
+        breakdowns:[
+            {
+                description:"string"，
+                item:"string",
+                material:"string",
+                netValue:"string",
+                netValueUnit:"string",
+                orderProbability:"string",
+                orderQuantity:"string",
+                orderQuantityUnit:"string",
+                pricingDate:"string",//date
+                pricingElements:[],
+                reqDelivDate:"string",
+                taxValue:"string",
+                taxValueUnit:"string"
+            },
+            ...
+        ]
+    }
+}
+
+错误响应 (Error Response):
+
+Content-Type: application/json
+
+{
+    "success": false,
+    "message": "items not found" // 或其他错误信息
+}
+
+6. 获取报价单详情 (Get Quotation Details for Creation)
    URL: /api/quotation/details
 
 方法: POST
@@ -364,11 +446,3 @@ Content-Type: application/json
     "success": false,
     "message": "Quotation not found or API error." // 或其他错误信息
 }
-
-6. 物品条件批量查询/验证 (Items Tab Query)
-
-**接口地址：** `api/so/items-tab-query`
-
-**接口描述：** 销售订单物品验证服务端点。详细的接口规范和数据结构请参考：[Item组件接口文档](../components/item.md)
-
-**使用场景：** 销售订单中物品信息的实时验证和定价计算
