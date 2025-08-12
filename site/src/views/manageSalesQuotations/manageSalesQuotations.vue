@@ -258,7 +258,7 @@ const quotationDataTree = createTreeFromConfig(
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/app/sales-quotation/items-tab-query',
+  validationEndpoint: '/api/quotation/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -903,9 +903,8 @@ defineExpose({
 /* 包裹表格的容器，增加一些空间和阴影 */
 .search-results-table-container {
     margin-top: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--theme-color-page);
+    border-radius: 2px;
     overflow: hidden; /* 确保圆角和阴影效果正确 */
 }
 
@@ -919,9 +918,9 @@ table {
 
 /* 表头样式 */
 thead {
-    background-color: #f0f4f8; /* 浅灰色背景 */
-    color: #4a5568; /* 深色文字 */
-    font-weight: 600;
+    background-color: var(--theme-color-dark); 
+    color: var(--theme-color-text); 
+    font-weight: 500;
     text-transform: uppercase; /* 字母大写 */
     letter-spacing: 0.5px;
 }
@@ -929,17 +928,17 @@ thead {
 th, td {
     padding: 12px 15px; /* 增加内边距 */
     text-align: left;
-    border-bottom: 1px solid #e2e8f0; /* 柔和的底部边框线 */
+    border-bottom: 1px solid #ccc; /* 柔和的底部边框线 */
 }
 
 /* 斑马纹效果，让行更易读 */
 tbody tr:nth-child(even) {
-    background-color: #f7fafc; /* 偶数行使用浅色背景 */
+    background-color: var(--theme-color-page); /* 偶数行使用浅色背景 */
 }
 
 /* 行悬停效果 */
 tbody tr:hover {
-    background-color: #ebf4ff; /* 悬停时使用更亮的蓝色背景 */
+    background-color: #ccc; /* 悬停时使用更亮的蓝色背景 */
     cursor: pointer;
     transform: scale(1.005); /* 轻微放大，增加交互感 */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);

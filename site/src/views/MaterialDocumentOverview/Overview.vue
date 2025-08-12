@@ -265,7 +265,7 @@ const viewMaterialDocumentDetail = async (materialDocumentId: string) => {
           appContentRef.value.footerMessage = 'Material document details loaded.';
         } else {
           appContentRef.value.footerMessage = result.message || 'Failed to load material document details.';
-          showAppContent.value = false;
+          showAppContent.value = true;
         }
       } catch (error: any) {
         appContentRef.value.footerMessage = `Error fetching details: ${error.message}`;
