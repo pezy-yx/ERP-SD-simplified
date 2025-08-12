@@ -72,6 +72,7 @@
                   <option value="http://localhost:8080">本地后端 http://localhost:8080</option>
                   <option value="http://ztt.aimixtech.com:30003">真实后端 http://ztt.aimixtech.com:30003</option>
                   <option value="http://124.70.192.112:3000">模拟后端 http://124.70.192.112:3000</option>
+                  <option value="http://localhost:3005">本地模拟后端 localhost:3005</option>
                 </select>
                 <p>手动输入</p>
                 <input
