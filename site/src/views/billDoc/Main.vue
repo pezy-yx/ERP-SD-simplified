@@ -5,6 +5,7 @@ import AppContent from '@/components/applicationContent/AppContent.vue'
 import {createTreeFromConfig, cns, VarNodeValue, VarNode} from '@/utils/VarTree';
 import {
   billingDocumentIdSearch,
+  CurrencyUnitSearch,
   customerSearch,
   deliveryIdSearch,
 } from '@/utils/searchMethods'
@@ -111,8 +112,8 @@ const billingDataTree = createTreeFromConfig(
       cns('selection','leaf','type','',false,{options:["Invoice"], hideLabel:true},[]," "),
       cns('string','leaf','id','',false,{},[]," "),
       cns('string','leaf','netValue','',false,{},[],"Net Value: "),
-      cns('string','leaf','netValueUnit','',false,{hideLabel:true},[]," "),
-      cns('string','leaf','payer','',false,{},[],"Payer: "),
+      cns('string','leaf','netValueUnit','',false,{hideLabel:true, searchMethods:CurrencyUnitSearch},[]," "),
+      cns('string','leaf','payer','',false,{searchMethods:customerSearch},[],"Payer: "),
       cns('date','leaf','billingDate','',false,{},[],"Billing Date: "),
       cns('string','leaf','deliveryId','',true,{searchMethods:deliveryIdSearch},[],"Delivery:"),
     ]),
