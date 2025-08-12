@@ -6,6 +6,7 @@ import {createTreeFromConfig, cns, VarNodeValue, VarNode} from '@/utils/VarTree'
 import {
   billingDocumentIdSearch,
   customerSearch,
+  deliveryIdSearch,
 } from '@/utils/searchMethods'
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
@@ -81,6 +82,7 @@ const initialCreationTree = createTreeFromConfig(
     cns('dict','dict','billingDueList',{},false,{hideLabel:true},[
       cns('date','leaf','billingDate','',false,{},[],"Billing Date:"),
       cns('string','leaf','soldToParty','',false,{searchMethods:customerSearch},[],"Sold-To Party:"),
+      cns('string','leaf','deliveryId','',false,{searchMethods:deliveryIdSearch},[],"Delivery:"),
     ]),
   ])
 )
@@ -112,6 +114,7 @@ const billingDataTree = createTreeFromConfig(
       cns('string','leaf','netValueUnit','',false,{hideLabel:true},[]," "),
       cns('string','leaf','payer','',false,{},[],"Payer: "),
       cns('date','leaf','billingDate','',false,{},[],"Billing Date: "),
+      cns('string','leaf','deliveryId','',true,{searchMethods:deliveryIdSearch},[],"Delivery:"),
     ]),
     cns('dict','dict','itemOverview',{},false,{},[
       // items节点将通过ItemConditionKit动态创建
@@ -453,6 +456,10 @@ async function handleItemsTableClick() {
 :deep(.billingData-basicInfo-billingDate--wrapper) {
   grid-column: var(--first-col-right);
   grid-row: 3;
+}
+:deep(.billingData-basicInfo-deliveryId--wrapper) {
+  grid-column: var(--first-col-right);
+  grid-row: 4;
 }
 :deep(.billingData-basicInfo-netValue--wrapper) {
   grid-column: var(--second-col);

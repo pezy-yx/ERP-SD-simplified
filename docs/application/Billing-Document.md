@@ -91,7 +91,8 @@
 {
   "billingDueList": {
     "billingDate": "2024-01-15",
-    "soldToParty": "C001 - ABC Company"
+    "soldToParty": "2", // 可能为空
+    "deliveryId": "1", // 可能为空
   }
 }
 ```
@@ -108,12 +109,13 @@
       "basicInfo": {
         "type": "Invoice",
         "id": "",
+        "deliveryId": "1", // 从请求体拷贝
         "netValue": "0.00",
         "netValueUnit": "USD",
-        "payer": "C001 - ABC Company",
-        "billingDate": "2024-01-15"
+        "payer": "1", // 如有，从请求体拷贝
+        "billingDate": "2024-01-15" // 从请求体拷贝，请求体为空则返回一个默认值(今天)
       },
-      "itemOverview": {
+      "itemOverview": { // delivery包含的
         "items": [
           {
             "item": "1",
@@ -168,6 +170,10 @@
 - `data.content.itemOverview.items[].pricingElements`: 每个项目的定价元素详细信息
 - `data.message`: 操作结果消息
 
+**验证逻辑：**
+- 如果deliveryId的客户和soldToParty冲突，success: false
+- 如果指定了deliveryId，需要检查delivery是否已经完全结束，否则success: false
+
 ### 2. 开票凭证查询接口
 
 **接口地址：** `POST /api/app/billing/get`
@@ -184,6 +190,7 @@
 ```
 
 **响应结果：**
+- 完整的billdoc数据结构
 ```json
 {
   "success": true,
@@ -195,6 +202,7 @@
       "basicInfo": {
         "type": "Invoice",
         "id": "BD001",
+        "deliveryId": "1",
         "netValue": "1500.00",
         "netValueUnit": "USD",
         "payer": "C001 - ABC Company",
@@ -276,6 +284,7 @@
 
 **请求参数：**
 ```json
+- 完整的billdoc数据结构
 {
   "meta": {
     "id": ""
@@ -283,6 +292,7 @@
   "basicInfo": {
     "type": "Invoice",
     "id": "",
+    "deliveryId":"",
     "netValue": "1500.00",
     "netValueUnit": "USD",
     "payer": "C001 - ABC Company",
@@ -331,6 +341,7 @@
 ```
 
 **响应结果：**
+- 完整的billdoc数据结构
 ```json
 {
   "success": true,
@@ -343,6 +354,7 @@
       "basicInfo": {
         "type": "Invoice",
         "id": "BD001",
+        "deliveryId": "1",
         "netValue": "1500.00",
         "netValueUnit": "USD",
         "payer": "C001 - ABC Company",
@@ -399,6 +411,9 @@
 - `data.content.meta.id`: 开票凭证ID（创建时为新生成，修改时为原ID）
 - `data.content.basicInfo`: 开票凭证基本信息
 - `data.content.itemOverview`: 项目概览信息，包含完整的items和定价元素
+
+**备注：**
+- deliveryId可以为空
 
 ### 4. 开票凭证物品验证接口
 
