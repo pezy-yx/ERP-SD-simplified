@@ -36,7 +36,7 @@
           <div class="user-info-container">
               <img src="../assets/user.png" class="user-head"/>
               <div class="user-details">
-                  <span class="user-name">Administrator</span>
+                  <span class="user-name">{{ username }}</span>
                   <div class="user-actions">
                       <a href="#" class="setting-button" :onclick="handleLogout">
                           <img src="../assets/power-off.png" alt="Sign Out" class="icon"/>
@@ -86,6 +86,7 @@ import RecentApplications from '@/components/RecentApplications.vue';
 const currentPageTitle = ref<string>('Application');
 const showProfileSideZone = ref<boolean>(false);
 const sideZoneKey = ref<number>(0);
+const username = ref<string>('default');
 
 // 路由
 const route = useRoute();
@@ -189,6 +190,12 @@ function saveCustomApiBaseUrl() {
 
 // 生命周期
 onMounted(() => {
+  const storedName = localStorage.getItem('username');
+
+  if (storedName) {
+    console.log(`当前的storeNickName为${storedName}`)
+    username.value = storedName;
+  }
   const savedUrl = localStorage.getItem('CUSTOM_API_BASE_URL');
   if (savedUrl) {
     customApiBaseUrl.value = savedUrl;

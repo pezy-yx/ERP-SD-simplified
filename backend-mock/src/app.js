@@ -31,6 +31,8 @@ app.use('/api/app/billing', require('./routes/billing'));
 app.use('/api/material', require('./routes/material'));
 app.use('/api/finance', require('./routes/finance'));
 app.use('/api/stock', require('./routes/stock'));
+app.use('/api/register',require('./routes/register'));
+app.use('/api/login',require('./routes/login'));
 
 // 启动服务器
 app.listen(PORT, () => {

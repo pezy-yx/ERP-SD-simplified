@@ -104,15 +104,15 @@ const formTree = createTreeFromConfig({
     name: 'form',
     children: [
         cns('string', 'leaf', 'username', '', false, {
-        validators: [{ creteria: validators.required, message: '用户名不能为空' }],
+        validators: [{ creteria: validators.required, message: 'username cannot be empty' }],
         classPrefix: 'username',
         hideLabel: false
-        }, [], '用户名'),
+        }, [], 'Username'),
         cns('string', 'leaf', 'password', '', false, {
-        validators: [{ creteria: validators.required, message: '密码不能为空' }],
+        validators: [{ creteria: validators.required, message: 'password cannot be empty' }],
         classPrefix: 'password',
         hideLabel: false
-        }, [], '密码')
+        }, [], 'Password')
     ]
 });
 
@@ -168,7 +168,7 @@ async function handleRegister() {
         if (node.config?.validators) {
             for (const validator of node.config.validators) {
                 if (!validator.creteria(node.currentValue)) {
-                    message.value = validator.message || `${node.name} 验证失败`;
+                    message.value = validator.message || `${node.name} validation failed`;
                     isValid = false;
                     break; // 找到第一个错误就停止当前节点的验证
                 }
@@ -188,6 +188,7 @@ async function handleRegister() {
         isSubmitting.value = false;
         message.value = response.message;
         messageType.value = response.success ? 'success' : 'error';
+        console.log(response.statusCode ? response.statusCode : '')
 
         if (response.success) {
             setTimeout(() => router.push('/login'), 1000);
