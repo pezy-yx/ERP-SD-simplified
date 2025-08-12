@@ -482,21 +482,6 @@ async function handleExecute(currentStage: number, targetStage: number) {
         @validation-failed="handleValidationFailed"
         @validation-success="handleValidationSuccess"
       >
-        <!-- 传递 pricing elements 的额外按钮 -->
-        <template #[`itemDetailConditions-pricingElements--extra-buttons`]>
-          <button
-            class="execute-button table-extra-button item-condition-button"
-            @click="() => {}"
-          >
-            New
-          </button>
-          <button
-            class="execute-button table-extra-button item-condition-button"
-            @click="() => {}"
-          >
-            Delete
-          </button>
-        </template>
       </ItemConditionDetail>
     </template>
 
@@ -628,42 +613,6 @@ async function handleExecute(currentStage: number, targetStage: number) {
 
 .table-extra-button:disabled {
   cursor: not-allowed;
-}
-
-.item-condition-button {
-  margin-right: 4px;
-}
-
-/* 定价条件表格样式 */
-:deep(.itemDetailConditions--dict-leaf-section) {
-  display: grid;
-  grid-template-columns: 30% 10% 10% 30% 10%;
-  grid-template-rows: auto auto;
-  gap: 0
-}
-:deep(.itemDetailConditions-orderQuantity--wrapper) {
-  grid-column: 1;
-  grid-row: 1;
-}
-:deep(.itemDetailConditions-orderQuantityUnit--wrapper) {
-  grid-column: 2;
-  grid-row: 1;
-}
-:deep(.itemDetailConditions-netValue--wrapper) {
-  grid-column: 4;
-  grid-row: 1;
-}
-:deep(.itemDetailConditions-netValueUnit--wrapper) {
-  grid-column: 5;
-  grid-row: 1;
-}
-:deep(.itemDetailConditions-taxValue--wrapper) {
-  grid-column: 4;
-  grid-row: 2;
-}
-:deep(.itemDetailConditions-taxValueUnit--wrapper) {
-  grid-column: 5;
-  grid-row: 2;
 }
 
 /* Item导航样式 */

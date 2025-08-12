@@ -3,7 +3,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import VarBox from '@/components/varbox/VarBox.vue'
 import FilterTabs from '@/components/FilterTabs.vue'
 import { type ItemConditionKit } from '@/utils/ItemConditionKit'
-import { VarNode, VarTree } from '@/utils/VarTree'
+import { VarNode, VarTree, createNodeFromConfig } from '@/utils/VarTree'
 
 // Props
 interface Props {
@@ -120,7 +120,39 @@ async function handleItemsTableClick() {
  */
 async function validateItems(itemNodes: VarNode[]): Promise<boolean> {
   // 组件内部只负责当前编辑节点时，不做外部 forceUpdate；页面层会在批量校验时传入
-  return await (props.kit as any).validateItems(itemNodes)
+  const isValid = await (props.kit as any).validateItems(itemNodes)
+
+  // 如果验证成功，设置 pricingElements 为只读状态
+  if (isValid) {
+    itemNodes.forEach(item => {
+      if (item.config.data?.validation === true) {
+        setPricingElementsReadonly(item, true)
+      }
+    })
+  }
+
+  return isValid
+}
+
+/**
+ * 设置 item 的 pricingElements 只读状态
+ */
+function setPricingElementsReadonly(item: VarNode, readonly: boolean) {
+  const pricingElementsNode = item.findNodeByPath(['pricingElements'])
+  if (pricingElementsNode) {
+    pricingElementsNode.children.forEach(pricingElement => {
+      pricingElement.readonly = readonly
+      // 递归设置所有子节点的只读状态
+      const setChildrenReadonly = (node: VarNode) => {
+        node.children.forEach(child => {
+          child.readonly = readonly
+          setChildrenReadonly(child)
+        })
+      }
+      setChildrenReadonly(pricingElement)
+    })
+    console.log(`已将 pricingElements 设置为${readonly ? '只读' : '可编辑'}状态`)
+  }
 }
 
 /**
@@ -183,6 +215,11 @@ function updateItemDetailTrees() {
     }
   })
 
+  // 根据验证状态处理 pricingElements 只读状态（初次进入/切换项时）
+  if (editingNode.value.node?.config.data?.validation === true) {
+    setPricingElementsReadonly(editingNode.value.node as VarNode, true)
+  }
+
   // 数据准备完成
   isDataReady.value = true
 }
@@ -210,6 +247,11 @@ async function validateCurrentItemConditionData(): Promise<boolean> {
     // 同步数据
     const currentNode = selectedItems.value[currentItemIndex.value]
     currentNode.forceSetValue(editingNode.value.node.getValue())
+
+    // 验证成功后，将 editingNode 中的 pricingElements 设置为只读
+    if (editingNode.value.node && editingNode.value.node.config.data?.validation === true) {
+      setPricingElementsReadonly(editingNode.value.node as VarNode, true)
+    }
   } else {
     console.log('数据验证失败')
   }
@@ -234,6 +276,11 @@ async function validateCurrentItemConditionDataOnly(): Promise<boolean> {
 
   if (isValid) {
     console.log('数据验证成功（仅验证，未同步）')
+
+    // 验证成功后，将 editingNode 中的 pricingElements 设置为只读
+    if (editingNode.value.node && editingNode.value.node.config.data?.validation === true) {
+      setPricingElementsReadonly(editingNode.value.node as VarNode, true)
+    }
   } else {
     console.log('数据验证失败')
   }
@@ -392,6 +439,122 @@ onUnmounted(() => {
 })
 
 /**
+ * 添加新的 pricing element
+ */
+function addNewPricingElement() {
+  if (!editingNode.value.node) {
+    console.error('没有正在编辑的节点')
+    return
+  }
+
+  // 找到 pricingElements 节点
+  const pricingElementsNode = editingNode.value.node.findNodeByPath(['pricingElements'])
+  if (!pricingElementsNode) {
+    console.error('找不到 pricingElements 节点')
+    return
+  }
+
+  // 保持现有 pricing elements 的只读状态不变（不做任何修改）
+
+  // 创建新的空 pricing element（可编辑）
+  let newPricingElement: VarNode
+  if (pricingElementsNode.config?.childTemplate) {
+    // 使用配置的模板，但创建空值
+    newPricingElement = createNodeFromConfig(pricingElementsNode.config.childTemplate).template()
+    newPricingElement.readonly = false
+  } else {
+    // 创建空的 pricing element 结构
+    const emptyPricingElement = {
+      cnty: '',
+      name: '',
+      amount: '',
+      city: '',
+      per: '',
+      uom: '',
+      conditionValue: '',
+      curr: '',
+      status: '',
+      numC: '',
+      atoMtsComponent: '',
+      oun: '',
+      cconDe: '',
+      un: '',
+      conditionValue2: '',
+      cdCur: '',
+      stat: false
+    }
+    newPricingElement = new VarNode('dict', 'dict', '', emptyPricingElement, false, [], {}, '', '')
+  }
+
+  // 确保新元素是可编辑的
+  newPricingElement.readonly = false
+  // 递归设置所有子节点为可编辑
+  const setChildrenEditable = (node: VarNode) => {
+    node.children.forEach(child => {
+      child.readonly = false
+      setChildrenEditable(child)
+    })
+  }
+  setChildrenEditable(newPricingElement)
+
+  // 添加到 pricingElements 节点
+  pricingElementsNode.addChild(newPricingElement)
+
+  // 标记数据为未验证状态
+  if (editingNode.value.node.config.data) {
+    editingNode.value.node.config.data.validation = false
+  } else {
+    editingNode.value.node.config.data = { validation: false }
+  }
+
+  console.log('已添加新的空 pricing element（新行可编辑，现有行状态保持不变）')
+}
+
+/**
+ * 删除选中的 pricing elements
+ */
+function deleteSelectedPricingElements() {
+  if (!editingNode.value.node) {
+    console.error('没有正在编辑的节点')
+    return
+  }
+
+  // 找到 pricingElements 节点
+  const pricingElementsNode = editingNode.value.node.findNodeByPath(['pricingElements'])
+  if (!pricingElementsNode) {
+    console.error('找不到 pricingElements 节点')
+    return
+  }
+
+  // 获取选中的子节点
+  const selectedChildren = pricingElementsNode.getSelectedChildren()
+  if (selectedChildren.length === 0) {
+    console.log('没有选中的 pricing elements')
+    return
+  }
+
+  // 删除选中的子节点（从后往前删除以避免索引问题）
+  const selectedIndices = selectedChildren.map(child =>
+    pricingElementsNode.children.indexOf(child)
+  ).sort((a, b) => b - a) // 降序排列
+
+  selectedIndices.forEach(index => {
+    if (index >= 0) {
+      pricingElementsNode.removeChild(index)
+    }
+  })
+
+  // 标记数据为未验证状态
+  if (editingNode.value.node.config.data) {
+    editingNode.value.node.config.data.validation = false
+  } else {
+    editingNode.value.node.config.data = { validation: false }
+  }
+
+  console.log(`已删除 ${selectedChildren.length} 个 pricing elements`)
+}
+
+/**
  * 取消编辑
  */
 function cancel() {
@@ -501,6 +664,22 @@ defineExpose({
           :path="['taxValueUnit']"
           :hideLabel="true"
         />
+      </template>
+      
+      <!-- 传递 pricing elements 的额外按钮 -->
+      <template #[`itemDetailConditions-pricingElements--extra-buttons`]>
+        <button
+          class="execute-button table-extra-button item-condition-button"
+          @click="addNewPricingElement"
+        >
+          New
+        </button>
+        <button
+          class="execute-button table-extra-button item-condition-button"
+          @click="deleteSelectedPricingElements"
+        >
+          Delete
+        </button>
       </template>
     >
       <!-- 传递所有插槽 -->
@@ -681,5 +860,14 @@ defineExpose({
 :deep(.itemDetailConditions-netValue--extra),
 :deep(.itemDetailConditions-taxValue--extra) {
   flex: 1;
+}
+
+.item-condition-button {
+  margin-right: 4px;
+}
+
+:deep(.itemDetailConditions-pricingElements--btn-add),
+:deep(.itemDetailConditions-pricingElements--btn-remove-selected) {
+  display: none;
 }
 </style>

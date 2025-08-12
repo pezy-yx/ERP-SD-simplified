@@ -177,7 +177,7 @@ export class ItemConditionKit {
       cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[],"Tax Value Unit"),
       cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
       cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
-      cns('dynamiclist','list','pricingElements',null,true,{
+      cns('dynamiclist','list','pricingElements',null,false,{
         rowProvided:0,
         childTemplate: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.childTemplate
       },[],"Pricing Elements"),
