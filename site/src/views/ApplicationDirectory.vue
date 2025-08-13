@@ -4,15 +4,15 @@
       <!-- 标签筛选器 -->
       <div class="tag-filter-section">
         <div class="tag-filter-container">
-          <button 
+          <button
             class="tag-filter-button"
             :class="{ active: selectedTag === null }"
             @click="selectTag(null)"
           >
             全部
           </button>
-          <button 
-            v-for="tag in availableTags" 
+          <button
+            v-for="tag in availableTags"
             :key="tag"
             class="tag-filter-button"
             :class="{ active: selectedTag === tag }"
@@ -25,8 +25,8 @@
 
       <!-- 应用程序网格 -->
       <div class="applications-grid">
-        <div 
-          v-for="app in filteredApplications" 
+        <div
+          v-for="app in filteredApplications"
           :key="app.applicationName"
           class="application-card"
           @click="navigateToApplication(app)"
@@ -34,8 +34,8 @@
           <div class="application-header">
             <p class="application-name">{{ app.applicationName }}</p>
             <!-- <div class="application-tags">
-              <span 
-                v-for="tag in app.tags" 
+              <span
+                v-for="tag in app.tags"
                 :key="tag"
                 class="application-tag"
                 :class="`tag-${tag.replace(/\s+/g, '-')}`"
@@ -252,6 +252,18 @@ const applications = ref<ApplicationInfo[]>([
           "routePath": "/test/item-condition-kit",
           "tags": ["test"]
         },
+        {
+          "applicationName": "SearchMethods Test",
+          "lore": "测试SearchMethods",
+          "routePath": "/test/search",
+          "tags": ["test"]
+        },
+        {
+          "applicationName": "业务看板",
+          "lore": "核心业绩、Top客户、畅销/滞销、预警与营收对比",
+          "routePath": "/kanban",
+          "tags": ["financial management", "order management"]
+        }
       ]
 );
 

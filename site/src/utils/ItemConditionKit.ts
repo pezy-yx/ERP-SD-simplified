@@ -16,6 +16,8 @@ export interface ItemConditionKitConfig {
     previous?: string
     next?: string
   }
+  // 可选：页面层用于更新总计数据的回调（如 netValue/expectOralVal）
+  onGeneralData?: (generalData: any) => void
   // 自定义详细信息页面结构
   detailStructures?: {
     header?: NodeStructure
@@ -32,7 +34,7 @@ export class ItemConditionKit {
   private config: ItemConditionKitConfig
   private itemsNodeRef: Ref<VarNode | null> = ref(null)
   private detailTrees: { header?: VarTree, sales?: VarTree, conditions?: VarTree } = {}
-  
+
   // 默认的详细信息结构
   private static defaultDetailStructures = {
     header: cns('dict','dict','itemDetailHeader',{},true,{
@@ -44,7 +46,7 @@ export class ItemConditionKit {
       cns('string','leaf','item','',false,{},[]),
       cns('string','leaf','material','',false,{},[]),
     ]),
-    
+
     sales: cns('dict','dict','itemDetailSales',{},false,{hideLabel:true},[
       cns('dict','dict','orderQuantityAndDeliveryDate',{},false,{
         childNameDisplayTranslation: {
@@ -70,7 +72,7 @@ export class ItemConditionKit {
         cns('string','leaf','orderProbability','1',false,{},[]),
       ])
     ]),
-    
+
     conditions: cns('dict','dict','itemDetailConditions',{},false,{
       childNameDisplayTranslation: {
         orderQuantity: 'Quantity',
@@ -119,7 +121,7 @@ export class ItemConditionKit {
       },
       ...config
     }
-    
+
     // 初始化详细信息树
     this.initializeDetailTrees()
   }
@@ -175,7 +177,7 @@ export class ItemConditionKit {
       cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[],"Tax Value Unit"),
       cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
       cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
-      cns('dynamiclist','list','pricingElements',null,true,{
+      cns('dynamiclist','list','pricingElements',null,false,{
         rowProvided:0,
         childTemplate: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.childTemplate
       },[],"Pricing Elements"),
@@ -202,7 +204,7 @@ export class ItemConditionKit {
 
     // 保存引用
     this.itemsNodeRef.value = itemsNode
-    
+
     return itemsNode
   }
 
@@ -224,7 +226,7 @@ export class ItemConditionKit {
           ]
         },
         {
-          name: 'conditions', 
+          name: 'conditions',
           tree: this.detailTrees.conditions!,
           headerTree: this.detailTrees.header
         }
@@ -261,6 +263,84 @@ export class ItemConditionKit {
    */
   updateConfig(newConfig: Partial<ItemConditionKitConfig>) {
     this.config = { ...this.config, ...newConfig }
+  }
+
+  /**
+   * 批量验证并回填 item 数据
+   * - 端点来自 this.config.validationEndpoint
+   * - 回填 breakdowns 到传入的 itemNodes
+   * - 设置每个节点的 config.data.validation
+   * - 如配置了 onGeneralData，则将 generalData 交由页面层处理
+   * - 完成后可选择对树或外部 AppContent 做 forceUpdate（VarTree 非响应式场景）
+   */
+  async validateItems(itemNodes: VarNode[], opts?: { forceUpdateTree?: VarTree; forceUpdateApp?: { forceUpdate: () => void } }): Promise<boolean> {
+    if (!itemNodes || itemNodes.length === 0) return true
+
+    const endpoint = this.config.validationEndpoint
+    const itemValues = itemNodes.map(node => node.getValue())
+
+    try {
+      const response = await fetch(`${(window as any).getAPIBaseUrl?.() ?? ''}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(itemValues)
+      })
+      const data = await response.json()
+
+      if (!data?.success) return false
+
+      // 页面层按需更新总计数据
+      if (this.config.onGeneralData && data.data?.generalData) {
+        try { this.config.onGeneralData(data.data.generalData) } catch {}
+      }
+
+      // 更新每个 item 的详细信息
+      if (Array.isArray(data.data?.breakdowns)) {
+        data.data.breakdowns.forEach((breakdown: any, index: number) => {
+          if (index < itemNodes.length) {
+            itemNodes[index].forceSetValue(breakdown)
+          }
+        })
+      }
+
+      // 根据 badRecordIndices 设置 validation
+      if (data.data?.result && Array.isArray(data.data.result.badRecordIndices)) {
+        // 先重置所有节点的 validation
+        itemNodes.forEach(node => {
+          if (!node.config.data) node.config.data = {}
+          node.config.data.validation = true
+        })
+        // 设置不合法节点
+        data.data.result.badRecordIndices.forEach((badIndex: number) => {
+          if (badIndex < itemNodes.length) {
+            if (!itemNodes[badIndex].config.data) itemNodes[badIndex].config.data = {}
+            itemNodes[badIndex].config.data.validation = false
+          }
+        })
+      }
+
+      // 非响应式：按需 forceUpdate
+      if (opts?.forceUpdateTree) {
+        opts.forceUpdateTree.forceUpdate()
+      }
+      if (opts?.forceUpdateApp) {
+        opts.forceUpdateApp.forceUpdate()
+      }
+
+      return data.data?.result?.allDataLegal === 1
+    } catch (error) {
+      console.error('ItemConditionKit.validateItems 调用失败:', error)
+      return false
+    }
+  }
+
+  /**
+   * 便捷方法：从树和路径中取出 items 的 children 进行验证
+   */
+  async validateItemsInTree(tree: VarTree, itemsPath: string[], opts?: { forceUpdateTree?: VarTree; forceUpdateApp?: { forceUpdate: () => void } }): Promise<boolean> {
+    const itemsNode = tree.findNodeByPath(itemsPath)
+    const children = itemsNode?.children ?? []
+    return await this.validateItems(children, opts)
   }
 
   /**

@@ -96,9 +96,20 @@ async function handleExecuteClick() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        selectedOrders: orderValues
-      })
+      // body: JSON.stringify({
+      //   selectedOrders: orderValues
+      // })
+      body: JSON.stringify(((obj)=>{
+        // return {selectedOrders:{id:string}[]}
+        const tobj = {...obj}
+        console.log(obj)
+        tobj.selectedOrders = obj.selectedOrders.map(
+          (item: any) => {
+            return { id: item.id }
+          }
+        )
+        return tobj
+      })(initialInputTree.getValue()))
     }).then(response => {
       console.log('正常返回', response)
       return response.json()

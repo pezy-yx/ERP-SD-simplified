@@ -55,10 +55,10 @@ export const companyCodeSearch: SearchMethod[] = [
     paramTree: companyCodeParamSearchTree,
     serviceUrl: '/api/search/company-code',
     resultHeaderDisplay:{
-      result: 'companyCode',
-      name: 'companyName',
-      city: 'city',
-      currency: 'currency',
+      result: 'Company Code',
+      name: 'Company Name',
+      city: 'City',
+      currency: 'Currency',
     }
   }
 ]
@@ -81,7 +81,7 @@ export const countrySearch:SearchMethod[] = [
     paramTree: countryParamSearchTree,
     serviceUrl: '/api/search/country',
     resultHeaderDisplay:{
-      result: 'country',
+      result: 'Country',
     }
   }
 ]
@@ -129,8 +129,8 @@ export const customerSearch:SearchMethod[] = [
     paramTree: customerSearchTree,
     serviceUrl: '/api/search/customer',
     resultHeaderDisplay:{
-      result: 'customerId',
-      name: 'name',
+      result: 'Customer Id',
+      name: 'Name'
     }
   }
 ]
@@ -196,9 +196,9 @@ export const bpSearch: SearchMethod[] = [
     paramTree: bpParamSearchTree,
     serviceUrl: '/api/search/business-partner',
     resultHeaderDisplay:{
-      result: 'customerId',
-      name: 'name',
-      companyCode: 'companyCode',
+      result: 'Customer Id',
+      name: 'Name',
+      companyCode: 'Company Code',
     }
   }
 ]
@@ -223,11 +223,11 @@ export const GLAccountSearch: SearchMethod[] = [
     paramTree: glAccountParamSearchTree,
     serviceUrl: '/api/search/gl-account',
     resultHeaderDisplay:{
-      result: 'glAccount',
-      chartOfAccounts: 'chartOfAccounts',
-      shortText: 'shortText',
-      companyCode: 'companyCode',
-      longText:'longText'
+      result: 'GL Account',
+      chartOfAccounts: 'Chart of Accounts',
+      shortText: 'Short Text',
+      companyCode: 'Company Code',
+      longText:'Long Text'
     }
   }
 ]
@@ -237,6 +237,9 @@ export const CurrencyUnitSearch: SearchMethod[] = [
     name: 'Currency Unit search',
     paramTree: null,
     serviceUrl: '/api/search/currency-unit',
+    resultHeaderDisplay: {
+      result: 'Unit'
+    }
   }
 ]
 
@@ -422,8 +425,8 @@ export const materialSearch: SearchMethod[] = [
     paramTree: materialSearchTree,
     serviceUrl: '/api/search/material',
     resultHeaderDisplay: {
-      result: 'material',
-      matDesc: 'matDesc',
+      result: 'Material',
+      matDesc: 'Material Description',
     }
   }
 ]
@@ -460,9 +463,9 @@ export const plantSearch: SearchMethod[] = [
     paramTree: plantSearchTree,
     serviceUrl: '/api/search/plant',
     resultHeaderDisplay: {
-      result: 'plantId',
-      plantName: 'plantName',
-      city: 'city',
+      result: 'Plant Id',
+      plantName: 'Plant Name',
+      city: 'City',
     }
   }
 ]
@@ -471,7 +474,10 @@ export const quotationIdSearch: SearchMethod[] = [
   {
     name: '报价单搜索',
     paramTree: quotationIdParamSearchTree,
-    serviceUrl: '/api/search/quotation-id'
+    serviceUrl: '/api/search/quotation-id',
+    resultHeaderDisplay: {
+      result: 'ID'
+    }
   }
 ]
 
@@ -572,9 +578,9 @@ export const soldToPartySearch: SearchMethod[] = [
     paramTree: soldToPartySearchTree,
     serviceUrl: '/api/search/sold-to-party',
     resultHeaderDisplay: {
-      'result': '售达方',
-      'city': '城市',
-      'country': '国家'
+      'result': 'Sold to Party',
+      'city': 'City',
+      'country': 'Country'
     }
   }
 ]
@@ -599,9 +605,9 @@ export const salesOrderIdSearch: SearchMethod[] = [
     serviceUrl: '/api/search/salesOrder-id',
     resultHeaderDisplay: {
       result: 'so_id',
-      soldToParty: 'soldToParty',
-      netValue: 'netValue',
-      customerReference: 'customerReference',
+      soldToParty: 'Sold to Party',
+      netValue: 'Net Value',
+      customerReference: 'Customer Reference',
     }
   }
 ]
@@ -612,9 +618,9 @@ export const billToPartySearch: SearchMethod[] = [
     paramTree: null,
     serviceUrl: '/api/search/bill-to-party',
     resultHeaderDisplay: {
-      'result': '开票方',
-      'city': '城市',
-      'country': '国家'
+      result: 'Bill to Party',
+      city: 'City',
+      country: 'Country'
     }
   }
 ]
@@ -625,9 +631,9 @@ export const payerPartySearch: SearchMethod[] = [
     paramTree: null,
     serviceUrl: '/api/search/payer-party',
     resultHeaderDisplay: {
-      'result': '付款方',
-      'city': '城市',
-      'country': '国家'
+      result: 'Payer Party',
+      city: 'City',
+      country: 'Country'
     }
   }
 ]

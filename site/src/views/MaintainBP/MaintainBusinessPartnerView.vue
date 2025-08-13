@@ -18,15 +18,15 @@
                 <div class="header-item name">Name</div>
                 <div class="header-item city">City</div>
                 <div class="header-item country">Country</div>
-                <div class="header-item bp-role">BP Role</div>
+                <div class="header-item bp-role">Type</div>
                 <div class="header-item"></div>
             </div>
             <div v-for="bp in businessPartnerResults" :key="bp.customerId" class="business-partner-row" @click="viewBusinessPartnerDetail(bp.customerId)">
               <span class="row-item customer-id">{{ bp.customerId }}</span>
-              <span class="row-item name">{{ bp.type === 'person' ? bp.firstName + " " + bp.lastName : bp.name }}</span>
+              <span class="row-item name">{{bp.firstName + " " + bp.lastName }}</span>
               <span class="row-item city">{{ bp.city }}</span>
               <span class="row-item country">{{ bp.country }}</span>
-              <span class="row-item bp-role">{{ bp.bpRole }}</span>
+              <span class="row-item bp-role">{{ bp.type }}</span>
               <span class="row-item arrow-icon">▶</span>
             </div>
           </div>
@@ -66,7 +66,9 @@ import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFr
 import { bpSearch, countrySearch, relationSearch } from '@/utils/searchMethods';
 
 const customerQueryStructure = cns("dict", "dict", "query", null, false, {hideLabel: true}, [
-  cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID")
+  cns("dict","dict","query",null,false,{hideLabel:true},[
+  cns("string", "leaf", "customerId", '', false, { searchMethods: bpSearch }, [], "Customer ID"),
+],""),
 ]);
 
 // 封装成一个函数，用于根据类型创建不同的表单结构
@@ -80,7 +82,7 @@ function createCustomerTreeStructure(type = 'org') {
     ],""),
 
     cns("dict","dict","name",null,false,{},[
-      cns("selection","leaf","title",null,false,{options:['Mr.','Mrs.','Ms.','Company']},[],"Title:"),
+      cns("selection","leaf","title",null,false,{options:['MR','MRS','MS','COMP']},[],"Title:"), //后面做title_id到title_name的转换
       cns("string","leaf","name",null,false,{hideSelf: isPerson},[],"Name:"),
       cns("string","leaf","firstName",null,false,{hideSelf: !isPerson},[],"First Name:"),
       cns("string","leaf","lastName",null,false,{hideSelf: !isPerson},[],"Last Name:"),
@@ -257,16 +259,24 @@ export default {
       const createData = this.customerCreateTree.root?.getValue();
 
       if (createData) {
-        if (!createData.bpIdAndRoleSection) {
-          createData.bpIdAndRoleSection = {};
+         if (!createData.bpIdAndRoleSection) {
+           createData.bpIdAndRoleSection = {};
         }
-        createData.bpIdAndRoleSection.type = type;
-      }
-
+        if (createData.bpIdAndRoleSection.type === 'person') {
+          // 自动填充name字段
+          createData.name.name = `${createData.name.firstName} ${createData.name.lastName}`;
+          console.log('自动生成 name 字段:', createData.name.name);
+         }
+         if (!createData.name.firstName && !createData.name.lastName && createData.name.name) {
+          createData.name.firstName = createData.name.name ;
+          createData.name.lastName = "";
+         }
+         createData.bpIdAndRoleSection.type = type;
+       }
       console.log('提交的创建数据:', JSON.stringify(createData, null, 2));
 
       try {
-        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/create`, {
+        const response = await fetch(`${window.getAPIBaseUrl()}/api/bp/edit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(createData),
@@ -288,7 +298,13 @@ export default {
     async saveBusinessPartnerDetail() {
       console.log(`执行保存业务伙伴 ${this.selectedBusinessPartnerId} 的详情...`);
       const detailData = this.customerDetailTree.root?.getValue();
-
+      if (detailData.bpIdAndRoleSection.type === 'person') {
+          // 自动填充name字段
+          detailData.name.name = `${detailData.name.firstName} ${detailData.name.lastName}`;
+         }
+         else{
+          detailData.name.firstName = detailData.name.name;
+         }
       if (!this.selectedBusinessPartnerId) {
         alert('无法保存：未选择业务伙伴ID。');
         return;
@@ -370,7 +386,7 @@ export default {
   bottom: 0; /* 固定在底部 */
   left: 0; /* 固定在左侧 */
   width: 100%; /* 宽度占满 */
-  padding: 20px; /* 增加内边距 */
+  padding: 10px; /* 增加内边距 */
   display: flex;
   justify-content: flex-end;
   background-color: var(--theme-color-dark); /* 设置背景色以防内容透出 */
@@ -396,7 +412,6 @@ export default {
 
 /* 搜索结果列表样式 (参考 ManageSalesOrders.vue) */
 .query-results-list {
-  margin-top: 20px;
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;

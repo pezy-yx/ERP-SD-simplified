@@ -21,16 +21,16 @@
               <div class="header-item net-value">Net Value</div>
               <div class="header-item doc-date ">Document Date</div>
               <div class="header-item"></div> </div>
-          <div v-for="order in salesOrdersResult" :key="order.so_id" class="sales-order-row" @click="viewSalesOrderDetail(order.so_id)">
-            <span class="row-item sales-order-id">{{ order.so_id }}</span>
-            <span class="row-item sold-to-party">{{ order.soldToPartyName }} ({{ order.customer_no }})</span>
-            <span class="row-item customer-reference">{{ order.customer_reference }}</span>
-            <span class="row-item req-delivery-date">{{ order.req_delivery_date }}</span>
-            <span :class="['row-item overall-status', { 'status-open': order.status === 'Open', 'status-completed': order.status === 'Completed', 'status-in-progress': order.status === 'In Progress', 'status-new': order.status === 'New' }]">
-              {{ order.status }}
+          <div v-for="order in salesOrdersResult" :key="order.basicInfo.so_id" class="sales-order-row" @click="viewSalesOrderDetail(order.basicInfo.so_id)">
+            <span class="row-item sales-order-id">{{ order.basicInfo.so_id }}</span>
+            <span class="row-item sold-to-party">{{ order.basicInfo.soldToParty }}</span>
+            <span class="row-item customer-reference">{{ order.basicInfo.customerReference }}</span>
+            <span class="row-item req-delivery-date">{{ order.itemOverview.reqDelivDate }}</span>
+            <span :class="['row-item overall-status', { 'status-open': order.basicInfo.status === 'Open', 'status-completed': order.basicInfo.status === 'Completed', 'status-in-progress': order.basicInfo.status === 'In Progress', 'status-new': order.basicInfo.status === 'New' }]">
+              {{ order.basicInfo.status }}
             </span>
-            <span class="row-item net-value">{{ order.net_value }} {{ order.currency }}</span>
-            <span class="row-item doc-date">{{ order.doc_date }}</span>
+            <span class="row-item net-value">{{ order.basicInfo.netValue }} {{ order.basicInfo.netValueUnit }}</span>
+            <span class="row-item doc-date">{{ order.basicInfo.customerReferenceDate }}</span>
             <span class="row-item arrow-icon">▶</span>
           </div>
         </div>
@@ -146,11 +146,12 @@ import { createTreeFromConfig, cns, VarTree, VarNodeValue, VarNode, createNodeFr
 import { bpSearch, quotationIdSearch, salesOrderIdSearch, soldToPartySearch } from '@/utils/searchMethods';
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
+
 import AppContent from '@/components/applicationContent/AppContent.vue';
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/app/sales-order/items-tab-query',
+  validationEndpoint: '/api/inquiry/items-tab-query',//测能不能全用inquiry
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -159,6 +160,8 @@ const itemConditionKit = createItemConditionKit({
     next: 'Next →'
   }
 })
+
+// 复用 kit 的校验能力（SO 无需更新 generalData）
 
 const appContentRef = ref(null) as any;
 const currentAppStage = computed(() => appContentRef.value?.currentStage || 0);
@@ -199,15 +202,18 @@ function appToState(newState: State) {
 const writableTrees: VarTree[] = [];
 
 interface SalesOrderResult {
-  so_id: string;
-  soldToPartyName: string;
-  customer_no: string;
-  customer_reference: string;
-  req_delivery_date: string;
-  status: 'New' | 'Open' | 'In Progress' | 'Completed';
-  net_value: string;
-  currency: string;
-  doc_date: string;
+  basicInfo:{
+    soldToParty: string;
+    so_id: string;
+    netValue: string;
+    customerReferenceDate: string;
+    customerReference: string;
+    status: 'New' | 'Open' | 'In Progress' | 'Completed';
+    netValueUnit: string;
+  }
+  itemOverview:{
+    reqDelivDate: string;
+  }
 }
 
 const salesOrderQueryStructure = cns(
@@ -215,8 +221,8 @@ const salesOrderQueryStructure = cns(
   [
     cns("string", "leaf", "so_id", '', false, { searchMethods: salesOrderIdSearch }, [], "Sales Order:"),
     cns("selection", "leaf", "status", '', false, {options:['New','Open','In progress','Completed']}, [], "Overall Status:"),
-    cns("string", "leaf", "customer_no", '', false, { searchMethods: soldToPartySearch }, [], "Sold-To Party:"),
-    cns("string", "leaf", "customer_reference", '', false, {}, [], "Customer Reference:"),
+    cns("string", "leaf", "soldToParty", '', false, { searchMethods: soldToPartySearch }, [], "Sold-To Party:"),
+    cns("string", "leaf", "customer_referenR", '', false, {}, [], "Customer Reference:"),
   ]
 );
 
@@ -594,82 +600,16 @@ itemConditionKit.summonItemsNode(
    * @description Encapsulate itemsTabQuery - query all
    */
   async function itemsTabQueryAll() {
-    const items = salesOrderDataTree.findNodeByPath(['itemOverview','items'])?.children || [];
-    return await itemsTabQuery(items);
+    return await (itemConditionKit as any).validateItemsInTree(
+      salesOrderDataTree,
+      ['itemOverview','items'],
+      { forceUpdateTree: salesOrderDataTree }
+    );
   }
 
   /**
-   * @description Sales order batch query, send VarNode[] to backend, return Net Value: and Expect. Oral Val: including value and unit, and detailed information for each item
-   * @description This method will update the data in the input VarNode[]
-   * @param {Array<VarNode>} itemNodes
-   * Also set config.data.validation for each VarNode based on returned badRecordIndices
+   * @description 复用统一校验逻辑，移除本地 itemsTabQuery
    */
-  async function itemsTabQuery(itemNodes: VarNode[]) {
-    // Extract values from each VarNode
-    const itemValues = itemNodes.map(node => node.getValue());
-
-    const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/items-tab-query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(itemValues)
-    }).then(response => {
-      console.log('Normal return', response);
-      return response.json();
-    }).catch(error => {
-      console.error('Batch query failed:', error);
-      return { success: false };
-    });
-
-    console.log('Returned data', data);
-
-    if (data.success) {
-      // Update overall data (if applicable, e.g., total net value for the sales order)
-      // For sales orders, the total net value is typically calculated from items.
-      // We might want to update salesOrderDataTree.basicInfo.netValue here if needed.
-
-      // Update detailed information for each item, use forceSetValue to ensure full update
-      if (data.data.breakdowns && Array.isArray(data.data.breakdowns)) {
-        data.data.breakdowns.forEach((breakdown: any, index: number) => {
-          if (index < itemNodes.length) {
-            console.log('Breakdown data for item', index, ':', breakdown);
-            if (breakdown.pricingElements) {
-              console.log('PricingElements structure:', breakdown.pricingElements);
-            }
-            // Use forceSetValue to ensure all fields including pricingElements are correctly updated
-            itemNodes[index].forceSetValue(breakdown);
-          }
-        });
-      }
-
-      // Set validation based on badRecordIndices
-      if (data.data.result && Array.isArray(data.data.result.badRecordIndices)) {
-        // First, reset validation for all nodes
-        itemNodes.forEach(node => {
-          if (!node.config.data) {
-            node.config.data = {};
-          }
-          node.config.data.validation = true;
-        });
-
-        // Set validation for invalid nodes
-        data.data.result.badRecordIndices.forEach((badIndex: number) => {
-          if (badIndex < itemNodes.length) {
-            if (!itemNodes[badIndex].config.data) {
-              itemNodes[badIndex].config.data = {};
-            }
-            itemNodes[badIndex].config.data.validation = false;
-          }
-        });
-      }
-
-      appContentRef.value.forceUpdate();
-      return data.data.result.allDataLegal === 1;
-    }
-
-    return false;
-  }
 
   /**
    * @description Handle the click event for the Items Table button
@@ -688,7 +628,7 @@ itemConditionKit.summonItemsNode(
       // If there are unvalidated items, validate them first
       if (itemsWithoutValidation.length > 0) {
         console.log('Found unvalidated items, validating...');
-        const result = await itemsTabQuery(itemsWithoutValidation as VarNode[]);
+        const result = await (itemConditionKit as any).validateItems(itemsWithoutValidation as VarNode[], { forceUpdateTree: salesOrderDataTree });
         if (!result) {
           console.log('Validation failed, cannot proceed');
           return; // Validation failed, do not proceed
@@ -901,6 +841,7 @@ itemConditionKit.summonItemsNode(
     width: 100%;
     display: flex;
     align-items: center;
+    min-height: 3.6em;
     border-bottom: 1px solid var(--theme-color-lighter);
   }
 
@@ -955,11 +896,11 @@ itemConditionKit.summonItemsNode(
       grid-row: 1;
       max-width: 300px;
   }
-  :deep(.salesOrderQuery-customer_no--wrapper) {
+  :deep(.salesOrderQuery-soldToParty--wrapper) {
       grid-row: 1;
       max-width: 300px;
   }
-  :deep(.salesOrderQuery-customer_reference--wrapper) {
+  :deep(.salesOrderQuery-customer_referenR--wrapper) {
       grid-row: 1;
       max-width: 300px;
   }
@@ -1054,7 +995,8 @@ itemConditionKit.summonItemsNode(
   .bottom-actions {
     display: flex;
     justify-content: flex-end;
-    padding: 40px 20px;
+    padding: 10px 20px;
+    margin-bottom: 30px;
     background-color: var(--theme-color-dark);
   }
 

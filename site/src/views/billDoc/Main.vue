@@ -5,7 +5,9 @@ import AppContent from '@/components/applicationContent/AppContent.vue'
 import {createTreeFromConfig, cns, VarNodeValue, VarNode} from '@/utils/VarTree';
 import {
   billingDocumentIdSearch,
+  CurrencyUnitSearch,
   customerSearch,
+  deliveryIdSearch,
 } from '@/utils/searchMethods'
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
@@ -81,6 +83,7 @@ const initialCreationTree = createTreeFromConfig(
     cns('dict','dict','billingDueList',{},false,{hideLabel:true},[
       cns('date','leaf','billingDate','',false,{},[],"Billing Date:"),
       cns('string','leaf','soldToParty','',false,{searchMethods:customerSearch},[],"Sold-To Party:"),
+      cns('string','leaf','deliveryId','',false,{searchMethods:deliveryIdSearch},[],"Delivery:"),
     ]),
   ])
 )
@@ -109,9 +112,10 @@ const billingDataTree = createTreeFromConfig(
       cns('selection','leaf','type','',false,{options:["Invoice"], hideLabel:true},[]," "),
       cns('string','leaf','id','',false,{},[]," "),
       cns('string','leaf','netValue','',false,{},[],"Net Value: "),
-      cns('string','leaf','netValueUnit','',false,{hideLabel:true},[]," "),
-      cns('string','leaf','payer','',false,{},[],"Payer: "),
+      cns('string','leaf','netValueUnit','',false,{hideLabel:true, searchMethods:CurrencyUnitSearch},[]," "),
+      cns('string','leaf','payer','',false,{searchMethods:customerSearch},[],"Payer: "),
       cns('date','leaf','billingDate','',false,{},[],"Billing Date: "),
+      cns('string','leaf','deliveryId','',true,{searchMethods:deliveryIdSearch},[],"Delivery:"),
     ]),
     cns('dict','dict','itemOverview',{},false,{},[
       // items节点将通过ItemConditionKit动态创建
@@ -163,7 +167,7 @@ async function initializeByCreation() {
   console.log('返回的数据',data)
   initializeResult.value = data.success
   if(!data.success) return false
-  
+
   if(data.data.content) {
     billingDataTree.forceSetValue(data.data.content)
   }
@@ -201,6 +205,19 @@ async function initializeByGet() {
 }
 
 /**
+ * @description 开票凭证变量树的enter-from-node事件处理（对齐 inquiry）
+ */
+async function handleEnterFromNodeBillingTree(node: VarNode, value: string, data: any) {
+  if (data.nodePath.length > 2 && data.nodePath[0] === 'itemOverview' && data.nodePath[1] === 'items') {
+    await (itemConditionKit as any).validateItemsInTree(
+      billingDataTree,
+      ['itemOverview','items'],
+      { forceUpdateTree: billingDataTree }
+    )
+  }
+}
+
+/**
  * @description 状态管理的after-next钩子
  */
 async function handleAfterNext(_currentStage: number, _targetStage: number) {
@@ -218,7 +235,7 @@ async function handleAfterPrev(_currentStage: number, _targetStage: number) {
 async function handleCancel(currentStage: number, _targetStage: number) {
   if (currentStage === 1) {
     const confirmValue = confirm('Cancel?')
-    if(confirmValue) {    
+    if(confirmValue) {
       appContentRef.value.footerMessage = ''
     }
     return confirmValue
@@ -358,6 +375,7 @@ async function handleItemsTableClick() {
     <template #[`stage-information`]>
       <VarBox
         :tree="billingDataTree"
+        @enter-from-node="handleEnterFromNodeBillingTree"
       >
         <template #[`billingData-basicInfo-netValue--extra`]>
           <VarBox
@@ -439,6 +457,10 @@ async function handleItemsTableClick() {
 :deep(.billingData-basicInfo-billingDate--wrapper) {
   grid-column: var(--first-col-right);
   grid-row: 3;
+}
+:deep(.billingData-basicInfo-deliveryId--wrapper) {
+  grid-column: var(--first-col-right);
+  grid-row: 4;
 }
 :deep(.billingData-basicInfo-netValue--wrapper) {
   grid-column: var(--second-col);
