@@ -7,14 +7,18 @@ Item组件是SD模块中用于管理物品条件的核心组件，提供了统�
 ## 核心功能
 
 ### 1. ItemConditionKit组件
+
 ItemConditionKit是一个可复用的物品条件管理工具，提供以下功能：
+
 - **物品列表管理**：支持多物品的选择、导航和编辑
 - **详细信息页面**：为每个物品提供详细的条件编辑界面
 - **数据验证**：集成后端验证服务，确保数据的准确性
 - **导航控制**：提供上一步/下一步导航，支持物品间的快速切换
 
 ### 2. 数据结构标准化
+
 所有使用Item组件的应用都采用统一的数据结构，确保：
+
 - **一致性**：跨应用的数据格式保持一致
 - **可扩展性**：支持定价元素等复杂数据结构
 - **兼容性**：与现有VarTree/VarNode系统完全兼容
@@ -22,6 +26,7 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 ## 物品数据结构
 
 ### 基础物品结构 (Item)
+
 ```json
 {
   "item": "string",                    // 项目号
@@ -41,6 +46,7 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 ```
 
 ### 定价元素结构 (PricingElement)
+
 ```json
 {
   "cnty": "string",                    // 国家代码
@@ -72,6 +78,7 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 **功能描述：** 批量验证和计算物品的定价信息，返回详细的定价元素和验证结果。
 
 **使用场景：**
+
 - 用户修改物品信息后的实时验证
 - 物品条件页面的数据计算
 - 保存前的数据完整性检查
@@ -81,6 +88,7 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 **Content-Type:** `application/json`
 
 **请求体格式：**
+
 ```json
 [
   {
@@ -124,6 +132,7 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 ### 响应结果
 
 **成功响应：**
+
 ```json
 {
   "success": true,
@@ -141,18 +150,18 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
     },
     "breakdowns": [
       {
-        "item": "string",
-        "material": "string",
-        "orderQuantity": "string",
-        "orderQuantityUnit": "string",
-        "description": "string",
-        "reqDelivDate": "string",
-        "netValue": "number",          // 计算后的净值
-        "netValueUnit": "string",
-        "taxValue": "number",          // 计算后的税值
-        "taxValueUnit": "string",
-        "pricingDate": "string",
-        "orderProbability": "string",
+        "item": "string", // 行号-按顺序生成
+        "material": "string", // 材料的名称
+        "orderQuantity": "string", // 数量
+        "orderQuantityUnit": "string", // 单位-由材料生成
+        "description": "string", // 描述-由材料生成
+        "reqDelivDate": "string", // 送货日期，设定一个默认值 或者 返回用户输入的值
+        "netValue": "number",           // 根据pricingElement计算后的净值
+        "netValueUnit": "string",       // 币种，根据pricingElement
+        "taxValue": "number",       // 计算后的税值，netValue * 0.13
+        "taxValueUnit": "string",   // 同netValueUnit
+        "pricingDate": "string",    // 日期，设定一个默认值 或者 返回用户输入的值
+        "orderProbability": "string", // 默认值，100或者 返回用户输入的值
         "pricingElements": [
           {
             "cnty": "string", // 定价元素的唯一标识，例如：BASE（基础价格），DISC（固定折扣），DISCP（百分比折扣）。-> 新增时，一般由用户输入
@@ -163,6 +172,15 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
             "uom": "string", // 上一行数量的单位。例如每两件，那就是EA（每件）。默认是EA，用户可以改。
             "conditionValue": "string", // 本行定价元素的金额，参与最后的netValue计算，例如打折造成了减25，那就是-25。后端计算得到
             "curr": "string", // 金额的币种单位，和material的单位是一样的，由material生成。
+
+            // "cnty": "BASE",
+            // "name": "基础价格",
+            // "amount": "500",
+            // "city": "USD",
+            // "per": "1",
+            // "uom": "EA",
+            // "conditionValue": "500",
+            // "curr": "USD",
 
             "status": "string", // 留空
             "numC": "string", // 留空
@@ -182,6 +200,7 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 ```
 
 **错误响应：**
+
 ```json
 {
   "success": false,
@@ -192,23 +211,27 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
 ### 响应字段说明
 
 #### result字段
+
 - `allDataLegal`: 整体验证结果，1表示通过，0表示失败
 - `badRecordIndices`: 验证失败的物品索引数组，用于前端标记错误项
 
 #### generalData字段
+
 - `netValue`: 所有物品的总净值
 - `netValueUnit`: 总净值的货币单位
 - `expectOralVal`: 预期口头价值（通常比净值高10-15%）
 - `expectOralValUnit`: 预期口头价值的货币单位
 
 #### breakdowns字段
+
 - 包含每个物品的详细计算结果
-- `netValue`和`taxValue`为计算后的数值类型
+- `netValue`和 `taxValue`为计算后的数值类型
 - `pricingElements`包含完整的定价元素明细
 
 ## ItemConditionKit配置
 
 ### 基础配置接口
+
 ```typescript
 interface ItemConditionKitConfig {
   validationEndpoint: string           // 验证服务端点
@@ -228,6 +251,7 @@ interface ItemConditionKitConfig {
 ```
 
 ### 使用示例
+
 ```typescript
 import { createItemConditionKit } from '@/utils/ItemConditionKit'
 
@@ -255,6 +279,7 @@ const detailConfig = itemKit.detailPageConfig()
 ### 1. 在应用中集成ItemConditionKit
 
 #### 步骤1：导入和配置
+
 ```typescript
 import { createItemConditionKit } from '@/utils/ItemConditionKit'
 
@@ -265,12 +290,14 @@ const itemConditionKit = createItemConditionKit({
 ```
 
 #### 步骤2：设置物品节点
+
 ```typescript
 // 在适当的时机设置物品节点
 itemConditionKit.setItemsNode(yourItemsNode)
 ```
 
 #### 步骤3：配置详细页面
+
 ```typescript
 // 获取详细页面的VarBox配置
 const itemConditionConfig = itemConditionKit.detailPageConfig()
@@ -279,6 +306,7 @@ const itemConditionConfig = itemConditionKit.detailPageConfig()
 ### 2. VarTree数据结构配置
 
 #### 物品列表配置
+
 ```typescript
 cns('dynamiclist','list','items',null,false,{
   hideLabel: true,
@@ -327,16 +355,17 @@ cns('dynamiclist','list','items',null,false,{
 
 ### 各应用的验证端点
 
-| 应用类型 | 验证端点 | 说明 |
-|---------|---------|------|
-| 销售订单 | `/api/app/so/items-tab-query` | 销售订单物品验证服务 |
-| 报价单 | `/api/app/quotation/items-tab-query` | 报价单物品验证服务 |
-| 询价单 | `/api/app/inquiry/items-tab-query` | 询价单物品验证服务 |
-| 开票凭证 | `/api/app/billing/items-tab-query` | 开票凭证物品验证服务 |
+| 应用类型 | 验证端点                               | 说明                 |
+| -------- | -------------------------------------- | -------------------- |
+| 销售订单 | `/api/app/so/items-tab-query`        | 销售订单物品验证服务 |
+| 报价单   | `/api/app/quotation/items-tab-query` | 报价单物品验证服务   |
+| 询价单   | `/api/app/inquiry/items-tab-query`   | 询价单物品验证服务   |
+| 开票凭证 | `/api/app/billing/items-tab-query`   | 开票凭证物品验证服务 |
 
 ### 端点实现要求
 
 每个应用的验证端点都必须：
+
 1. **接受标准的物品数组作为输入**
 2. **返回标准的验证响应格式**
 3. **支持定价元素的计算和验证**
@@ -345,18 +374,21 @@ cns('dynamiclist','list','items',null,false,{
 ## 业务规则
 
 ### 1. 数据验证规则
+
 - **必填字段验证**：item、material、orderQuantity等关键字段不能为空
 - **数值格式验证**：数量、金额等字段必须为有效数值
 - **日期格式验证**：日期字段必须符合YYYY-MM-DD格式
 - **业务逻辑验证**：根据具体业务场景进行逻辑校验
 
 ### 2. 定价计算规则
+
 - **基础价格计算**：根据物料和数量计算基础价格
 - **税费计算**：根据税率和基础价格计算税费
 - **折扣应用**：应用相关的折扣条件
 - **总价汇总**：计算物品的最终净值和税值
 
 ### 3. 数据同步规则
+
 - **实时验证**：用户修改数据时触发验证
 - **批量处理**：支持多物品的批量验证
 - **错误标记**：验证失败的物品会被标记并阻止保存
@@ -365,16 +397,19 @@ cns('dynamiclist','list','items',null,false,{
 ## 错误处理
 
 ### 1. 网络错误
+
 - 验证服务不可用时的降级处理
 - 超时重试机制
 - 用户友好的错误提示
 
 ### 2. 数据错误
+
 - 无效数据的标记和提示
 - 错误字段的高亮显示
 - 详细的错误信息展示
 
 ### 3. 业务错误
+
 - 业务规则违反的处理
 - 数据不一致的解决方案
 - 用户操作指导
@@ -382,16 +417,19 @@ cns('dynamiclist','list','items',null,false,{
 ## 性能优化
 
 ### 1. 数据缓存
+
 - 验证结果的本地缓存
 - 重复请求的避免
 - 智能的缓存失效策略
 
 ### 2. 批量处理
+
 - 多物品的批量验证
 - 减少网络请求次数
 - 优化数据传输量
 
 ### 3. 用户体验
+
 - 异步验证不阻塞用户操作
 - 渐进式数据加载
 - 响应式界面更新
@@ -399,16 +437,19 @@ cns('dynamiclist','list','items',null,false,{
 ## 扩展性设计
 
 ### 1. 自定义字段支持
+
 - 支持业务特定的额外字段
 - 灵活的数据结构扩展
 - 向后兼容性保证
 
 ### 2. 多业务场景适配
+
 - 不同应用的个性化配置
 - 可插拔的验证逻辑
 - 统一的接口标准
 
 ### 3. 国际化支持
+
 - 多语言的字段标签
 - 本地化的数据格式
 - 区域特定的业务规则
@@ -418,6 +459,7 @@ cns('dynamiclist','list','items',null,false,{
 Item组件为SD模块提供了统一、可靠、可扩展的物品管理解决方案。通过标准化的数据结构、统一的验证接口和灵活的配置选项，Item组件确保了跨应用的一致性和可维护性。
 
 ### 主要优势
+
 - **标准化**：统一的数据结构和接口规范
 - **可复用**：ItemConditionKit可在多个应用中复用
 - **可扩展**：支持自定义字段和业务逻辑
@@ -425,8 +467,9 @@ Item组件为SD模块提供了统一、可靠、可扩展的物品管理解决�
 - **用户友好**：直观的界面和流畅的操作体验
 
 ### 适用场景
+
 - 销售订单管理
-- 报价单管理  
+- 报价单管理
 - 询价单管理
 - 开票凭证管理
 - 其他需要物品条件管理的业务场景

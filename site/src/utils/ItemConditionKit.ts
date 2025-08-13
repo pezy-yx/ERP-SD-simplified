@@ -276,8 +276,8 @@ export class ItemConditionKit {
   async validateItems(itemNodes: VarNode[], opts?: { forceUpdateTree?: VarTree; forceUpdateApp?: { forceUpdate: () => void } }): Promise<boolean> {
     if (!itemNodes || itemNodes.length === 0) return true
 
-    // const endpoint = this.config.validationEndpoint
-    const endpoint = '/api/app/items/items-tab-query'
+    const endpoint = this.config.validationEndpoint
+    // const endpoint = '/api/app/items/items-tab-query'
     const itemValues = itemNodes.map(node => node.getValue())
 
     try {
