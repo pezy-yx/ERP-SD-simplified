@@ -485,7 +485,15 @@ defineExpose({
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
+}
+
+.result-area::-webkit-scrollbar {
+  display: none;
+}
+
+.search-modal-body::-webkit-scrollbar {
+  display: none;
 }
 
 .no-results {
