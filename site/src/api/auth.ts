@@ -1,17 +1,7 @@
 import axios, { AxiosError } from 'axios'; // 导入 AxiosError 类型
 
-// 定义统一的 API 响应类型
-interface ApiResponse<T> {
-    success: boolean;
-    message: string;
-    data?: T; // 成功时的数据
-    statusCode?: number; // HTTP 状态码
-    errorCode?: string; // 后端自定义错误码
-    details?: any; // 更多错误详情，如字段验证错误
-}
-
 // 注册接口
-export async function register(username: string, password: string): Promise<ApiResponse<null>> {
+export async function register(username: string, password: string) {
     try {
         const response = await axios.post(`${window.getAPIBaseUrl()}/api/register`, {
             username,
@@ -19,9 +9,8 @@ export async function register(username: string, password: string): Promise<ApiR
         });
 
         // 假设后端成功响应时，data 结构就是 { success: boolean, message: string }
-        // 如果后端只返回 { message: "Registered successfully" }，你可能需要调整 data: response.data
         return {
-            success: true,
+            success: response.data.success,
             message: response.data.message || '注册成功',
             statusCode: response.status
         };
@@ -56,14 +45,8 @@ export async function register(username: string, password: string): Promise<ApiR
     }
 }
 
-// 定义登录成功时的数据类型
-interface LoginSuccessData {
-    token: string;
-    user?: { id: string; username: string }; // 可选的用户信息
-}
-
 // 登录接口
-export async function login(username: string, password: string): Promise<ApiResponse<LoginSuccessData>> {
+export async function login(username: string, password: string){
     try {
         const response = await axios.post(`${window.getAPIBaseUrl()}/api/login`, {
             username,
@@ -74,11 +57,13 @@ export async function login(username: string, password: string): Promise<ApiResp
         // 确保你的后端在成功登录时返回了 token
         if (response.data.token) {
             return {
-                success: true,
+                success: response.data.success,
                 message: response.data.message || '登录成功',
                 data: {
                     token: response.data.token,
-                    user: response.data.user // 如果后端返回用户信息
+                    user: {
+                        username: response.data.user.username
+                    }
                 },
                 statusCode: response.status
             };

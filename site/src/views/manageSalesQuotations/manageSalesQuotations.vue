@@ -101,12 +101,13 @@
         <div v-if="showInquiryModal" class="modal-overlay">
             <div class="modal-content">
                 <div class="input-group">
-                    <label for="inquiryIdInput">请输入 Inquiry ID:</label>
-                    <input type="text" id="inquiryIdInput" v-model="inquiryIdInput" placeholder="例如: INQ-2024-001" />
+                    <label for="inquiryIdInput">create quotation according inquiry:</label>
+                    <input type="text" id="inquiryIdInput" v-model="inquiryIdInput" placeholder="inquiry id" />
+                    <input type="text" id="customerIdInput" v-model="customerIdInput" placeholder="customer id" />
                 </div>
                 <div class="modal-actions">
-                    <button @click="createQuotationFromInquiry" class="btn-primary">确认创建</button>
-                    <button @click="cancelInquiryCreation" class="btn-secondary">取消</button>
+                    <button @click="createQuotationFromInquiry" class="btn-primary">create</button>
+                    <button @click="cancelInquiryCreation" class="btn-secondary">cancel</button>
                 </div>
             </div>
         </div>
@@ -132,6 +133,7 @@ import { toRaw } from 'vue'; // 用于获取非响应式原始数据
 import { createItemConditionKit, type ItemConditionKit } from '@/utils/ItemConditionKit'
 import ItemConditionDetail from '@/components/itemCondition/ItemConditionDetail.vue'
 
+const customerIdInput = ref(''); // 用于存储用户输入的客户 ID
 
 const cancelInquiryCreation = () => {
     showInquiryModal.value = false;
@@ -152,7 +154,7 @@ const createQuotationFromInquiry = async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ inquiryId: inquiryIdInput.value })
+            body: JSON.stringify({ inquiryId: inquiryIdInput.value, customerId: customerIdInput.value })
         });
 
         const result = await response.json();

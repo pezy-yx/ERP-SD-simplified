@@ -150,7 +150,8 @@ async function handleLogin() {
         messageType.value = response.success ? 'success' : 'error';
 
         if (response.success) {
-            localStorage.setItem('token', response.token ?? ''); // 存储 token
+            localStorage.setItem('token', response.data?.token ?? ''); // 存储 token
+            localStorage.setItem('username',response.data?.user.username);
             setTimeout(() => router.push('/application/home'), 1000); // 登录成功后跳转到application下的home页面
         }
     } catch (error: any) {
