@@ -92,35 +92,37 @@ const appContentRef = ref(null) as any
  * @description 向后端获取stock的合法阶段，给stockStages和stockLevelString赋值
  */
 async function initializeTrees() {
-  const stagesRes = await fetch(`${window.getAPIBaseUrl()}/api/stock/getStockStages`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({})
-  })
-  if(!stagesRes.ok){
-    alert('Network Error')
-    return
-  }
-  const stagesResJson = await stagesRes.json()
-  stockStages.value = stagesResJson.data ?? []
+  // const stagesRes = await fetch(`${window.getAPIBaseUrl()}/api/stock/getStockStages`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'Accept': 'application/json'
+  //   },
+  //   body: JSON.stringify({})
+  // })
+  // if(!stagesRes.ok){
+  //   alert('Network Error')
+  //   return
+  // }
+  // const stagesResJson = await stagesRes.json()
+  // stockStages.value = stagesResJson.data ?? []
+  stockStages.value = ['On Hand','Committed']
 
-  const levelsRes = await fetch(`${window.getAPIBaseUrl()}/api/stock/getStockLevels`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({})
-  })
-  if(!levelsRes.ok){
-    alert('Network Error')
-    return
-  }
-  const levelsResJson = await levelsRes.json()
-  stockLevels.value = levelsResJson.data ?? []
+  // const levelsRes = await fetch(`${window.getAPIBaseUrl()}/api/stock/getStockLevels`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'Accept': 'application/json'
+  //   },
+  //   body: JSON.stringify({})
+  // })
+  // if(!levelsRes.ok){
+  //   alert('Network Error')
+  //   return
+  // }
+  // const levelsResJson = await levelsRes.json()
+  // stockLevels.value = levelsResJson.data ?? []
+  stockLevels.value = ['Full','Client','Plant']
 }
 
 /** @description 搜索并展示material基本信息 */
