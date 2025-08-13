@@ -155,23 +155,24 @@ ItemConditionKit是一个可复用的物品条件管理工具，提供以下功�
         "orderProbability": "string",
         "pricingElements": [
           {
-            "cnty": "string",
-            "name": "string",
-            "amount": "string",
-            "city": "string",
-            "per": "string",
-            "uom": "string",
-            "conditionValue": "string",
-            "curr": "string",
-            "status": "string",
-            "numC": "string",
-            "atoMtsComponent": "string",
-            "oun": "string",
-            "cconDe": "string",
-            "un": "string",
-            "conditionValue2": "string",
-            "cdCur": "string",
-            "stat": "boolean"
+            "cnty": "string", // 定价元素的唯一标识，例如：BASE（基础价格），DISC（固定折扣），DISCP（百分比折扣）。-> 新增时，一般由用户输入
+            "name": "string", // 定价元素的文字说明，如：基础价格，现金折扣，百分比折扣。新增时根据输入的cnty生成。
+            "amount": "string", // 该定价元素的金额。可以是货币值（如 $10.00）或百分比（如 10%）。-> 新增时，一般由用户输入
+            "city": "string", // 应该改名叫crcy，上一行对应的单位，比如打折那就是用商品的单位，百分比打折那就是用%。新增时由cnty生成。
+            "per": "string", // 指示上面的金额是每单位的数量。例如每两件，那就是2。默认是1，用户可以改。
+            "uom": "string", // 上一行数量的单位。例如每两件，那就是EA（每件）。默认是EA，用户可以改。
+            "conditionValue": "string", // 本行定价元素的金额，参与最后的netValue计算，例如打折造成了减25，那就是-25。后端计算得到
+            "curr": "string", // 金额的币种单位，和material的单位是一样的，由material生成。
+
+            "status": "string", // 留空
+            "numC": "string", // 留空
+            "atoMtsComponent": "string", // 留空
+            "oun": "string", // 留空
+            "cconDe": "string", // 留空
+            "un": "string", // 留空
+            "conditionValue2": "string", // 留空
+            "cdCur": "string", // 留空
+            "stat": "boolean" // 默认是true
           }
         ]
       }

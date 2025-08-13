@@ -109,7 +109,9 @@ async function handleExecuteClick() {
           }
         )
         return tobj
-      })(initialInputTree.getValue()))
+      })({
+        selectedOrders: orderValues
+      })),
     }).then(response => {
       console.log('正常返回', response)
       return response.json()
