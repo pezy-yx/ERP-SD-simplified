@@ -175,7 +175,7 @@ const quotationModalMessage = ref('');
 const quotationQueryStructure = cns(
   "dict", "dict", "quotationQuery", null, false, { hideLabel: true },
   [
-    cns("string", "leaf", "quotation_id", '', false, {searchMethods: quotationIdSearch}, [], "Quotation Number:"),
+    cns("string", "leaf", "salesQuotationId", '', false, {searchMethods: quotationIdSearch}, [], "Quotation Number:"),
   ]
 );
 const quotationQueryTree = createTreeFromConfig(quotationQueryStructure);
@@ -232,7 +232,7 @@ const salesOrderDataTree = createTreeFromConfig(
        cns('string','leaf','id','',false,{},[]),
      ]),
      cns('dict','dict','basicInfo',{},false,{hideLabel:true},[
-       cns('string','leaf','quotation_id','',false,{searchMethods: quotationIdSearch},[],"Quotation:"),
+       cns('string','leaf','salesQuotationId','',false,{searchMethods: quotationIdSearch},[],"Quotation:"),
        cns('string','leaf','so_id','',true,{},[],"Sales Order:"),
        cns('string','leaf','soldToParty','',false,{searchMethods: soldToPartySearch},[],"Sold-To Party:"),
        cns('string','leaf','shipToParty','',false,{searchMethods: soldToPartySearch},[],"Ship-To Party:"),
@@ -468,7 +468,7 @@ itemConditionKit.summonItemsNode(
     console.log('Creating sales order - showing quotation input modal');
     showQuotationModal.value = true;
     quotationModalMessage.value = ''; // Clear previous messages
-    quotationQueryTree.root?.forceSetValue({ quotation_id: '' }); // Reset input
+    quotationQueryTree.root?.forceSetValue({ salesQuotationId: '' }); // Reset input
   };
 
   const cancelQuotationInput = () => {
@@ -477,7 +477,7 @@ itemConditionKit.summonItemsNode(
   };
 
   const confirmQuotationInput = async () => {
-    const quotationId = quotationQueryTree.root?.findNodeByPath(['quotation_id'])?.getValue();
+    const quotationId = quotationQueryTree.root?.findNodeByPath(['salesQuotationId'])?.getValue();
     if (!quotationId) {
       quotationModalMessage.value = 'Please enter a Quotation Number.';
       return;
@@ -488,12 +488,12 @@ itemConditionKit.summonItemsNode(
       const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/details`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quotation_id: quotationId }),
+        body: JSON.stringify({ salesQuotationId: quotationId }),
       });
       const result = await response.json();
 
-      if (result.success && result.data?.quotationData) {
-        const quotationData = result.data.quotationData;
+      if (result.success && result.data) {
+        const quotationData = result.data;
         console.log('Quotation data fetched:', quotationData);
 
         showQuotationModal.value = false;
@@ -504,7 +504,7 @@ itemConditionKit.summonItemsNode(
         // Populate basicInfo
         const basicInfoNode = salesOrderDataTree.findNodeByPath(['basicInfo']);
         if (basicInfoNode && quotationData.basicInfo) {
-          basicInfoNode.findNodeByPath(['quotation_id'])?.setValue(quotationData.basicInfo.quotation);
+          basicInfoNode.findNodeByPath(['salesQuotationId'])?.setValue(quotationData.basicInfo.quotation);
           basicInfoNode.findNodeByPath(['soldToParty'])?.setValue(quotationData.basicInfo.soldToParty);
           basicInfoNode.findNodeByPath(['shipToParty'])?.setValue(quotationData.basicInfo.shipToParty);
           basicInfoNode.findNodeByPath(['customerReference'])?.setValue(quotationData.basicInfo.customerReference);
