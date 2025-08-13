@@ -639,7 +639,7 @@ async function handleExecute(currentStage: number, targetStage: number): Promise
             const body = {
                 quotation: toRaw(quotationDataTree.root?.currentValue) // 获取原始数据以发送到后端
             };
-            const res = await fetch(`${window.getAPIBaseUrl()}/api/quotation/create`, { // 假设这是创建 API
+            const res = await fetch(`${window.getAPIBaseUrl()}/api/quotation/update`, { // 假设这是创建 API
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
