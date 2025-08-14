@@ -160,7 +160,7 @@ const createQuotationFromInquiry = async () => {
         const result = await response.json();
 
         if (result.success) {
-            alert(`报价单创建成功！新报价单 ID: ${result.data.quotationData.basicInfo.quotation || '未知'}`);
+            // alert(`报价单创建成功！新报价单 ID: ${result.data.quotationData.basicInfo.quotation || '未知'}`);
             showInquiryModal.value = false;
             inquiryIdInput.value = ''; // 清空输入
 
@@ -563,9 +563,9 @@ async function handleSearch() {
             searchResults.value = results; // 更新搜索结果列表，供表格渲染
             searchResultsTree.value = response.data.quotationStruct; // 存储完整的 NodeStructure (备用，当前未直接使用)
 
-            alert(`查询成功，共找到 ${results.length} 条报价单！`);
+            // alert(`查询成功，共找到 ${results.length} 条报价单！`);
         } else {
-            alert('未找到报价单信息!');
+            // alert('未找到报价单信息!');
             searchResults.value = null; // 清空搜索结果
             searchResultsTree.value = null; // 清空结构
         }
