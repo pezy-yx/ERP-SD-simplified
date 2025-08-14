@@ -26,7 +26,7 @@
             <span class="row-item sold-to-party">{{ order.basicInfo.soldToParty }}</span>
             <span class="row-item customer-reference">{{ order.basicInfo.customerReference }}</span>
             <span class="row-item req-delivery-date">{{ order.itemOverview.reqDelivDate }}</span>
-            <span :class="['row-item overall-status', { 'status-open': order.basicInfo.status === 'Open', 'status-completed': order.basicInfo.status === 'Completed', 'status-in-progress': order.basicInfo.status === 'In Progress', 'status-new': order.basicInfo.status === 'New' }]">
+            <span :class="['row-item overall-status', { 'status-open': order.basicInfo.status === 'OPEN', 'status-completed': order.basicInfo.status === 'COMPLETED', 'status-in-progress': order.basicInfo.status === 'In Progress', 'status-new': order.basicInfo.status === 'NEW' }]">
               {{ order.basicInfo.status }}
             </span>
             <span class="row-item net-value">{{ order.basicInfo.netValue }} {{ order.basicInfo.netValueUnit }}</span>
@@ -208,7 +208,7 @@ interface SalesOrderResult {
     netValue: string;
     customerReferenceDate: string;
     customerReference: string;
-    status: 'New' | 'Open' | 'In Progress' | 'Completed';
+    status: 'NEW' | 'OPEN' | 'In Progress' | 'COMPLETED';
     netValueUnit: string;
   }
   itemOverview:{
@@ -220,7 +220,7 @@ const salesOrderQueryStructure = cns(
   "dict", "dict", "salesOrderQuery", null, false, { hideLabel: true },
   [
     cns("string", "leaf", "so_id", '', false, { searchMethods: salesOrderIdSearch }, [], "Sales Order:"),
-    cns("selection", "leaf", "status", '', false, {options:['New','Open','In progress','Completed']}, [], "Overall Status:"),
+    cns("selection", "leaf", "status", '', false, {options:['NEW','OPEN','In progress','COMPLETED']}, [], "Overall Status:"),
     cns("string", "leaf", "soldToParty", '', false, { searchMethods: soldToPartySearch }, [], "Sold-To Party:"),
     cns("string", "leaf", "customer_referenR", '', false, {}, [], "Customer Reference:"),
   ]
@@ -391,7 +391,7 @@ itemConditionKit.summonItemsNode(
             // After successful creation/save, stay on stage 0 (sales order form)
             if (onCreateState.value && result.data?.so_id) {
               salesOrderDataTree.findNodeByPath(['basicInfo', 'so_id'])?.setValue(result.data.so_id);
-              salesOrderDataTree.findNodeByPath(['meta', 'id'])?.setValue(result.data.so_id);
+              salesOrderDataTree.findNodeByPath(['meta', 'id'])?.setValue(result.data.id);
             }
             appToState('display'); // Switch to display mode after save/create
             // No automatic navigation to item details here. User will click "..."
@@ -492,8 +492,8 @@ itemConditionKit.summonItemsNode(
       });
       const result = await response.json();
 
-      if (result.success && result.data) {
-        const quotationData = result.data;
+      if (result.success && result.data.quotationData) {
+        const quotationData = result.data.quotationData;
         console.log('Quotation data fetched:', quotationData);
 
         showQuotationModal.value = false;
@@ -728,6 +728,7 @@ itemConditionKit.summonItemsNode(
     align-items: center;
     padding: 20px;
     margin: 20px;
+    overflow-y: auto;
   }
 
   /* Sales order query area style, adjusted based on business-partner-search */
@@ -828,6 +829,8 @@ itemConditionKit.summonItemsNode(
     width: 100%;
     font-size: 1em;
     color: var(--color-text-primary);
+    max-height: 60vh; /* 1. 限制一个最大高度, vh单位代表视口高度的百分比 */
+    overflow-y: auto; /* 2. 当内容垂直溢出时，自动显示滚动条 */
   }
 
   .sales-order-rows-container {
