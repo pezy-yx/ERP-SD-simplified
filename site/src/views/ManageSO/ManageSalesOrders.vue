@@ -151,7 +151,7 @@ import AppContent from '@/components/applicationContent/AppContent.vue';
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/inquiry/items-tab-query',//测能不能全用inquiry
+  validationEndpoint: '/api/so/items-tab-query',//测能不能全用inquiry
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -389,9 +389,9 @@ itemConditionKit.summonItemsNode(
           if (result.success) {
             appContentRef.value.footerMessage = result.message || (onCreateState.value ? 'Sales Order created successfully!' : 'Sales Order saved successfully!');
             // After successful creation/save, stay on stage 0 (sales order form)
-            if (onCreateState.value && result.data?.so_id) {
-              salesOrderDataTree.findNodeByPath(['basicInfo', 'so_id'])?.setValue(result.data.so_id);
-              salesOrderDataTree.findNodeByPath(['meta', 'id'])?.setValue(result.data.id);
+            if (onCreateState.value && result?.data?.data?.so_id) {
+              salesOrderDataTree.findNodeByPath(['basicInfo', 'so_id'])?.setValue(result?.data?.data?.so_id);
+              salesOrderDataTree.findNodeByPath(['meta', 'id'])?.setValue(result?.data?.data?.so_id);
             }
             appToState('display'); // Switch to display mode after save/create
             // No automatic navigation to item details here. User will click "..."

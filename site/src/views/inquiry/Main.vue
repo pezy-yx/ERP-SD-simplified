@@ -423,6 +423,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
         appContentRef.value.footerMessage = data.data.message
         if (data.data.content?.id) {
           inquiryDataTree.findNodeByPath(['meta','id'])!.setValue(data.data.content?.id)
+          inquiryDataTree.findNodeByPath(['basicInfo','inquiry'])!.setValue(data.data.content?.id)
         }
         appToState('display')
       }
