@@ -474,16 +474,16 @@ async function handleExecute(currentStage: number, targetStage: number) {
             try {
                 // 🔥 获取客户实际支付的金额信息
                 const inputData = inputTree.getValue();
-                const paymentAmount = inputData.bankData?.amount?.amount;
-                const paymentCurrency = inputData.bankData?.amount?.unit;
+                const paymentAmount = inputData.bankData?.amount;
+                const paymentCurrency = inputData.bankData?.unit;
 
                 console.log('客户支付金额:', paymentAmount, paymentCurrency);
 
                 // 🔥 为每个待提交的项目添加支付金额信息
                 const itemsWithPayment = itemsToPost.map(item => ({
                     ...item,
-                    paymentAmount: paymentAmount,
-                    currency: paymentCurrency
+                    // paymentAmount: paymentAmount,
+                    // currency: paymentCurrency
                 }));
 
                 console.log('带支付金额的未清项:', itemsWithPayment);
@@ -491,13 +491,26 @@ async function handleExecute(currentStage: number, targetStage: number) {
                 const response = await fetch(`${window.getAPIBaseUrl()}/api/finance/postOpenItems`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemsWithPayment)
+                    // body: JSON.stringify(((itemsWithPayment:any)=>{
+                    //     const t = itemsWithPayment
+                    //     t[0].amount = -t[0].amount
+                    //     return t
+                    // })(itemsWithPayment))
+                    body: JSON.stringify({
+                        customerPayment: {
+                            customer: inputData?.generalInformation?.customerID,
+                            companyCode: inputData?.generalInformation?.companyCode,
+                            amount: paymentAmount,
+                            currency: paymentCurrency
+                        },
+                        items: itemsWithPayment
+                    })
                 });
                 
                 const result = await response.json();
 
                 if (result.success) {
-                    postedJournalEntryNumber.value = result.data.JournalEntry.journalEntryId || 'N/A'; // 获取过账后的 Journal Entry Number
+                    // postedJournalEntryNumber.value = result.data.JournalEntry.journalEntryId || 'N/A'; // 获取过账后的 Journal Entry Number
                     showPostSuccessModal.value = true; // 显示过账成功的模态框
                     appContentRef.value.footerMessage = ''; // 提供反馈
                     console.log('过账成功:', result);
@@ -508,7 +521,8 @@ async function handleExecute(currentStage: number, targetStage: number) {
                 }   
             } catch (error) {
                 console.error('过账时发生错误:', error);
-                alert('过账失败，请检查网络。');
+                // alert('过账失败，请检查网络。');
+                setFooterMsg('过账失败，请检查网络。');
                 return false;
             }
         }
