@@ -290,11 +290,6 @@ export class ItemConditionKit {
 
       if (!data?.success) return false
 
-      // 页面层按需更新总计数据
-      if (this.config.onGeneralData && data.data?.generalData) {
-        try { this.config.onGeneralData(data.data.generalData) } catch {}
-      }
-
       // 更新每个 item 的详细信息
       if (Array.isArray(data.data?.breakdowns)) {
         data.data.breakdowns.forEach((breakdown: any, index: number) => {
@@ -302,6 +297,11 @@ export class ItemConditionKit {
             itemNodes[index].forceSetValue(breakdown)
           }
         })
+      }
+
+      // 页面层按需更新总计数据
+      if (this.config.onGeneralData) {
+        try { this.config.onGeneralData(data.data?.generalData?? {}) } catch {}
       }
 
       // 根据 badRecordIndices 设置 validation

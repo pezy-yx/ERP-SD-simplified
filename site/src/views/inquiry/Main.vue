@@ -32,6 +32,24 @@ const itemConditionKit: ItemConditionKit = createItemConditionKit({
   }
 })
 // 复用 kit 的校验能力，并在校验成功后更新总计字段
+itemConditionKit.updateConfig({
+  onGeneralData: async (generalData: any) => {
+    await fetch(`${window.getAPIBaseUrl()}/api/item/cal-value`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inquiryDataTree.findNodeByPath(['itemOverview','items'])?.getValue() ?? [])
+    }).then(async (response) => {
+      const data = await response.json()
+      // 更新销售订单数据树
+      inquiryDataTree.findNodeByPath(['basicInfo','netValue'])?.forceSetValue(data?.data?.netValue)
+      inquiryDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      inquiryDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.forceSetValue(data?.data?.netValue)
+      inquiryDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      inquiryDataTree.forceUpdate()
+    })
+  }
+})
+
 function validateItemsInTree(itemsPath: string[]) {
   return (itemConditionKit as any).validateItemsInTree(
     inquiryDataTree,
@@ -475,7 +493,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
       </VarBox>
     </template>
     <template #[`stage-itemCondition`]>
-      <h2>Item 详细信息 (使用 ItemConditionKit)</h2>
+      <h2>Item 详细信息</h2>
       <ItemConditionDetail
         :kit="itemConditionKit"
         @save="handleSave"
@@ -488,7 +506,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
 
     <template #[`footer-content-right`]>
       <div class="app-content-footer-content-right">
-        {{ appContentRef?.getCurrentStageName() }}
+        
         <!-- ItemConditionDetail 组件会使用 teleport 将按钮显示在这里 -->
       </div>
     </template>

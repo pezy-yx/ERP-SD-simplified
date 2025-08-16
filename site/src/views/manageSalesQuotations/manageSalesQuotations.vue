@@ -88,7 +88,7 @@
             </template>
 
             <template #footer-content-right>
-                {{ appContentRef?.getCurrentStageName() }}
+                
                 <template v-if="appContentRef?.currentStage === 0">
                     <button v-if="onSearchState" class="nav-button next-button" @click="initializeCreation()">Create New</button>
                 </template>
@@ -271,11 +271,20 @@ const itemConditionKit = createItemConditionKit({
 })
 // 复用 kit 的校验能力，并在校验成功后更新总计字段
 itemConditionKit.updateConfig({
-  onGeneralData: (generalData: any) => {
-    quotationDataTree.findNodeByPath(['basicInfo','netValue'])?.setValue(generalData?.netValue)
-    quotationDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.setValue(generalData?.netValueUnit)
-    quotationDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.setValue(generalData?.expectOralVal)
-    quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.setValue(generalData?.expectOralValUnit)
+  onGeneralData: async (generalData: any) => {
+    await fetch(`${window.getAPIBaseUrl()}/api/item/cal-value`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(quotationDataTree.findNodeByPath(['itemOverview','items'])?.getValue() ?? [])
+    }).then(async (response) => {
+      const data = await response.json()
+      // 更新销售订单数据树
+      quotationDataTree.findNodeByPath(['basicInfo','netValue'])?.forceSetValue(data?.data?.netValue)
+      quotationDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      quotationDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.forceSetValue(data?.data?.netValue)
+      quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      quotationDataTree.forceUpdate()
+    })
   }
 })
 

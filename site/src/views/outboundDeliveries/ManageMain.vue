@@ -243,7 +243,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     </template>
 
     <template #[`footer-content-right`]>
-      {{ appContentRef?.getCurrentStageName() }}
+      
       <button
         v-if="appContentRef?.currentStage == 0"
         class = "nav-button next-button"

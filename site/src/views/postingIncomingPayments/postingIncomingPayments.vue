@@ -23,7 +23,15 @@
                     <VarBox
                         :tree="bankDataTree!"
                         v-show="onInputState"
-                    ></VarBox>
+                    >
+                        <!-- <template #[`bankData-amount-amount--extra`]>
+                            <VarBox
+                                :tree = "bankDataTree!"
+                                :path="['amount','unit']"
+                            >
+                            </VarBox>
+                        </template> -->
+                    </VarBox>
                 </div>
                 <div id="openItemSelection">
                     <VarBox
@@ -151,7 +159,7 @@
         </template>
 
         <template #[`footer-content-right`]>
-        {{ appContentRef?.getCurrentStageName() }}
+        
         </template>
 
     </AppContent>
@@ -254,10 +262,27 @@ const allSelected_itemsToBeCleared = computed({
 const showPostSuccessModal = ref(false);
 const postedJournalEntryNumber = ref('');
 
+let msgVersion = 0
+const setFooterMsg = (msg:string, timeoutSec:number=5) => {
+    if(!appContentRef.value) return
+    appContentRef.value.footerMessage = msg;
+    appContentRef.value.forceUpdate()
+    msgVersion++
+    const myVersion = msgVersion
+    if (timeoutSec < 0) {
+        return
+    }
+    setTimeout(() => {
+        if(myVersion != msgVersion) return
+        appContentRef.value.footerMessage = '';
+        // appContentRef.value.forceUpdate()
+    }, timeoutSec * 1000);
+}
 // 原始的大的 VarTree 定义 (作为整体数据结构的基础)
 const inputTree = createTreeFromConfig(
     cns('dict','dict','payment',null,false,{},[
         cns('dict','dict','generalInformation',null,false,{},[
+            cns('string','leaf','customerID',null,false,{searchMethods:customerSearch},[],'Customer'),
             cns('string','leaf','companyCode',null,false,{searchMethods:companyCodeSearch},[],'Company Code'),
             cns('date','leaf','postingDate',null,false,{},[],'Posting Date'),
             cns('date','leaf','journalEntryDate',null,false,{},[],'Journal Entry Date'),
@@ -268,16 +293,19 @@ const inputTree = createTreeFromConfig(
         ],'General Information'),
         cns('dict','dict','bankData',null,false,{},[
             cns('number','leaf','G/LAccount',null,false,{searchMethods:GLAccountSearch},[],'G/L Account'),
-            cns('dict','dict','amount',null,false,{hideLabel:true},[
+            cns('dict','dict','amount',null,false,{
+                hideLabel:true,
+                // hideList: ['unit']
+            },[
                 cns('number','leaf','amount',null,false,{},[],'Amount'),
-                cns('string','leaf','unit','EUR',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[],'Unit'),
+                cns('string','leaf','unit','EUR',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[],' '),
             ],'Amount')
         ],'Bank Data'),
         cns('dict','dict','openItemSelection',null,false,{},[
             cns('selection','leaf','accountType',null,false,{
                 options:['Customer','Vendor']
             },[],'Account Type'),
-            cns('number','leaf','accountId',null,false,{searchMethods:customerSearch,hideLabel:true},[],'Account ID'),
+            cns('number','leaf','accountID',null,false,{searchMethods:customerSearch,hideLabel:true},[],'Account ID'),
         ],'Open Item Selection'),
     ],'Payment'),
 )
@@ -377,7 +405,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
             } else {
                 // 后端返回成功但数据不符合预期
                 console.error('后端返回数据格式不正确:', result);
-                alert('查询未清项失败：' + (result.message || '数据格式错误'));
+                setFooterMsg('查询未清项失败：' + (result.message || '数据格式错误'));
                 openItems.value = []; // 清空之前的可能数据
                 balance.value = 0;
                 balanceUnit.value = 'EUR';
@@ -400,17 +428,34 @@ async function handleExecute(currentStage: number, targetStage: number) {
         console.log('准备提交的未清项:', itemsToPost);
 
         if(balance.value < 0) {
-            alert('客户少付款，无法提交未清项。');
+            // alert('客户少付款，无法提交未清项。');
+            setFooterMsg('Customer underpaid, cannot post open items.')
             return false;
-        } else if(balance.value > 0) {
-            alert('客户多付款，无法提交未清项。');
+        } else if(0 && balance.value > 0) {
+            // alert('客户多付款，无法提交未清项。');
             return false;
         } else {
             try {
+                // 🔥 获取客户实际支付的金额信息
+                const inputData = inputTree.getValue();
+                const paymentAmount = inputData.bankData?.amount?.amount;
+                const paymentCurrency = inputData.bankData?.amount?.unit;
+
+                console.log('客户支付金额:', paymentAmount, paymentCurrency);
+
+                // 🔥 为每个待提交的项目添加支付金额信息
+                const itemsWithPayment = itemsToPost.map(item => ({
+                    ...item,
+                    paymentAmount: paymentAmount,
+                    currency: paymentCurrency
+                }));
+
+                console.log('带支付金额的未清项:', itemsWithPayment);
+
                 const response = await fetch(`${window.getAPIBaseUrl()}/api/finance/postOpenItems`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemsToPost)
+                    body: JSON.stringify(itemsWithPayment)
                 });
                 
                 const result = await response.json();
@@ -422,7 +467,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
                     console.log('过账成功:', result);
                     return true;
                 } else {
-                    alert('过账失败：' + (result.message || '未知错误'));
+                    setFooterMsg('过账失败：' + (result.message || '未知错误'));
                     return false;
                 }   
             } catch (error) {
@@ -501,7 +546,7 @@ function clearSelectedItems() {
     const selectedItems = openItems.value.filter(item => item.selected);
 
     if (selectedItems.length === 0) {
-        alert('请先选择要清除的未清项！');
+        // alert('请先选择要清除的未清项！');
         return;
     }
 
@@ -535,7 +580,7 @@ function removeItemsToBeCleared() {
     const selectedItems = itemsToBeCleared.value.filter(item => item.selected);
 
     if (selectedItems.length === 0) {
-        alert('请先选择要移除的项！');
+        setFooterMsg('Please select items to remove.')
         return;
     }
 
@@ -630,7 +675,7 @@ function viewJournalEntryDetails() {
     grid-column: 1;
 }
 
-:deep(.openItemSelection-accountId--wrapper) {
+:deep(.openItemSelection-accountID--wrapper) {
     margin-left: auto;
     grid-column: 2;
 }
@@ -941,4 +986,8 @@ function viewJournalEntryDetails() {
         transform: scale(1);
     }
 }
+
+/* :deep(.bankData-amount-amount--extra) {
+    flex: 1
+} */
 </style>
