@@ -2,6 +2,7 @@ import { VarTree, VarNode, createTreeFromConfig, createNodeFromConfig, cns, type
 import { ref, computed, type Ref } from 'vue'
 import {
   materialSearch,
+  pricingElementKeySearch,
 } from '@/utils/searchMethods'
 
 /**
@@ -36,6 +37,7 @@ export class ItemConditionKit {
   private config: ItemConditionKitConfig
   private itemsNodeRef: Ref<VarNode | null> = ref(null)
   private detailTrees: { header?: VarTree, sales?: VarTree, conditions?: VarTree } = {}
+  public detailQueryKey: Ref<number>
 
   // 默认的详细信息结构
   private static defaultDetailStructures = {
@@ -91,7 +93,9 @@ export class ItemConditionKit {
         rowProvided:0,
         hideList: ['status','atoMtsComponent','oun','cconDe','un','conditionValue2','cdCur','stat'],
         childTemplate:cns('dict','dict','condition',{},false,{},[
-          cns('string','leaf','cnty','',false,{data:{editableCaseofNew: true}},[],"Cnty"),
+          cns('string','leaf','cnty','',false,{data:{editableCaseofNew: true},searchMethods: pricingElementKeySearch,customSearchResultHandler: async (data, currentNode)=> {
+            // 实例化时添加
+          }},[],"Cnty"),
           cns('string','leaf','name','',false,{data:{editableCaseofNew: false}},[],"Name"),
           cns('string','leaf','amount','',false,{data:{editableCaseofNew: true}},[],"Amount"),
           cns('string','leaf','city','',false,{data:{editableCaseofNew: true}},[],"City"),
@@ -115,6 +119,7 @@ export class ItemConditionKit {
   }
 
   constructor(config: ItemConditionKitConfig) {
+    this.detailQueryKey = ref(0)
     this.config = {
       readonly: false,
       navigationLabels: {
@@ -168,7 +173,7 @@ export class ItemConditionKit {
    */
   summonItemsNode = (tree: VarTree, path: string[], itemTemplate?: NodeStructure): VarNode => {
     // 默认的 item 模板
-    const defaultItemTemplate = cns('dict','dict','item',null,false,{},[
+    const defaultItemTemplate = itemTemplate || cns('dict','dict','item',null,false,{},[
       cns('string','leaf','item','',true,{},[],"Item"),
       cns('string','leaf','material','',false,{searchMethods: materialSearch},[],"Material"),
       cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
@@ -188,6 +193,18 @@ export class ItemConditionKit {
         // hideList: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.hideList,
       },[],"Pricing Elements"),
     ])
+
+    try {
+      defaultItemTemplate
+      .children!.filter((child)=>(child.name=='pricingElements'))![0]!
+      .config!.childTemplate!.children!.filter((child)=>(child.name=='cnty'))![0]!
+      .config!.customSearchResultHandler = async (data, currentNode) => {
+        // if(!this.detailQueryKey || !this.detailQueryKey.value) {
+        //   this.detailQueryKey = ref(0);
+        // }
+        this.detailQueryKey.value++;
+      }
+    } catch {}
 
     // 创建 items 节点
     const itemsNode = createNodeFromConfig(

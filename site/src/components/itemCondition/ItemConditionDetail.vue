@@ -45,6 +45,10 @@ const currentDetailTree = computed(() => {
   return config.value.detailTrees[0]
 })
 
+watch(props.kit.detailQueryKey,async () => {
+  await validateCurrentItemConditionDataOnly()
+})
+
 /**
  * 处理 Items 表格的按钮点击事件
  */

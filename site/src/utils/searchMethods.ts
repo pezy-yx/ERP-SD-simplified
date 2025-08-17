@@ -558,6 +558,22 @@ export const materialUnitSearch: SearchMethod[] = [
   }
 ]
 
+/**
+ * @description pricing-element-key，直接返回
+ * @vakesamahere
+ */
+export const pricingElementKeySearch: SearchMethod[] = [
+  {
+    name: '定价元素搜索',
+    paramTree: null,
+    serviceUrl: '/api/search/pricing-element-key',
+    resultHeaderDisplay: {
+      result: 'Pricing Element',
+      description: 'Description',
+    }
+  }
+]
+
 const soldToPartySearchStructure  = cns('dict', 'dict', 'Search', null, false, {hideLabel: true}, [
   cns('string','leaf','customer','',false,{},[],'Customer'),
   cns('string','leaf','city','',false,{},[],'City'),
