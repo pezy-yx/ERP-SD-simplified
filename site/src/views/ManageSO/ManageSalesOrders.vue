@@ -26,7 +26,7 @@
             <span class="row-item sold-to-party">{{ order.basicInfo.soldToParty }}</span>
             <span class="row-item customer-reference">{{ order.basicInfo.customerReference }}</span>
             <span class="row-item req-delivery-date">{{ order.itemOverview.reqDelivDate }}</span>
-            <span :class="['row-item overall-status', { 'status-open': order.basicInfo.status === 'Open', 'status-completed': order.basicInfo.status === 'Completed', 'status-in-progress': order.basicInfo.status === 'In Progress', 'status-new': order.basicInfo.status === 'New' }]">
+            <span :class="['row-item overall-status', { 'status-open': order.basicInfo.status === 'OPEN', 'status-completed': order.basicInfo.status === 'COMPLETED', 'status-in-progress': order.basicInfo.status === 'In Progress', 'status-new': order.basicInfo.status === 'NEW' }]">
               {{ order.basicInfo.status }}
             </span>
             <span class="row-item net-value">{{ order.basicInfo.netValue }} {{ order.basicInfo.netValueUnit }}</span>
@@ -151,7 +151,8 @@ import AppContent from '@/components/applicationContent/AppContent.vue';
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/inquiry/items-tab-query',//测能不能全用inquiry
+  // validationEndpoint: '/api/so/items-tab-query',
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -161,7 +162,24 @@ const itemConditionKit = createItemConditionKit({
   }
 })
 
-// 复用 kit 的校验能力（SO 无需更新 generalData）
+itemConditionKit.updateConfig({
+  onGeneralData: async (generalData: any) => {
+    await fetch(`${window.getAPIBaseUrl()}/api/item/cal-value`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(salesOrderDataTree.findNodeByPath(['itemOverview','items'])?.getValue() ?? [])
+    }).then(async (response) => {
+      const data = await response.json()
+      // 更新销售订单数据树
+      salesOrderDataTree.findNodeByPath(['basicInfo','netValue'])?.forceSetValue(data?.data?.netValue)
+      salesOrderDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      salesOrderDataTree.forceUpdate()
+    })
+  },
+  onSave: async () => {
+    await itemsTabQueryAll();
+  }
+})
 
 const appContentRef = ref(null) as any;
 const currentAppStage = computed(() => appContentRef.value?.currentStage || 0);
@@ -175,7 +193,7 @@ const quotationModalMessage = ref('');
 const quotationQueryStructure = cns(
   "dict", "dict", "quotationQuery", null, false, { hideLabel: true },
   [
-    cns("string", "leaf", "quotation_id", '', false, {searchMethods: quotationIdSearch}, [], "Quotation Number:"),
+    cns("string", "leaf", "salesQuotationId", '', false, {searchMethods: quotationIdSearch}, [], "Quotation Number:"),
   ]
 );
 const quotationQueryTree = createTreeFromConfig(quotationQueryStructure);
@@ -208,7 +226,7 @@ interface SalesOrderResult {
     netValue: string;
     customerReferenceDate: string;
     customerReference: string;
-    status: 'New' | 'Open' | 'In Progress' | 'Completed';
+    status: 'NEW' | 'OPEN' | 'In Progress' | 'COMPLETED';
     netValueUnit: string;
   }
   itemOverview:{
@@ -220,7 +238,7 @@ const salesOrderQueryStructure = cns(
   "dict", "dict", "salesOrderQuery", null, false, { hideLabel: true },
   [
     cns("string", "leaf", "so_id", '', false, { searchMethods: salesOrderIdSearch }, [], "Sales Order:"),
-    cns("selection", "leaf", "status", '', false, {options:['New','Open','In progress','Completed']}, [], "Overall Status:"),
+    cns("selection", "leaf", "status", '', false, {options:['NEW','OPEN','In progress','COMPLETED']}, [], "Overall Status:"),
     cns("string", "leaf", "soldToParty", '', false, { searchMethods: soldToPartySearch }, [], "Sold-To Party:"),
     cns("string", "leaf", "customer_referenR", '', false, {}, [], "Customer Reference:"),
   ]
@@ -232,7 +250,7 @@ const salesOrderDataTree = createTreeFromConfig(
        cns('string','leaf','id','',false,{},[]),
      ]),
      cns('dict','dict','basicInfo',{},false,{hideLabel:true},[
-       cns('string','leaf','quotation_id','',false,{searchMethods: quotationIdSearch},[],"Quotation:"),
+       cns('string','leaf','salesQuotationId','',false,{searchMethods: quotationIdSearch},[],"Quotation:"),
        cns('string','leaf','so_id','',true,{},[],"Sales Order:"),
        cns('string','leaf','soldToParty','',false,{searchMethods: soldToPartySearch},[],"Sold-To Party:"),
        cns('string','leaf','shipToParty','',false,{searchMethods: soldToPartySearch},[],"Ship-To Party:"),
@@ -389,9 +407,9 @@ itemConditionKit.summonItemsNode(
           if (result.success) {
             appContentRef.value.footerMessage = result.message || (onCreateState.value ? 'Sales Order created successfully!' : 'Sales Order saved successfully!');
             // After successful creation/save, stay on stage 0 (sales order form)
-            if (onCreateState.value && result.data?.so_id) {
-              salesOrderDataTree.findNodeByPath(['basicInfo', 'so_id'])?.setValue(result.data.so_id);
-              salesOrderDataTree.findNodeByPath(['meta', 'id'])?.setValue(result.data.so_id);
+            if (onCreateState.value && result?.data?.so_id) {
+              salesOrderDataTree.findNodeByPath(['basicInfo', 'so_id'])?.forceSetValue(result?.data?.so_id);
+              salesOrderDataTree.findNodeByPath(['meta', 'id'])?.forceSetValue(result?.data?.so_id);
             }
             appToState('display'); // Switch to display mode after save/create
             // No automatic navigation to item details here. User will click "..."
@@ -468,7 +486,7 @@ itemConditionKit.summonItemsNode(
     console.log('Creating sales order - showing quotation input modal');
     showQuotationModal.value = true;
     quotationModalMessage.value = ''; // Clear previous messages
-    quotationQueryTree.root?.forceSetValue({ quotation_id: '' }); // Reset input
+    quotationQueryTree.root?.forceSetValue({ salesQuotationId: '' }); // Reset input
   };
 
   const cancelQuotationInput = () => {
@@ -477,7 +495,7 @@ itemConditionKit.summonItemsNode(
   };
 
   const confirmQuotationInput = async () => {
-    const quotationId = quotationQueryTree.root?.findNodeByPath(['quotation_id'])?.getValue();
+    const quotationId = quotationQueryTree.root?.findNodeByPath(['salesQuotationId'])?.getValue();
     if (!quotationId) {
       quotationModalMessage.value = 'Please enter a Quotation Number.';
       return;
@@ -488,11 +506,11 @@ itemConditionKit.summonItemsNode(
       const response = await fetch(`${window.getAPIBaseUrl()}/api/quotation/details`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quotation_id: quotationId }),
+        body: JSON.stringify({ salesQuotationId: quotationId }),
       });
       const result = await response.json();
 
-      if (result.success && result.data?.quotationData) {
+      if (result.success && result.data.quotationData) {
         const quotationData = result.data.quotationData;
         console.log('Quotation data fetched:', quotationData);
 
@@ -504,7 +522,7 @@ itemConditionKit.summonItemsNode(
         // Populate basicInfo
         const basicInfoNode = salesOrderDataTree.findNodeByPath(['basicInfo']);
         if (basicInfoNode && quotationData.basicInfo) {
-          basicInfoNode.findNodeByPath(['quotation_id'])?.setValue(quotationData.basicInfo.quotation);
+          basicInfoNode.findNodeByPath(['salesQuotationId'])?.setValue(quotationData.basicInfo.quotation);
           basicInfoNode.findNodeByPath(['soldToParty'])?.setValue(quotationData.basicInfo.soldToParty);
           basicInfoNode.findNodeByPath(['shipToParty'])?.setValue(quotationData.basicInfo.shipToParty);
           basicInfoNode.findNodeByPath(['customerReference'])?.setValue(quotationData.basicInfo.customerReference);
@@ -728,6 +746,7 @@ itemConditionKit.summonItemsNode(
     align-items: center;
     padding: 20px;
     margin: 20px;
+    overflow-y: auto;
   }
 
   /* Sales order query area style, adjusted based on business-partner-search */
@@ -828,6 +847,8 @@ itemConditionKit.summonItemsNode(
     width: 100%;
     font-size: 1em;
     color: var(--color-text-primary);
+    max-height: 60vh; /* 1. 限制一个最大高度, vh单位代表视口高度的百分比 */
+    overflow-y: auto; /* 2. 当内容垂直溢出时，自动显示滚动条 */
   }
 
   .sales-order-rows-container {

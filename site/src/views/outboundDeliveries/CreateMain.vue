@@ -30,12 +30,14 @@ const salesOrdersTree = createTreeFromConfig(
       hideLabel:true,
       rowProvided: 1,
       childTemplate:cns('dict','dict','order',null,false,{},[
-        cns('string','leaf','id','',true,{hideSelf:true},[],"Sales Order"),
+        cns('string','leaf','id','',true,{},[],"Sales Order"),
+        cns('string','leaf','netValue','',true,{},[],"Net Value"),
+        cns('string','leaf','currency','',true,{},[],"Currency"),
+        cns('string','leaf','shippingPoint','',true,{hideSelf:true},[],"Shipping Point"),
+        cns('string','leaf','shipToParty','',true,{},[],"Ship-To Party"),
         cns('date','leaf','plannedCreationDate','',true,{},[],"Planned Creation Date"),
         cns('date','leaf','plannedGIDate','',true,{},[],"Planned GI Date"),
-        cns('string','leaf','shippingPoint','',true,{},[],"Shipping Point"),
-        cns('string','leaf','shipToParty','',true,{},[],"Ship-To Party"),
-        cns('string','leaf','grossWeight','',true,{},[],"Gross Weight"),
+        cns('string','leaf','grossWeight','',true,{hideSelf:true},[],"Gross Weight"),
       ]),
     },[])
   ],"Sales Orders")
@@ -109,7 +111,9 @@ async function handleExecuteClick() {
           }
         )
         return tobj
-      })(initialInputTree.getValue()))
+      })({
+        selectedOrders: orderValues
+      })),
     }).then(response => {
       console.log('正常返回', response)
       return response.json()
@@ -121,7 +125,8 @@ async function handleExecuteClick() {
     console.log('返回的数据',data)
 
     if (data.success) {
-      appContentRef.value.footerMessage = data.data.message
+      const idsString = (data.data.createdDeliveries as Array<string>)?.join(', ')
+      appContentRef.value.footerMessage = `${data.data.message} ${idsString}`
       appContentRef.value.forceUpdate()
       // 重新加载销售订单列表以反映更新
       await loadSalesOrders()
@@ -186,7 +191,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     </template>
 
     <template #[`footer-content-right`]>
-      {{ appContentRef?.getCurrentStageName() }}
+      
     </template>
 
   </AppContent>

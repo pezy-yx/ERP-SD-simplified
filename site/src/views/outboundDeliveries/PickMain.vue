@@ -123,11 +123,12 @@ const deliveryItemsTree = createTreeFromConfig(
         'details',
       ],
       childTemplate:cns('dict','dict','item',null,false,{},[
+        cns('string','leaf','dlvId','',true,{},[],"Dlv Id"),
         cns('string','leaf','item','',true,{},[],"Item"),
         cns('string','leaf','material','',true,{},[],"Material"),
         cns('string','leaf','deliveryQuantity','',false,{},[],"Delivery Quantity"),
         cns('string','leaf','deliveryQuantityUnit','',false,{searchMethods:materialUnitSearch},[]," "),
-        cns('string','leaf','pickingQuantity','',true,{},[],"Picking Quantity"),
+        cns('string','leaf','pickingQuantity','',false,{},[],"Picking Quantity"),
         cns('string','leaf','pickingQuantityUnit','',true,{searchMethods:materialUnitSearch},[]," "),
         cns('string','leaf','pickingStatus','',true,{},[],"Picking Status"),
         cns('string','leaf','confirmationStatus','',true,{},[],"Confirmation Status"),
@@ -348,7 +349,8 @@ async function itemsTabQuery(itemNodes: VarNode[]) {
 
     itemDetailTree.forceUpdate()
     deliveryItemsTree.forceUpdate()
-    return data.data.result.allDataLegal === 1
+    const allDataLegalFlag = (data.data?.result?.allDataLegal ?? 0) == 1
+    return allDataLegalFlag
   }
 
   return false
@@ -684,7 +686,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     </template>
 
     <template #[`footer-content-right`]>
-      {{ appContentRef?.getCurrentStageName() }}
+      
 
       <!-- 操作按钮 -->
        

@@ -3,6 +3,7 @@
 ## 概述
 
 Outbound Deliveries出库交货单管理系统包含三个主要应用：
+
 1. **Create Outbound Delivery** - 创建出库交货单 (路由: `/application/create-outbound-delivery`)
 2. **Manage Outbound Deliveries** - 管理出库交货单 (路由: `/application/manage-outbound-deliveries`)
 3. **Pick Outbound Delivery** - 拣配出库交货单 (路由: `/application/pick-outbound-delivery`)
@@ -20,6 +21,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **功能**: 根据查询条件获取可用于创建出库交货单的销售订单列表
 
 **请求参数**:
+
 ```json
 {
   "shipToParty": "string",
@@ -29,6 +31,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -55,6 +58,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **功能**: 从选中的销售订单创建出库交货单
 
 **请求参数**:
+
 ```json
 {
   "selectedOrders": [
@@ -72,6 +76,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -90,6 +95,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **功能**: 根据查询条件获取出库交货单汇总信息
 
 **请求参数**:
+
 ```json
 {
   "overallStatus": "string",
@@ -99,6 +105,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -124,6 +131,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **功能**: 根据交货单ID获取完整的交货单详细信息
 
 **请求参数**:
+
 ```json
 {
   "deliveryId": "string"
@@ -131,6 +139,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -164,6 +173,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
     "items": {
       "items": [
         {
+          "dlvId": "xxx", // 与上面的id对应
           "item": "10",
           "material": "MAT-001",
           "deliveryQuantity": "100",
@@ -185,7 +195,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
           "storageLocationDescription": "Main Warehouse",
           "storageBin": "A-01-01",
           "materialAvailability": "2024-01-15",
-        } // ref/as Sales-Order-Item interface: line 364，如果Sales Order部分的Item接口有变动，这里的结构也可能改变，请及时提醒更新文档
+        } // ref/as  OutboundItem
       ]
     }
   }
@@ -199,13 +209,15 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **功能**: 批量验证和补全交货单物品信息
 
 **请求参数**:
+
 ```json
 [
-  // ref Sales-Order-Item[] interface: line 364，所有字段都可能缺省
+  // ref Outbound-Item[]
 ]
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -216,7 +228,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
       "badRecordIndices": []
     },
     "breakdowns": [
-      // ref Sales-Order-Item[] interface: line 364，任何字段都不能缺省
+      // ref Outbound-Item[]
     ]
   }
 }
@@ -229,6 +241,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **功能**: 根据交货单ID列表批量提交发货过账
 
 **请求参数**:
+
 ```json
 {
   "deliveryIds": ["DEL-2024-100", "DEL-2024-101"]
@@ -236,6 +249,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -267,6 +281,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 **说明，这里是一个复合的服务地址**: 提交新的详细数据，并触发post。可以直接符合items-tab-query并用新的数据进行post-gis-by-id
 
 **请求参数**:
+
 ```json
 [
   {
@@ -286,13 +301,14 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
       "volumeUnit": "M3" // 任何字段可能缺省/非法
     },
     "items": [
-      // ref Sales-Order-Item[] interface: line 364，任何字段可能缺省/非法
+      // ref OutboundItem[]
     ]
   }
 ]
 ```
 
 **响应格式**:
+
 ```json
 {
   "success": true,
@@ -331,6 +347,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 - 这里为AI生成，释义的参考价值有限
 
 ### 销售订单字段 (Sales Orders)
+
 - `id`: 唯一表示
 - `plannedCreationDate`: 计划创建日期
 - `plannedGIDate`: 计划发货日期
@@ -339,6 +356,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 - `grossWeight`: 毛重
 
 ### 交货单头部字段 (Delivery Detail)
+
 - `meta.id`: 交货单号
 - `meta.posted`: 是否已过账
 - `meta.readyToPost`: 是否准备过账
@@ -362,6 +380,7 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 - `shippingPoint`: 装运点
 
 ### 交货单物品字段 (Delivery Items) ref/as Sales-Order-Item
+
 - `item`: 行项目号
 - `material`: 物料号
 - `deliveryQuantity`: 交货数量
@@ -387,29 +406,33 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ## 业务流程说明
 
 ### 创建出库交货单流程 (Create Outbound Delivery)
+
 1. **参数输入阶段**: 用户输入送达方、计划创建日期、TM相关性等查询条件
 2. **获取销售订单**: 调用 `/outbound-delivery/get-sales-orders` 获取符合条件的销售订单列表
 3. **选择订单**: 用户从列表中选择需要创建交货单的销售订单
 4. **创建交货单**: 调用 `/outbound-delivery/create-from-orders` 创建出库交货单
 
 ### 管理出库交货单流程 (Manage Outbound Deliveries)
+
 1. **查询阶段**: 用户输入总体状态、创建人等查询条件
 2. **获取交货单列表**: 调用 `/outbound-delivery/get-deliveries-summary` 获取交货单汇总列表
 3. **拣配操作**: 用户可以点击"Pick"按钮进入拣配界面
 4. **批量过账**: 用户可以选择多个交货单进行批量发货过账，调用 `/outbound-delivery/post-gis-by-id`
 
 ### 拣配出库交货单流程 (Pick Outbound Delivery)
+
 1. **获取详情阶段**: 输入交货单ID，调用 `/outbound-delivery/get-detail` 获取完整交货单信息
-2. **拣配信息查看**: 
+2. **拣配信息查看**:
    - **Picking标签页**: 显示物品列表，支持查看和编辑物品详情
    - **GI标签页**: 显示发货汇总信息
-3. **物品详情编辑**: 
+3. **物品详情编辑**:
    - 用户可以点击">"按钮进入物品详情页面
    - 编辑交货数量、库存地点等信息
    - 系统调用 `/outbound-delivery/items-tab-query` 进行实时验证
 4. **发货过账**: 调用 `/outbound-delivery/post-gis` 提交发货过账
 
 ### 关键业务规则
+
 - 只有拣配完成的交货单才能进行发货过账
 - 发货过账后交货单状态变为"Posted"，不能再修改
 - 物品数据修改时需要实时验证，验证失败的记录会在 `badRecordIndices` 中标识
@@ -419,27 +442,32 @@ Outbound Deliveries出库交货单管理系统包含三个主要应用：
 ## 技术实现说明
 
 ### 前端架构
+
 - **Create应用**: 单阶段应用，使用VarTree管理查询条件和销售订单列表
 - **Manage应用**: 集成Pick应用的复合应用，支持应用间切换
 - **Pick应用**: 双阶段应用，支持列表查看和物品详情编辑
 
 ### 状态管理
+
 - **Create**: 通过选择销售订单创建交货单
 - **Manage**: 查看交货单列表，支持拣配和批量过账操作
 - **Pick**: 详细的拣配和发货过账操作
 
 ### 数据流向
+
 1. **查询流**: 查询条件 → 后端接口 → VarTree数据结构
 2. **验证流**: 用户输入 → `items-tab-query` → 实时验证反馈
 3. **过账流**: 交货单数据 → `post-gis` 接口 → 状态更新
 
 ### 错误处理
+
 - 所有接口调用都包含 `success` 字段用于状态判断
 - `items-tab-query` 返回 `badRecordIndices` 数组标识验证失败的记录
 - 前端根据验证结果设置 `config.data.validation` 属性控制UI显示
 - 发货过账失败时显示具体错误信息
 
 ### 界面特性
+
 - **FilterTabs组件**: Pick应用中的Picking/GI标签页切换
 - **动态按钮**: 根据交货单状态动态显示操作按钮
 - **实时计算**: GI标签页中的汇总信息实时计算显示

@@ -306,7 +306,7 @@ defineExpose({
     </template>
 
     <template #[`footer-content-right`]>
-      {{ appContentRef?.getCurrentStageName() }}
+      
     </template>
 
   </AppContent>

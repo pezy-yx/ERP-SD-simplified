@@ -62,7 +62,7 @@ export async function login(username: string, password: string){
                 data: {
                     token: response.data.token,
                     user: {
-                        username: response.data.user.username
+                        username: response.data.data.user.username
                     }
                 },
                 statusCode: response.status
@@ -79,7 +79,7 @@ export async function login(username: string, password: string){
 
     } catch (error) {
         const axiosError = error as AxiosError; // 类型断言
-
+        console.log(error)
         if (axiosError.response) {
             // 服务器返回了状态码在 2xx 之外的响应 (如 401 Unauthorized)
             const errorData = axiosError.response.data as { message?: string, code?: string, details?: any };

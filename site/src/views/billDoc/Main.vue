@@ -111,8 +111,8 @@ const billingDataTree = createTreeFromConfig(
     },[
       cns('selection','leaf','type','',false,{options:["Invoice"], hideLabel:true},[]," "),
       cns('string','leaf','id','',false,{},[]," "),
-      cns('string','leaf','netValue','',false,{},[],"Net Value: "),
-      cns('string','leaf','netValueUnit','',false,{hideLabel:true, searchMethods:CurrencyUnitSearch},[]," "),
+      cns('string','leaf','netValue','',true,{},[],"Net Value: "),
+      cns('string','leaf','netValueUnit','',true,{hideLabel:true, searchMethods:CurrencyUnitSearch},[]," "),
       cns('string','leaf','payer','',false,{searchMethods:customerSearch},[],"Payer: "),
       cns('date','leaf','billingDate','',false,{},[],"Billing Date: "),
       cns('string','leaf','deliveryId','',true,{searchMethods:deliveryIdSearch},[],"Delivery:"),
@@ -125,13 +125,31 @@ const billingDataTree = createTreeFromConfig(
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/app/billing/items-tab-query',
+  // validationEndpoint: '/api/app/billing/items-tab-query',
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
     save: 'Save',
     previous: '← Previous',
     next: 'Next →'
+  }
+})
+
+// 复用 kit 的校验能力，并在校验成功后更新总计字段
+itemConditionKit.updateConfig({
+  onGeneralData: async (generalData: any) => {
+    await fetch(`${window.getAPIBaseUrl()}/api/item/cal-value`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(billingDataTree.findNodeByPath(['itemOverview','items'])?.getValue() ?? [])
+    }).then(async (response) => {
+      const data = await response.json()
+      // 更新销售订单数据树
+      billingDataTree.findNodeByPath(['basicInfo','netValue'])?.forceSetValue(data?.data?.netValue)
+      billingDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      billingDataTree.forceUpdate()
+    })
   }
 })
 
@@ -166,6 +184,12 @@ async function initializeByCreation() {
   })
   console.log('返回的数据',data)
   initializeResult.value = data.success
+  if(data.message) {
+    appContentRef.value?.setFooterMsg(data.message, 5)
+  }
+  if(data.data?.message) {
+    appContentRef.value?.setFooterMsg(data.data?.message, 5)
+  }
   if(!data.success) return false
 
   if(data.data.content) {
@@ -195,6 +219,10 @@ async function initializeByGet() {
     return { success: false }
   })
   console.log('返回的数据',data)
+  const message = data.message ?? data.data?.message ?? ''
+  if(message) {
+    appContentRef.value?.setFooterMsg(message)
+  }
   if(!data.success) return false
   if(!data.data.content) {
     return false
@@ -425,7 +453,7 @@ async function handleItemsTableClick() {
     </template>
 
     <template #[`footer-content-right`]>
-      {{ appContentRef?.getCurrentStageName() }}
+      
     </template>
 
   </AppContent>

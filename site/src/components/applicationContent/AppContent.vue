@@ -206,9 +206,27 @@ const forceUpdate = () => {
   forceUpdateKey.value++
 }
 
+
+let msgVersion = 0
+const setFooterMsg = (msg:string, timeoutSec:number=3) => {
+    footerMessage.value = msg;
+    forceUpdate()
+    msgVersion++
+    const myVersion = msgVersion
+    if (timeoutSec < 0) {
+        return
+    }
+    setTimeout(() => {
+        if(myVersion != msgVersion) return
+        footerMessage.value = '';
+        // forceUpdate()
+    }, timeoutSec * 1000);
+}
+
 // 暴露的方法和属性
 defineExpose({
   forceUpdate,
+  setFooterMsg,
   footerMessage,
   currentStage,
   goToStage,

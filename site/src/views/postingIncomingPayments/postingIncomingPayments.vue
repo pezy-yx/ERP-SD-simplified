@@ -17,20 +17,29 @@
                     <VarBox
                         :tree="generalInfoTree!"
                         v-show="onInputState"
+                        @enter-from-node = "handleEnterFromNode"
                     ></VarBox> 
                 </div>
                 <div id="bankData">
                     <VarBox
                         :tree="bankDataTree!"
                         v-show="onInputState"
-                    ></VarBox>
+                    >
+                        <!-- <template #[`bankData-amount--extra`]>
+                            <VarBox
+                                :tree = "bankDataTree!"
+                                :path="['unit']"
+                            >
+                            </VarBox>
+                        </template> -->
+                    </VarBox>
                 </div>
-                <div id="openItemSelection">
+                <!-- <div id="openItemSelection">
                     <VarBox
                         :tree="openItemSelectionTree!"
                         v-show="onInputState"
                     ></VarBox>
-                </div>
+                </div> -->
             </div>
         </template>
         <template #[`stage-post`]>
@@ -138,20 +147,22 @@
                     <span>Already Selected {{ selectedItemsToBeCleared.length }} / Total {{ itemsToBeCleared.length }}</span>
                 </div>
             </div>
-            <div v-if="showPostSuccessModal" class="modal-overlay">
-                <div class="modal-content">
-                    <h2>Success</h2>
-                    <span>Journal Entry&nbsp;<span>{{ postedJournalEntryNumber }}</span>&nbsp;Successfully Posted</span>
-                    <div class="modal-actions">
-                        <button class="btn" @click="viewJournalEntryDetails">View Details</button>
-                        <button class="btn" @click="closePostSuccessModal">Close</button>
+            <teleport to="body">
+                <div v-if="showPostSuccessModal" class="modal-overlay">
+                    <div class="modal-content">
+                        <h2>Success</h2>
+                        <span>Journal Entry&nbsp;<span>{{ postedJournalEntryNumber }}</span>&nbsp;Successfully Posted</span>
+                        <div class="modal-actions">
+                            <!-- <button class="btn" @click="viewJournalEntryDetails">View Details</button> -->
+                            <button class="btn" @click="closePostSuccessModal">Close</button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </teleport>
         </template>
 
         <template #[`footer-content-right`]>
-        {{ appContentRef?.getCurrentStageName() }}
+        
         </template>
 
     </AppContent>
@@ -190,7 +201,7 @@ const journalEntryTypeOptions = ['AA(Asset Posting)','AB(Accounting Document)','
 ]
 
 const balance = ref(0 as number) // 用于存储余额
-const balanceUnit = ref('EUR') // 用于存储余额单位
+const balanceUnit = ref('') // 用于存储余额单位
 const appContentRef = ref(null) as any
 interface OpenItem {
     companyCode: string;
@@ -254,10 +265,55 @@ const allSelected_itemsToBeCleared = computed({
 const showPostSuccessModal = ref(false);
 const postedJournalEntryNumber = ref('');
 
+let msgVersion = 0
+const setFooterMsg = (msg:string, timeoutSec:number=5) => {
+    if(!appContentRef.value) return
+    appContentRef.value.footerMessage = msg;
+    appContentRef.value.forceUpdate()
+    msgVersion++
+    const myVersion = msgVersion
+    if (timeoutSec < 0) {
+        return
+    }
+    setTimeout(() => {
+        if(myVersion != msgVersion) return
+        appContentRef.value.footerMessage = '';
+        // appContentRef.value.forceUpdate()
+    }, timeoutSec * 1000);
+}
+
+
+const companyCodeTab = async (customerID:string|undefined) => {
+    if(!customerID) return
+    await fetch(`${window.getAPIBaseUrl()}/api/search/company-code/customer`,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({customer:customerID})
+    }).then((res) => {
+        if(!res.ok) throw new Error('ERROR');
+        return res.json()
+    }).then((data)=>{
+        const companyCode = (data?.data as Array<{result: string}>)?.[0]?.result;
+        if(!companyCode) return
+        inputTree.findNodeByPath(['generalInformation','companyCode'])?.forceSetValue(`${companyCode}`)
+        appContentRef.value?.forceUpdate()
+    })
+    .catch((_)=>{})
+}
+
+async function handleEnterFromNode(node?:VarNode, value?:string) {
+    if (node === generalInfoTree.value?.findNodeByPath(['customerID'])){
+        await companyCodeTab(value)
+    }
+}
+
 // 原始的大的 VarTree 定义 (作为整体数据结构的基础)
 const inputTree = createTreeFromConfig(
     cns('dict','dict','payment',null,false,{},[
         cns('dict','dict','generalInformation',null,false,{},[
+            cns('string','leaf','customerID',null,false,{searchMethods:customerSearch, customSearchResultHandler: (data) => companyCodeTab(data?.firstSelectedResult?.result)},[],'Customer'),
             cns('string','leaf','companyCode',null,false,{searchMethods:companyCodeSearch},[],'Company Code'),
             cns('date','leaf','postingDate',null,false,{},[],'Posting Date'),
             cns('date','leaf','journalEntryDate',null,false,{},[],'Journal Entry Date'),
@@ -266,18 +322,25 @@ const inputTree = createTreeFromConfig(
             },[],'Journal Entry Type'),
             cns('string','leaf','period',null,false,{},[],'Period'),
         ],'General Information'),
-        cns('dict','dict','bankData',null,false,{},[
+        cns('dict','dict','bankData',null,false,{
+            // hideList:['unit']
+        },[
             cns('number','leaf','G/LAccount',null,false,{searchMethods:GLAccountSearch},[],'G/L Account'),
-            cns('dict','dict','amount',null,false,{hideLabel:true},[
-                cns('number','leaf','amount',null,false,{},[],'Amount'),
-                cns('string','leaf','unit','EUR',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[],'Unit'),
-            ],'Amount')
+            // cns('dict','dict','amount',null,false,{
+            //     hideLabel:true,
+            //     // hideList: ['unit']
+            // },[
+            //     cns('number','leaf','amount',null,false,{},[],'Amount'),
+            //     cns('string','leaf','unit','',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[],' '),
+            // ],'Amount'),
+            cns('number','leaf','amount',null,false,{},[],'Amount'),
+            cns('string','leaf','unit','',false,{searchMethods:CurrencyUnitSearch,hideLabel:true},[],' '),
         ],'Bank Data'),
         cns('dict','dict','openItemSelection',null,false,{},[
             cns('selection','leaf','accountType',null,false,{
                 options:['Customer','Vendor']
             },[],'Account Type'),
-            cns('number','leaf','accountId',null,false,{searchMethods:customerSearch,hideLabel:true},[],'Account ID'),
+            cns('number','leaf','accountID',null,false,{searchMethods:customerSearch,hideLabel:true},[],'Account ID'),
         ],'Open Item Selection'),
     ],'Payment'),
 )
@@ -286,6 +349,7 @@ const inputTree = createTreeFromConfig(
 const generalInfoTree: Ref<VarTree | null> = ref(null);
 const bankDataTree: Ref<VarTree | null> = ref(null);
 const openItemSelectionTree: Ref<VarTree | null> = ref(null);
+
 
 // 在组件挂载后，从原始的 inputTree 中提取子节点并创建新的 VarTree
 onMounted(() => {
@@ -370,17 +434,17 @@ async function handleExecute(currentStage: number, targetStage: number) {
                 })) : [];
                 // 更新 balance 和 balanceUnit
                 balance.value = typeof result.data.balance === 'number' ? result.data.balance : parseFloat(result.data.balance || '0');
-                balanceUnit.value = result.data.balanceUnit || 'EUR';
+                balanceUnit.value = result.data.balanceUnit || '';
                 
                 // 如果成功获取数据，允许跳转到下一阶段
                 return true; 
             } else {
                 // 后端返回成功但数据不符合预期
                 console.error('后端返回数据格式不正确:', result);
-                alert('查询未清项失败：' + (result.message || '数据格式错误'));
+                setFooterMsg('查询未清项失败：' + (result.message || '数据格式错误'));
                 openItems.value = []; // 清空之前的可能数据
                 balance.value = 0;
-                balanceUnit.value = 'EUR';
+                balanceUnit.value = '';
                 return false; // 阻止跳转
             }
         } catch (error){
@@ -388,7 +452,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
             alert('查询未清项失败，请检查网络或联系管理员。');
             openItems.value = []; // 清空之前的可能数据
             balance.value = 0;
-            balanceUnit.value = 'EUR';
+            balanceUnit.value = '';
             return false; // 阻止跳转
         }
     }
@@ -400,34 +464,65 @@ async function handleExecute(currentStage: number, targetStage: number) {
         console.log('准备提交的未清项:', itemsToPost);
 
         if(balance.value < 0) {
-            alert('客户少付款，无法提交未清项。');
+            // alert('客户少付款，无法提交未清项。');
+            setFooterMsg('Customer underpaid, cannot post open items.')
             return false;
-        } else if(balance.value > 0) {
-            alert('客户多付款，无法提交未清项。');
+        } else if(0 && balance.value > 0) {
+            // alert('客户多付款，无法提交未清项。');
             return false;
         } else {
             try {
+                // 🔥 获取客户实际支付的金额信息
+                const inputData = inputTree.getValue();
+                const paymentAmount = inputData.bankData?.amount;
+                const paymentCurrency = inputData.bankData?.unit;
+
+                console.log('客户支付金额:', paymentAmount, paymentCurrency);
+
+                // 🔥 为每个待提交的项目添加支付金额信息
+                const itemsWithPayment = itemsToPost.map(item => ({
+                    ...item,
+                    // paymentAmount: paymentAmount,
+                    // currency: paymentCurrency
+                }));
+
+                console.log('带支付金额的未清项:', itemsWithPayment);
+
                 const response = await fetch(`${window.getAPIBaseUrl()}/api/finance/postOpenItems`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemsToPost)
+                    // body: JSON.stringify(((itemsWithPayment:any)=>{
+                    //     const t = itemsWithPayment
+                    //     t[0].amount = -t[0].amount
+                    //     return t
+                    // })(itemsWithPayment))
+                    body: JSON.stringify({
+                        customerPayment: {
+                            customer: inputData?.generalInformation?.customerID,
+                            companyCode: inputData?.generalInformation?.companyCode,
+                            amount: paymentAmount,
+                            currency: paymentCurrency
+                        },
+                        items: itemsWithPayment
+                    })
                 });
                 
                 const result = await response.json();
 
                 if (result.success) {
-                    postedJournalEntryNumber.value = result.data.JournalEntry.journalEntryId || 'N/A'; // 获取过账后的 Journal Entry Number
+                    // postedJournalEntryNumber.value = result.data.JournalEntry.journalEntryId || 'N/A'; // 获取过账后的 Journal Entry Number
                     showPostSuccessModal.value = true; // 显示过账成功的模态框
                     appContentRef.value.footerMessage = ''; // 提供反馈
                     console.log('过账成功:', result);
                     return true;
                 } else {
-                    alert('过账失败：' + (result.message || '未知错误'));
+                    setFooterMsg('过账失败：' + (result.message || '未知错误'));
                     return false;
                 }   
             } catch (error) {
                 console.error('过账时发生错误:', error);
-                alert('过账失败，请检查网络。');
+                // alert('过账失败，请检查网络。');
+                setFooterMsg('过账失败，请检查网络。');
                 return false;
             }
         }
@@ -445,8 +540,9 @@ async function handleCancel(currentStage: number, _targetStage: number) {
         if(confirmValue) {    
             appContentRef.value.footerMessage = '';
             openItems.value = [];
+            itemsToBeCleared.value = [];
             balance.value = 0;
-            balanceUnit.value = 'EUR';
+            balanceUnit.value = '';
         }
         console.log('取消操作，返回到输入阶段');
         console.log('当前阶段:', currentStage, '目标阶段:', _targetStage);
@@ -501,7 +597,7 @@ function clearSelectedItems() {
     const selectedItems = openItems.value.filter(item => item.selected);
 
     if (selectedItems.length === 0) {
-        alert('请先选择要清除的未清项！');
+        // alert('请先选择要清除的未清项！');
         return;
     }
 
@@ -535,7 +631,7 @@ function removeItemsToBeCleared() {
     const selectedItems = itemsToBeCleared.value.filter(item => item.selected);
 
     if (selectedItems.length === 0) {
-        alert('请先选择要移除的项！');
+        setFooterMsg('Please select items to remove.')
         return;
     }
 
@@ -569,7 +665,7 @@ function closePostSuccessModal() {
     openItems.value = [];
     itemsToBeCleared.value = [];
     balance.value = 0;
-    balanceUnit.value = 'EUR';
+    balanceUnit.value = '';
     appContentRef.value.goToStage(0); // 返回到输入阶段
     appToState('input'); // 切换内部状态，控制 template 渲染
 }
@@ -595,26 +691,23 @@ function viewJournalEntryDetails() {
 </script>
 
 <style scoped>
-.total {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
+/* .total {
+} */
 
-#generalInfo {
+/* #generalInfo {
     grid-column: 1;
     grid-row: 1 / 3; 
 }
 
 #bankData {
-    grid-column: 2;
-    grid-row: 1;
+    grid-column: 1;
+    grid-row: 2;
 }
 
 #openItemSelection {
     grid-column: 2;
     grid-row: 2; 
-}
+} */
 
 :deep(.generalInformation--dict-leaf-section) {
     display: flex;
@@ -630,7 +723,7 @@ function viewJournalEntryDetails() {
     grid-column: 1;
 }
 
-:deep(.openItemSelection-accountId--wrapper) {
+:deep(.openItemSelection-accountID--wrapper) {
     margin-left: auto;
     grid-column: 2;
 }
@@ -941,4 +1034,47 @@ function viewJournalEntryDetails() {
         transform: scale(1);
     }
 }
+
+:deep(.bankData--dict-leaf-section) {
+    display: grid;
+    grid-template-columns: 20% 20% 10%;
+    grid-template-rows: auto auto;
+    gap: 0;
+    --main-col: 2;
+    --unit-col: 3;
+}
+:deep(.bankData-G\/LAccount--wrapper) {
+    grid-column: var(--main-col);
+    grid-row: 1;
+}
+:deep(.bankData-amount--wrapper) {
+    grid-column: var(--main-col);
+    grid-row: 2;
+}
+:deep(.bankData-unit--wrapper) {
+    grid-column: var(--unit-col);
+    grid-row: 2;
+}
+:deep(.generalInformation--dict-leaf-section) {
+    display: grid;
+    grid-template-columns: 20% 20% 10%;
+    grid-template-rows: auto auto;
+    gap: 0;
+    --main-col: 2;
+}
+:deep(.generalInformation--dict-leaf-section > .wrapper) {
+    grid-column: var(--main-col);
+}
+/* :deep(.bankData-amount--extra) {
+    flex: 1
+}
+:deep(.bankData-amount--leaf-input-container > .bankData--dict-item--leaf){
+    flex: 1
+}
+:deep(.bankData-unit--var-label){
+    display: none;
+}
+:deep(.bankData-amount--leaf-input-container){
+    display: flex
+} */
 </style>

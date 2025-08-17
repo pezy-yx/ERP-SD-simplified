@@ -169,16 +169,16 @@ const appTree = createTreeFromConfig({
             }
         ], 'finance management'),
 
-        //库存管理
-        cns('dict', 'dict', 'Stock', null, true, {}, [
-            {
-                varType: 'string',
-                nodeType: "leaf",
-                name: 'Display Stock',
-                readonly: true,
-                iconPath: '@/assets/icons/material-documents-overview.svg',
-            }
-        ], 'stock management'),
+        // //库存管理
+        // cns('dict', 'dict', 'Stock', null, true, {}, [
+        //     {
+        //         varType: 'string',
+        //         nodeType: "leaf",
+        //         name: 'Display Stock',
+        //         readonly: true,
+        //         iconPath: '@/assets/icons/material-documents-overview.svg',
+        //     }
+        // ], 'stock management'),
     ]
 });
 console.log('应用树结构:', appTree.getRoot()?.children);

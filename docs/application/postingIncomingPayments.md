@@ -41,7 +41,7 @@ Content-Type: application/json
         period:'string',
         postingDate:'string'
     },
-    bankDate:{
+    bankData:{
         G/LAccount:'string',
         amount:{
             amount:'float',
@@ -62,8 +62,8 @@ Content-Type: application/json
     "success": true,
     "message":'find open items successfully'
     "data": {
-        balance:'string',
-        balanceUnit:'string',
+        balance:'string', // 示例:'5203.25'
+        balanceUnit:'string', // 示例:'EUR'
         openItems:[
             {
                 account:"string",
@@ -76,6 +76,38 @@ Content-Type: application/json
                 netDueDate:"string"//date
             },
             ...
+        ]
+    }
+}
+
+若不理解openItem里的意思，可以参考以下这个示例，自己去数据库结构里找到合适的返回
+{
+    "success": true,
+    "message": "成功找到未清项",
+    "data": {
+        "balance": "6525.95",
+        "balanceUnit": "EUR",
+        "openItems": [
+            {
+                "companyCode": "1000",
+                "account": "CUST-1001",
+                "journalEntry": "JE-CUST-001",
+                "journalEntryType": "DR(Customer Invoice)",
+                "journalEntryDate": "2024/07/01",
+                "netDueDate": "2024/07/31",
+                "amount": 1500,
+                "assignment": "INV-A123"
+            },
+            {
+                "companyCode": "1000",
+                "account": "CUST-1001",
+                "journalEntry": "JE-CUST-002",
+                "journalEntryType": "DA(Customer Document)",
+                "journalEntryDate": "2024/07/05",
+                "netDueDate": "2024/08/04",
+                "amount": 250.75,
+                "assignment": "PAY-B456"
+            }
         ]
     }
 }
@@ -97,11 +129,11 @@ Content-Type: application/json
 
 用途: 将前端选中的未清项过账
 
-请求体 (Request Body): (如果使用 POST)
+请求体 (Request Body): (POST)
 
 Content-Type: application/json
 
-{
+[
     {
         account:"string",
         amount:'float',
@@ -111,9 +143,10 @@ Content-Type: application/json
         journalEntryDate:"string",//date
         journalEntryType:"string"//固定的，找前端
         netDueDate:"string"//date
+        selected: 'boolean' // 可能没啥用，自己看着办
     },
     ...
-}
+]
 
 成功响应 (Success Response):
 
@@ -123,31 +156,31 @@ Content-Type: application/json
     "success": true,
     "message":"post open items successfully"
     "data": {
-        journalEntry:{
+        JournalEntry:{
                 journalEntryId: 'string',
-                companyCode: 'string',
-                account: "string",
-                journalEntryType: "string",
-                journalEntryDate: "string",//date
-                postingDate: "string"//使用当前的日期
-                postingPeriod: 'string', // 当前的会计周期
-                amount: "string",
-                assignment: "string",
-                currency: 'string', 
-                createdBy: 'string', // 创建人
+                companyCode: 'string', // 可以用"req.body.companyCode"
+                account: "string", // 可以用"req.body.account"
+                journalEntryType: "string", // 可以用"req.body.journalEntryType"
+                journalEntryDate: "string", // 可以用"req.body.journalEntryDate"
+                postingDate: "string"//使用当前的日期 "2025/08/07"
+                postingPeriod: 'string', // 当前的会计周期 like "08/2025"
+                amount: "string", // 可以用"req.body.account"
+                assignment: "string", // 可以用"req.body.assignment"
+                currency: 'string', // like "EUR"
+                createdBy: 'string', // 创建人，就"system"也行
                 lineItems: {
                     item1:{
                         postingViewItem:'string',
                         glAccount:'string',
-                        credit:'float',
-                        debit:'float',
+                        credit:'string', // 数字字符串
+                        debit:'string', // 数字字符串
                         currency:'string',
                     },
                     item2:{
                         postingViewItem:'string',
                         glAccount:'string',
-                        credit:'float',
-                        debit:'float',
+                        credit:'string', // 数字字符串
+                        debit:'string', // 数字字符串
                         currency:'string',
                     },
                     ...

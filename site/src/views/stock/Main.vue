@@ -82,6 +82,7 @@ import { createTreeFromConfig, cns, VarNode } from '@/utils/VarTree';
 import { computed, onMounted, ref, watch } from 'vue';
 import VarBox from '@/components/varbox/VarBox.vue';
 import AppContent from '@/components/applicationContent/AppContent.vue'
+import { materialSearch } from '@/utils/searchMethods'
 
 onMounted(async ()=>{
   await initializeTrees()
@@ -127,7 +128,7 @@ async function initializeTrees() {
 
 /** @description 搜索并展示material基本信息 */
 const materialInfoTree = createTreeFromConfig(cns("dict","dict","materialInfo",null,false,{hideLabel:true},[
-  cns("string","leaf","id","",false,{},[],"Material ID: "),
+  cns("string","leaf","id","",false,{searchMethods: materialSearch},[],"Material ID: "),
   cns("dict","dict","info","",true,{},[
     cns("string","leaf","name","",false,{},[],"Name: "),
     cns("string","leaf","materialType","",false,{},[],"Material Type: "),

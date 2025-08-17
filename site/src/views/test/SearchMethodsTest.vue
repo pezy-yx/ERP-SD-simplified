@@ -76,6 +76,7 @@ const searchMethodsTestTree = createTreeFromConfig(
       { prevText: '/hide', nextText: '/hide' },
     ]"
     ref="appContentRef"
+    :hideBottomBar="true"
   >
     <!-- Items 列表阶段 -->
     <template #[`stage-test`]>

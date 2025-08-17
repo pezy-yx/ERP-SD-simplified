@@ -88,7 +88,7 @@
             </template>
 
             <template #footer-content-right>
-                {{ appContentRef?.getCurrentStageName() }}
+                
                 <template v-if="appContentRef?.currentStage === 0">
                     <button v-if="onSearchState" class="nav-button next-button" @click="initializeCreation()">Create New</button>
                 </template>
@@ -160,7 +160,7 @@ const createQuotationFromInquiry = async () => {
         const result = await response.json();
 
         if (result.success) {
-            alert(`报价单创建成功！新报价单 ID: ${result.data.quotationData.basicInfo.quotation || '未知'}`);
+            // alert(`报价单创建成功！新报价单 ID: ${result.data.quotationData.basicInfo.quotation || '未知'}`);
             showInquiryModal.value = false;
             inquiryIdInput.value = ''; // 清空输入
 
@@ -247,7 +247,9 @@ const quotationDataTree = createTreeFromConfig(
             cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),
             cns('date','leaf','customerReferenceDate','',false,{},[],"Cust. Ref. Date:"),
         ]),
-        cns('dict','dict','itemOverview',{},false,{},[ // 项目概览
+        cns('dict','dict','itemOverview',{},false,{
+            hideList: ['expectOralVal', 'expectOralValUnit']
+        },[ // 项目概览
             cns('date','leaf','validFrom','',false,{},[],"Valid From:"),
             cns('date','leaf','validTo','',false,{},[],"Valid To:"),
             cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date:"),
@@ -260,7 +262,8 @@ const quotationDataTree = createTreeFromConfig(
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/quotation/items-tab-query',
+//   validationEndpoint: '/api/quotation/items-tab-query',
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -271,11 +274,27 @@ const itemConditionKit = createItemConditionKit({
 })
 // 复用 kit 的校验能力，并在校验成功后更新总计字段
 itemConditionKit.updateConfig({
-  onGeneralData: (generalData: any) => {
-    quotationDataTree.findNodeByPath(['basicInfo','netValue'])?.setValue(generalData?.netValue)
-    quotationDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.setValue(generalData?.netValueUnit)
-    quotationDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.setValue(generalData?.expectOralVal)
-    quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.setValue(generalData?.expectOralValUnit)
+  onGeneralData: async (generalData: any) => {
+    await fetch(`${window.getAPIBaseUrl()}/api/item/cal-value`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(quotationDataTree.findNodeByPath(['itemOverview','items'])?.getValue() ?? [])
+    }).then(async (response) => {
+      const data = await response.json()
+      // 更新销售订单数据树
+      quotationDataTree.findNodeByPath(['basicInfo','netValue'])?.forceSetValue(data?.data?.netValue)
+      quotationDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      quotationDataTree.findNodeByPath(['itemOverview','expectOralVal'])?.forceSetValue(data?.data?.netValue)
+      quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.forceSetValue(data?.data?.netValueUnit)
+      quotationDataTree.forceUpdate()
+    })
+  },
+  onSave: async () => {
+    await (itemConditionKit as any).validateItemsInTree(
+      quotationDataTree,
+      ['itemOverview','items'],
+      { forceUpdateTree: quotationDataTree }
+    )
   }
 })
 
@@ -333,7 +352,9 @@ const initialCreationTree = createTreeFromConfig(
             cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),
             cns('date','leaf','customerReferenceDate','',false,{},[],"Cust. Ref. Date:"),
         ]),
-        cns('dict','dict','itemOverview',{},false,{},[ // 项目概览
+        cns('dict','dict','itemOverview',{},false,{
+            hideList: ['expectOralVal', 'expectOralValUnit']
+        },[ // 项目概览
             cns('date','leaf','validFrom','',false,{},[],"Valid From:"),
             cns('date','leaf','validTo','',false,{},[],"Valid To:"),
             cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date:"),
@@ -563,9 +584,9 @@ async function handleSearch() {
             searchResults.value = results; // 更新搜索结果列表，供表格渲染
             searchResultsTree.value = response.data.quotationStruct; // 存储完整的 NodeStructure (备用，当前未直接使用)
 
-            alert(`查询成功，共找到 ${results.length} 条报价单！`);
+            // alert(`查询成功，共找到 ${results.length} 条报价单！`);
         } else {
-            alert('未找到报价单信息!');
+            // alert('未找到报价单信息!');
             searchResults.value = null; // 清空搜索结果
             searchResultsTree.value = null; // 清空结构
         }
@@ -639,7 +660,7 @@ async function handleExecute(currentStage: number, targetStage: number): Promise
             const body = {
                 quotation: toRaw(quotationDataTree.root?.currentValue) // 获取原始数据以发送到后端
             };
-            const res = await fetch(`${window.getAPIBaseUrl()}/api/quotation/create`, { // 假设这是创建 API
+            const res = await fetch(`${window.getAPIBaseUrl()}/api/quotation/update`, { // 假设这是创建 API
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)

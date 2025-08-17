@@ -2,6 +2,7 @@ import { VarTree, VarNode, createTreeFromConfig, createNodeFromConfig, cns, type
 import { ref, computed, type Ref } from 'vue'
 import {
   materialSearch,
+  pricingElementKeySearch,
 } from '@/utils/searchMethods'
 
 /**
@@ -18,6 +19,8 @@ export interface ItemConditionKitConfig {
   }
   // 可选：页面层用于更新总计数据的回调（如 netValue/expectOralVal）
   onGeneralData?: (generalData: any) => void
+  // 可选：页面层用于更新总计数据的回调（如 netValue/expectOralVal）
+  onSave?: () => void
   // 自定义详细信息页面结构
   detailStructures?: {
     header?: NodeStructure
@@ -34,18 +37,19 @@ export class ItemConditionKit {
   private config: ItemConditionKitConfig
   private itemsNodeRef: Ref<VarNode | null> = ref(null)
   private detailTrees: { header?: VarTree, sales?: VarTree, conditions?: VarTree } = {}
+  public detailQueryKey: Ref<number>
 
   // 默认的详细信息结构
   private static defaultDetailStructures = {
     header: cns('dict','dict','itemDetailHeader',{},true,{
       childNameDisplayTranslation: {
         item: 'Sales Document Item',
-        material: 'Material'
+        material: 'Material ID'
       }
     },[
       cns('string','leaf','item','',false,{},[]),
       cns('string','leaf','material','',false,{},[]),
-    ]),
+    ],"Item Header"),
 
     sales: cns('dict','dict','itemDetailSales',{},false,{hideLabel:true},[
       cns('dict','dict','orderQuantityAndDeliveryDate',{},false,{
@@ -70,7 +74,7 @@ export class ItemConditionKit {
         cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
         cns('string','leaf','pricingDate','',false,{},[]),
         cns('string','leaf','orderProbability','1',false,{},[]),
-      ])
+      ],"Sales")
     ]),
 
     conditions: cns('dict','dict','itemDetailConditions',{},false,{
@@ -85,32 +89,37 @@ export class ItemConditionKit {
       cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
       cns('string','leaf','taxValue','',true,{},[]),
       cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[]),
-      cns('dynamiclist','list','pricingElements',null,true,{
+      cns('dynamiclist','list','pricingElements',null,false,{
         rowProvided:0,
-        childTemplate:cns('dict','dict','condition',null,false,{},[
-          cns('string','leaf','cnty','',false,{},[],"Cnty"),
-          cns('string','leaf','name','',false,{},[],"Name"),
-          cns('string','leaf','amount','',false,{},[],"Amount"),
-          cns('string','leaf','city','',false,{},[],"City"),
-          cns('string','leaf','per','',false,{},[],"per"),
-          cns('string','leaf','uom','',false,{},[],"UoM"),
-          cns('string','leaf','conditionValue','',false,{},[],"Condition Value"),
-          cns('string','leaf','curr','',false,{},[],"Curr."),
-          cns('string','leaf','status','',false,{},[],"Status"),
-          cns('string','leaf','numC','',false,{},[],"NumC"),
-          cns('string','leaf','atoMtsComponent','',false,{},[],"ATO/MTS Component"),
-          cns('string','leaf','oun','',false,{},[],"OUn"),
-          cns('string','leaf','cconDe','',false,{},[],"CConDe"),
-          cns('string','leaf','un','',false,{},[],"Un"),
-          cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
-          cns('string','leaf','cdCur','',false,{},[],"CdCur"),
-          cns('boolean','leaf','stat',false,false,{},[],"Stat"),
+        hideList: ['status','atoMtsComponent','oun','cconDe','un','conditionValue2','cdCur','stat'],
+        childTemplate:cns('dict','dict','condition',{},false,{},[
+          cns('string','leaf','cnty','',false,{data:{editableCaseofNew: true},searchMethods: pricingElementKeySearch,customSearchResultHandler: async (data, currentNode)=> {
+            // 实例化时添加
+          }},[],"Cnty"),
+          cns('string','leaf','name','',false,{data:{editableCaseofNew: false}},[],"Name"),
+          cns('string','leaf','amount','',false,{data:{editableCaseofNew: true}},[],"Amount"),
+          cns('string','leaf','city','',false,{data:{editableCaseofNew: true}},[],"City"),
+          cns('string','leaf','per','',false,{data:{editableCaseofNew: true}},[],"Per"),
+          cns('string','leaf','uom','',false,{data:{editableCaseofNew: false}},[],"UoM"),
+          cns('string','leaf','numC','',false,{data:{editableCaseofNew: true}},[],"P.S."), // 存储一些描述信息
+          cns('string','leaf','conditionValue','',false,{data:{editableCaseofNew: false}},[],"Condition Value"),
+          cns('string','leaf','curr','',false,{data:{editableCaseofNew: false}},[],"Curr."),
+
+          cns('string','leaf','status','',true,{data:{editableCaseofNew: false}},[],"Status"),
+          cns('string','leaf','atoMtsComponent','',true,{data:{editableCaseofNew: false}},[],"ATO/MTS Component"),
+          cns('string','leaf','oun','',true,{data:{editableCaseofNew: false}},[],"OUn"),
+          cns('string','leaf','cconDe','',true,{data:{editableCaseofNew: false}},[],"CConDe"),
+          cns('string','leaf','un','',true,{data:{editableCaseofNew: false}},[],"Un"),
+          cns('string','leaf','conditionValue2','',true,{data:{editableCaseofNew: false}},[],"Condition Value"),
+          cns('string','leaf','cdCur','',true,{data:{editableCaseofNew: false}},[],"CdCur"),
+          cns('boolean','leaf','stat',false,true,{data:{editableCaseofNew: false}},[],"Stat"),
         ]),
       },[],"Pricing Elements")
-    ])
+    ],"Conditions")
   }
 
   constructor(config: ItemConditionKitConfig) {
+    this.detailQueryKey = ref(0)
     this.config = {
       readonly: false,
       navigationLabels: {
@@ -164,7 +173,7 @@ export class ItemConditionKit {
    */
   summonItemsNode = (tree: VarTree, path: string[], itemTemplate?: NodeStructure): VarNode => {
     // 默认的 item 模板
-    const defaultItemTemplate = cns('dict','dict','item',null,false,{},[
+    const defaultItemTemplate = itemTemplate || cns('dict','dict','item',null,false,{},[
       cns('string','leaf','item','',true,{},[],"Item"),
       cns('string','leaf','material','',false,{searchMethods: materialSearch},[],"Material"),
       cns('string','leaf','orderQuantity','',false,{},[],"Order Quantity"),
@@ -178,10 +187,24 @@ export class ItemConditionKit {
       cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
       cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
       cns('dynamiclist','list','pricingElements',null,false,{
-        rowProvided:0,
-        childTemplate: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.childTemplate
+        ...ItemConditionKit.defaultDetailStructures.conditions.children![6].config
+        // rowProvided:0,
+        // childTemplate: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.childTemplate,
+        // hideList: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.hideList,
       },[],"Pricing Elements"),
     ])
+
+    try {
+      defaultItemTemplate
+      .children!.filter((child)=>(child.name=='pricingElements'))![0]!
+      .config!.childTemplate!.children!.filter((child)=>(child.name=='cnty'))![0]!
+      .config!.customSearchResultHandler = async (data, currentNode) => {
+        // if(!this.detailQueryKey || !this.detailQueryKey.value) {
+        //   this.detailQueryKey = ref(0);
+        // }
+        this.detailQueryKey.value++;
+      }
+    } catch {}
 
     // 创建 items 节点
     const itemsNode = createNodeFromConfig(
@@ -266,6 +289,13 @@ export class ItemConditionKit {
   }
 
   /**
+   * 读取配置
+   */
+  getConfig() {
+    return this.config
+  }
+
+  /**
    * 批量验证并回填 item 数据
    * - 端点来自 this.config.validationEndpoint
    * - 回填 breakdowns 到传入的 itemNodes
@@ -277,6 +307,7 @@ export class ItemConditionKit {
     if (!itemNodes || itemNodes.length === 0) return true
 
     const endpoint = this.config.validationEndpoint
+    // const endpoint = '/api/app/items/items-tab-query'
     const itemValues = itemNodes.map(node => node.getValue())
 
     try {
@@ -289,11 +320,6 @@ export class ItemConditionKit {
 
       if (!data?.success) return false
 
-      // 页面层按需更新总计数据
-      if (this.config.onGeneralData && data.data?.generalData) {
-        try { this.config.onGeneralData(data.data.generalData) } catch {}
-      }
-
       // 更新每个 item 的详细信息
       if (Array.isArray(data.data?.breakdowns)) {
         data.data.breakdowns.forEach((breakdown: any, index: number) => {
@@ -301,6 +327,11 @@ export class ItemConditionKit {
             itemNodes[index].forceSetValue(breakdown)
           }
         })
+      }
+
+      // 页面层按需更新总计数据
+      if (this.config.onGeneralData) {
+        try { this.config.onGeneralData(data.data?.generalData?? {}) } catch {}
       }
 
       // 根据 badRecordIndices 设置 validation
