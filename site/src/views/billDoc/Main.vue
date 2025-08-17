@@ -125,7 +125,8 @@ const billingDataTree = createTreeFromConfig(
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/app/billing/items-tab-query',
+  // validationEndpoint: '/api/app/billing/items-tab-query',
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',

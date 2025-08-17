@@ -202,7 +202,7 @@ initializeTestData()
 
     <!-- Item 详细信息阶段 -->
     <template #[`stage-itemCondition`]>
-      <h2>Item 详细信息 (使用 ItemConditionKit)</h2>
+      <h2>Item Details</h2>
       <ItemConditionDetail
         ref="itemConditionDetailRef"
         :kit="itemConditionKit"

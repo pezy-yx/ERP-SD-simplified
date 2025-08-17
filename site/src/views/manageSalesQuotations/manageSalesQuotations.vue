@@ -247,7 +247,9 @@ const quotationDataTree = createTreeFromConfig(
             cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),
             cns('date','leaf','customerReferenceDate','',false,{},[],"Cust. Ref. Date:"),
         ]),
-        cns('dict','dict','itemOverview',{},false,{},[ // 项目概览
+        cns('dict','dict','itemOverview',{},false,{
+            hideList: ['expectOralVal', 'expectOralValUnit']
+        },[ // 项目概览
             cns('date','leaf','validFrom','',false,{},[],"Valid From:"),
             cns('date','leaf','validTo','',false,{},[],"Valid To:"),
             cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date:"),
@@ -260,7 +262,8 @@ const quotationDataTree = createTreeFromConfig(
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/quotation/items-tab-query',
+//   validationEndpoint: '/api/quotation/items-tab-query',
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -285,6 +288,13 @@ itemConditionKit.updateConfig({
       quotationDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.forceSetValue(data?.data?.netValueUnit)
       quotationDataTree.forceUpdate()
     })
+  },
+  onSave: async () => {
+    await (itemConditionKit as any).validateItemsInTree(
+      quotationDataTree,
+      ['itemOverview','items'],
+      { forceUpdateTree: quotationDataTree }
+    )
   }
 })
 
@@ -342,7 +352,9 @@ const initialCreationTree = createTreeFromConfig(
             cns('string','leaf','netValueUnit','',true,{hideLabel:true},[],"Net Value Unit:"),
             cns('date','leaf','customerReferenceDate','',false,{},[],"Cust. Ref. Date:"),
         ]),
-        cns('dict','dict','itemOverview',{},false,{},[ // 项目概览
+        cns('dict','dict','itemOverview',{},false,{
+            hideList: ['expectOralVal', 'expectOralValUnit']
+        },[ // 项目概览
             cns('date','leaf','validFrom','',false,{},[],"Valid From:"),
             cns('date','leaf','validTo','',false,{},[],"Valid To:"),
             cns('date','leaf','reqDelivDate','',false,{},[],"Req. Deliv Date:"),

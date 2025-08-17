@@ -47,6 +47,9 @@ itemConditionKit.updateConfig({
       inquiryDataTree.findNodeByPath(['itemOverview','expectOralValUnit'])?.forceSetValue(data?.data?.netValueUnit)
       inquiryDataTree.forceUpdate()
     })
+  },
+  onSave: async () => {
+    await itemsTabQueryAll()
   }
 })
 
@@ -420,6 +423,9 @@ async function handleExecute(currentStage: number, targetStage: number) {
       return false
     }
     if (onCreateState.value || onChangeState.value) {
+      // 先做一次tab
+      await itemsTabQueryAll()
+      inquiryDataTree.forceUpdate()
       console.log(inquiryDataTree.getValue())
       // 向后端发送stage 1的所有树，创建inquiry
       const data = await fetch(`${window.getAPIBaseUrl()}/api/app/inquiry/edit`, {
@@ -493,7 +499,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
       </VarBox>
     </template>
     <template #[`stage-itemCondition`]>
-      <h2>Item 详细信息</h2>
+      <h2>Item Details</h2>
       <ItemConditionDetail
         :kit="itemConditionKit"
         @save="handleSave"

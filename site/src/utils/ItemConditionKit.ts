@@ -18,6 +18,8 @@ export interface ItemConditionKitConfig {
   }
   // 可选：页面层用于更新总计数据的回调（如 netValue/expectOralVal）
   onGeneralData?: (generalData: any) => void
+  // 可选：页面层用于更新总计数据的回调（如 netValue/expectOralVal）
+  onSave?: () => void
   // 自定义详细信息页面结构
   detailStructures?: {
     header?: NodeStructure
@@ -40,12 +42,12 @@ export class ItemConditionKit {
     header: cns('dict','dict','itemDetailHeader',{},true,{
       childNameDisplayTranslation: {
         item: 'Sales Document Item',
-        material: 'Material'
+        material: 'Material ID'
       }
     },[
       cns('string','leaf','item','',false,{},[]),
       cns('string','leaf','material','',false,{},[]),
-    ]),
+    ],"Item Header"),
 
     sales: cns('dict','dict','itemDetailSales',{},false,{hideLabel:true},[
       cns('dict','dict','orderQuantityAndDeliveryDate',{},false,{
@@ -70,7 +72,7 @@ export class ItemConditionKit {
         cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
         cns('string','leaf','pricingDate','',false,{},[]),
         cns('string','leaf','orderProbability','1',false,{},[]),
-      ])
+      ],"Sales")
     ]),
 
     conditions: cns('dict','dict','itemDetailConditions',{},false,{
@@ -85,29 +87,31 @@ export class ItemConditionKit {
       cns('string','leaf','netValueUnit','',true,{hideLabel:true},[]),
       cns('string','leaf','taxValue','',true,{},[]),
       cns('string','leaf','taxValueUnit','',true,{hideLabel:true},[]),
-      cns('dynamiclist','list','pricingElements',null,true,{
+      cns('dynamiclist','list','pricingElements',null,false,{
         rowProvided:0,
-        childTemplate:cns('dict','dict','condition',null,false,{},[
-          cns('string','leaf','cnty','',false,{},[],"Cnty"),
-          cns('string','leaf','name','',false,{},[],"Name"),
-          cns('string','leaf','amount','',false,{},[],"Amount"),
-          cns('string','leaf','city','',false,{},[],"City"),
-          cns('string','leaf','per','',false,{},[],"per"),
-          cns('string','leaf','uom','',false,{},[],"UoM"),
-          cns('string','leaf','conditionValue','',false,{},[],"Condition Value"),
-          cns('string','leaf','curr','',false,{},[],"Curr."),
-          cns('string','leaf','status','',false,{},[],"Status"),
-          cns('string','leaf','numC','',false,{},[],"NumC"),
-          cns('string','leaf','atoMtsComponent','',false,{},[],"ATO/MTS Component"),
-          cns('string','leaf','oun','',false,{},[],"OUn"),
-          cns('string','leaf','cconDe','',false,{},[],"CConDe"),
-          cns('string','leaf','un','',false,{},[],"Un"),
-          cns('string','leaf','conditionValue2','',false,{},[],"Condition Value"),
-          cns('string','leaf','cdCur','',false,{},[],"CdCur"),
-          cns('boolean','leaf','stat',false,false,{},[],"Stat"),
+        hideList: ['status','atoMtsComponent','oun','cconDe','un','conditionValue2','cdCur','stat'],
+        childTemplate:cns('dict','dict','condition',{},false,{},[
+          cns('string','leaf','cnty','',false,{data:{editableCaseofNew: true}},[],"Cnty"),
+          cns('string','leaf','name','',false,{data:{editableCaseofNew: false}},[],"Name"),
+          cns('string','leaf','amount','',false,{data:{editableCaseofNew: true}},[],"Amount"),
+          cns('string','leaf','city','',false,{data:{editableCaseofNew: true}},[],"City"),
+          cns('string','leaf','per','',false,{data:{editableCaseofNew: true}},[],"Per"),
+          cns('string','leaf','uom','',false,{data:{editableCaseofNew: false}},[],"UoM"),
+          cns('string','leaf','numC','',false,{data:{editableCaseofNew: true}},[],"P.S."), // 存储一些描述信息
+          cns('string','leaf','conditionValue','',false,{data:{editableCaseofNew: false}},[],"Condition Value"),
+          cns('string','leaf','curr','',false,{data:{editableCaseofNew: false}},[],"Curr."),
+
+          cns('string','leaf','status','',true,{data:{editableCaseofNew: false}},[],"Status"),
+          cns('string','leaf','atoMtsComponent','',true,{data:{editableCaseofNew: false}},[],"ATO/MTS Component"),
+          cns('string','leaf','oun','',true,{data:{editableCaseofNew: false}},[],"OUn"),
+          cns('string','leaf','cconDe','',true,{data:{editableCaseofNew: false}},[],"CConDe"),
+          cns('string','leaf','un','',true,{data:{editableCaseofNew: false}},[],"Un"),
+          cns('string','leaf','conditionValue2','',true,{data:{editableCaseofNew: false}},[],"Condition Value"),
+          cns('string','leaf','cdCur','',true,{data:{editableCaseofNew: false}},[],"CdCur"),
+          cns('boolean','leaf','stat',false,true,{data:{editableCaseofNew: false}},[],"Stat"),
         ]),
       },[],"Pricing Elements")
-    ])
+    ],"Conditions")
   }
 
   constructor(config: ItemConditionKitConfig) {
@@ -178,8 +182,10 @@ export class ItemConditionKit {
       cns('date','leaf','pricingDate','',false,{},[],"Pricing Date"),
       cns('string','leaf','orderProbability','',false,{},[],"Order Probability"),
       cns('dynamiclist','list','pricingElements',null,false,{
-        rowProvided:0,
-        childTemplate: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.childTemplate
+        ...ItemConditionKit.defaultDetailStructures.conditions.children![6].config
+        // rowProvided:0,
+        // childTemplate: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.childTemplate,
+        // hideList: ItemConditionKit.defaultDetailStructures.conditions.children![6].config!.hideList,
       },[],"Pricing Elements"),
     ])
 
@@ -263,6 +269,13 @@ export class ItemConditionKit {
    */
   updateConfig(newConfig: Partial<ItemConditionKitConfig>) {
     this.config = { ...this.config, ...newConfig }
+  }
+
+  /**
+   * 读取配置
+   */
+  getConfig() {
+    return this.config
   }
 
   /**

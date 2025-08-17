@@ -141,12 +141,14 @@ function setPricingElementsReadonly(item: VarNode, readonly: boolean) {
   const pricingElementsNode = item.findNodeByPath(['pricingElements'])
   if (pricingElementsNode) {
     pricingElementsNode.children.forEach(pricingElement => {
-      pricingElement.readonly = readonly
-      // 递归设置所有子节点的只读状态
+      const newFlag = pricingElement.findNodeByPath(['status'])?.getValue() != ''
+      const innerReadonly = readonly && !newFlag
+      pricingElement.readonly = innerReadonly
+      // 设置所有子节点的只读状态
       const setChildrenReadonly = (node: VarNode) => {
         node.children.forEach(child => {
-          child.readonly = readonly
-          setChildrenReadonly(child)
+          child.readonly = innerReadonly || !child.config.data?.editableCaseofNew
+          // setChildrenReadonly(child)
         })
       }
       setChildrenReadonly(pricingElement)
@@ -192,6 +194,7 @@ function updateItemDetailTrees() {
       setNodeFromItem(['item'], ['item'], detailTree.headerTree)
       setNodeFromItem(['material'], ['material'], detailTree.headerTree)
     }
+    detailTree.headerTree?.forceUpdate()
 
     // 更新详细信息树
     if (detailTree.tree.root?.name === 'itemDetailSales') {
@@ -213,6 +216,7 @@ function updateItemDetailTrees() {
       setNodeFromItem(['taxValueUnit'], ['taxValueUnit'], detailTree.tree)
       setNodeFromItem(['pricingElements'], ['pricingElements'], detailTree.tree)
     }
+    detailTree.tree?.forceUpdate()
   })
 
   // 根据验证状态处理 pricingElements 只读状态（初次进入/切换项时）
@@ -248,10 +252,10 @@ async function validateCurrentItemConditionData(): Promise<boolean> {
     const currentNode = selectedItems.value[currentItemIndex.value]
     currentNode.forceSetValue(editingNode.value.node.getValue())
 
-    // 验证成功后，将 editingNode 中的 pricingElements 设置为只读
-    if (editingNode.value.node && editingNode.value.node.config.data?.validation === true) {
-      setPricingElementsReadonly(editingNode.value.node as VarNode, true)
-    }
+    // // 验证成功后，将 editingNode 中的 pricingElements 设置为只读 (Had done in validateItems)
+    // if (editingNode.value.node && editingNode.value.node.config.data?.validation === true) {
+    //   setPricingElementsReadonly(editingNode.value.node as VarNode, true)
+    // }
   } else {
     console.log('数据验证失败')
   }
@@ -277,10 +281,10 @@ async function validateCurrentItemConditionDataOnly(): Promise<boolean> {
   if (isValid) {
     console.log('数据验证成功（仅验证，未同步）')
 
-    // 验证成功后，将 editingNode 中的 pricingElements 设置为只读
-    if (editingNode.value.node && editingNode.value.node.config.data?.validation === true) {
-      setPricingElementsReadonly(editingNode.value.node as VarNode, true)
-    }
+    // // 验证成功后，将 editingNode 中的 pricingElements 设置为只读 (Had done in validateItems)
+    // if (editingNode.value.node && editingNode.value.node.config.data?.validation === true) {
+    //   setPricingElementsReadonly(editingNode.value.node as VarNode, true)
+    // }
   } else {
     console.log('数据验证失败')
   }
@@ -296,6 +300,11 @@ function syncCurrentDataToOriginalItem() {
 
   const currentNode = selectedItems.value[currentItemIndex.value]
   currentNode.forceSetValue(editingNode.value.node.getValue())
+  // 执行onSave钩子
+  const onSave = props.kit.getConfig().onSave
+  if (onSave) {
+    onSave()
+  }
   console.log('数据已同步到原始item')
 }
 
@@ -461,6 +470,7 @@ function addNewPricingElement() {
   if (pricingElementsNode.config?.childTemplate) {
     // 使用配置的模板，但创建空值
     newPricingElement = createNodeFromConfig(pricingElementsNode.config.childTemplate).template()
+    newPricingElement.findNodeByPath(['status'])?.forceSetValue('New')
     newPricingElement.readonly = false
   } else {
     // 创建空的 pricing element 结构
@@ -473,7 +483,7 @@ function addNewPricingElement() {
       uom: '',
       conditionValue: '',
       curr: '',
-      status: '',
+      status: 'New',
       numC: '',
       atoMtsComponent: '',
       oun: '',
@@ -488,11 +498,11 @@ function addNewPricingElement() {
 
   // 确保新元素是可编辑的
   newPricingElement.readonly = false
-  // 递归设置所有子节点为可编辑
+  // 设置所有子节点为可编辑
   const setChildrenEditable = (node: VarNode) => {
     node.children.forEach(child => {
-      child.readonly = false
-      setChildrenEditable(child)
+      child.readonly = false || !child.config.data?.editableCaseofNew
+      // setChildrenEditable(child)
     })
   }
   setChildrenEditable(newPricingElement)
@@ -550,7 +560,7 @@ function deleteSelectedPricingElements() {
   } else {
     editingNode.value.node.config.data = { validation: false }
   }
-
+  validateCurrentItemConditionDataOnly()
   console.log(`已删除 ${selectedChildren.length} 个 pricing elements`)
 }
 

@@ -151,7 +151,8 @@ import AppContent from '@/components/applicationContent/AppContent.vue';
 
 // 创建 ItemConditionKit 实例
 const itemConditionKit = createItemConditionKit({
-  validationEndpoint: '/api/so/items-tab-query',//测能不能全用inquiry
+  // validationEndpoint: '/api/so/items-tab-query',
+  validationEndpoint: '/api/app/inquiry/items-tab-query',
   readonly: false,
   navigationLabels: {
     cancel: 'Cancel',
@@ -174,6 +175,9 @@ itemConditionKit.updateConfig({
       salesOrderDataTree.findNodeByPath(['basicInfo','netValueUnit'])?.forceSetValue(data?.data?.netValueUnit)
       salesOrderDataTree.forceUpdate()
     })
+  },
+  onSave: async () => {
+    await itemsTabQueryAll();
   }
 })
 
