@@ -45,9 +45,9 @@
                       <a href="#" class="setting-button" :onclick="handleSettingButonClick">
                           <img src="../assets/settings.png" alt="Settings" class="icon"/>
                       </a>
-                      <a href="#" class="setting-button" :onclick="emitEditPanelOpen">
+                      <!-- <a href="#" class="setting-button" :onclick="emitEditPanelOpen">
                           <img src="../assets/settings.png" alt="Edit" class="icon"/>
-                      </a>
+                      </a> -->
                   </div>
               </div>
           </div>
