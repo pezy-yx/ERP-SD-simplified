@@ -2,7 +2,7 @@
     <div id="welcome-page-up">
         <div style="width:25% ; margin: 50px auto; padding: 20px;
             display: flex;flex-direction: column;align-items: center;">
-            <h1 style="margin-bottom: 40px;font-size:39px;">WELCOME TO LOGIN</h1>
+            <h1 style="margin-bottom: 40px;font-size:39px;">WELCOME TO ERP-C</h1>
             <div class="account-input">
                 <string-input
                     Type="text"
@@ -10,7 +10,7 @@
                     :tree="formTree"
                     :nodePath="['username']"
                     v-model="username"
-                    placeholder="Please enter username"
+                    placeholder="Username"
                     :readonly="readonly"
                     @validation-error="handleValidationError" />
             </div>
@@ -21,16 +21,16 @@
                     :tree="formTree"
                     :nodePath="['password']"
                     v-model="password"
-                    placeholder="Please enter password"
+                    placeholder="Password"
                     :readonly="readonly"
                     @validation-error="handleValidationError" />
             </div>
             <div style="width:100%;margin-top: 10px;margin-bottom: 20px;display: flex;">
                 <div style="margin-right:auto;">
-                    <router-link to="/register">Get an account</router-link>
+                    <router-link to="/register">Sign up</router-link>
                 </div>
                 <div style="margin-left:auto;">
-                    <router-link to="/getMyPassBack">Forgot password</router-link>
+                    <router-link to="/getMyPassBack">Forgot password?</router-link>
                 </div>
             </div>
             <button
@@ -38,7 +38,7 @@
                 :disabled="isSubmitting"
                 class="login-button"
             >
-                {{ isSubmitting ? 'login...' : '你给我摇滚出去🤘' }}
+                {{ isSubmitting ? 'Loading...' : 'Sign In' }}
             </button>
             <div v-if="message" :style="{ color: messageType === 'error' ? 'red' : 'white', marginTop: '10px' }">
                 {{ message }}
