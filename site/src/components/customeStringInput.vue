@@ -95,6 +95,7 @@ watch(() => props.modelValue, (newValue) => {
 
 // 统一的校验函数：返回最优先的错误信息
 function validateAll(value: string): { isValid: boolean; message: string } {
+    return { isValid: true, message: '' } // 输入时不显示报错
     // 1. 最高优先级：字符合法性校验
     if (!allowedCharsRegex.test(value)) {
         return { isValid: false, message: characterRestrictionMessage };

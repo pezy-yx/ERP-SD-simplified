@@ -2,7 +2,7 @@
     <div id="register-page-up">
         <div style="width:25% ; margin: 50px auto; padding: 20px;
             display: flex;flex-direction: column;align-items: center;">
-            <h1 style="margin-bottom: 40px;font-size:39px;">WELCOME TO US!</h1>
+            <h1 style="margin-bottom: 40px;font-size:39px;">SIGN UP TO US</h1>
             <div class="account-input">
                 <string-input
                     Type="text"
