@@ -6,7 +6,7 @@
       @search="handleGlobalSearch"
       @profile-click="handleProfileButtonClick"
     />
-    
+
     <!-- 主要内容区域 - 这里会根据子路由显示不同的内容 -->
     <div
       :class="`application-content-container ${showProfileSideZone?'showingSideZone':''}`"
@@ -18,7 +18,7 @@
         id = "application-content"
       />
     </div>
-    
+
     <!-- 侧栏 -->
     <span
       :class = "`side-zone-bg ${showProfileSideZone?'showing':''}` "
@@ -44,6 +44,9 @@
                       </a>
                       <a href="#" class="setting-button" :onclick="handleSettingButonClick">
                           <img src="../assets/settings.png" alt="Settings" class="icon"/>
+                      </a>
+                      <a href="#" class="setting-button" :onclick="emitEditPanelOpen">
+                          <img src="../assets/settings.png" alt="Edit" class="icon"/>
                       </a>
                   </div>
               </div>
@@ -231,6 +234,17 @@ onUnmounted(() => {
 });
 
 // 监听路由变化
+
+// 将“侧栏编辑”入口并入全局SideZone，向子页面广播打开指令
+
+function emitEditPanelOpen() {
+  const el = document.getElementById('application-content')
+  if (!el) return
+  // 直接切换编辑模式，不管理面板状态
+  const evt = new CustomEvent('home-edit-panel-open', { bubbles: true })
+  el.dispatchEvent(evt)
+}
+
 watch(route, () => {
   // 路由变化时更新标题
   updateTitleFromRoute();
@@ -276,11 +290,11 @@ watch(route, () => {
   height: calc(100vh - var(--nav-height));
   transition: all 0.3s ease;
   z-index: 100;
-  background: 
-    linear-gradient(to right, 
-      var(--theme-color-dark) 0%, 
-      var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-dark-ratio) / 100), 
-      var(--theme-color-light) calc(var(--side-width) * var(--side-zone-hard-bg-width-light-ratio) / 100), 
+  background:
+    linear-gradient(to right,
+      var(--theme-color-dark) 0%,
+      var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-dark-ratio) / 100),
+      var(--theme-color-light) calc(var(--side-width) * var(--side-zone-hard-bg-width-light-ratio) / 100),
       var(--theme-color-light-a) 80%,
       rgba(0,0,0,0) 100%
     );
@@ -295,9 +309,9 @@ watch(route, () => {
   height: calc(100vh - var(--nav-height));
   transition: all 0.3s ease;
   z-index: 120;
-  background: 
-    linear-gradient(to right, 
-      var(--theme-color-dark) 0%, 
+  background:
+    linear-gradient(to right,
+      var(--theme-color-dark) 0%,
       var(--theme-color-dark) calc(var(--side-width) * var(--side-zone-hard-bg-width-ratio) / 100),
       rgba(0,0,0,0)
     );
@@ -323,22 +337,22 @@ watch(route, () => {
 
 :deep(.application-content-container.showingSideZone .show-side--away),
 :deep(.application-content-container.showingSideZone .page-content > *) {
-  transform: translateX( calc(var(--side-width) / 2) ) scale(0.73);  
+  transform: translateX( calc(var(--side-width) / 2) ) scale(0.73);
 }
 
 :deep(.show-side--away),
 :deep(.page-content > *) {
-  transform: translateX(0);  
-  transform-origin: 68% 43%; 
+  transform: translateX(0);
+  transform-origin: 68% 43%;
   transition: all 0.3s ease;
 }
 
 :deep(.application-content-container.showingSideZone ~ .bottom-bar) {
-  transform: translate(100vw, 30vh) scale(0.73);  
+  transform: translate(100vw, 30vh) scale(0.73);
 }
 :deep(.bottom-bar) {
-  transform: translate(0 ,0);  
-  transform-origin: 68% 43%; 
+  transform: translate(0 ,0);
+  transform-origin: 68% 43%;
   transition: all 0.1s ease;
   z-index: 50;
 }
@@ -355,7 +369,8 @@ watch(route, () => {
   padding-top: 20px;
 }
 
-.setting-button {
+.setting-button,
+.edit-button {
   display: inline-block;
   text-decoration: none;
   overflow: hidden;
@@ -365,7 +380,8 @@ watch(route, () => {
   width: 30px;
   height: 30px;
 }
-.setting-button img {
+.setting-button img,
+.edit-button img {
   width: 100%;
   height: 100%;
   object-fit: cover; /* 保持图片比例并填充容器 */
@@ -471,5 +487,10 @@ watch(route, () => {
 }
 :deep(.search-modal) {
   z-index: 90;
+}
+
+.edit-tools {
+  color: var(--theme-color-page);
+  background-color: var(--theme-color-light);
 }
 </style>
