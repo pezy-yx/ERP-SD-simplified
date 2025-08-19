@@ -380,6 +380,7 @@ const getArrowStatusClass = (prevIdKey: string, nextIdKey: string) => {
     max-height: 90%;
     padding: 20px;
     margin: 20px;
+    overflow-y: auto;
   }
 
   .material-document-search {
