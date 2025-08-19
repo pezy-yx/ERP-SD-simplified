@@ -124,7 +124,7 @@ export default defineComponent({
 
 <style scoped>
 .single-app-card {
-    width: 90%; /* 固定宽度 */
+    width: 100%; /* 固定宽度 */
     height: 180px; /* 固定高度 */
     background-color: var(--theme-color-contrast); /* 背景颜色，可自定义 */
     border-top:1px solid white; /* 边框颜色，可自定义 */
