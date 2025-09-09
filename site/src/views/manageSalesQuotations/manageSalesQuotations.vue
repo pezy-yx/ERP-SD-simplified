@@ -172,9 +172,10 @@ const createQuotationFromInquiry = async () => {
 
                 appContentRef.value.goToStage(1); // 切换到详情页 (阶段 1)
                 appToState('create'); // 设置应用状态为“创建”模式 (可编辑)
+                await itemsTabQueryAll();
             } else {
                 appToState('search');
-                alert('可以尝试刷新一下')
+                // alert('可以尝试刷新一下')
             }
 
         } else {
@@ -545,6 +546,7 @@ async function viewDetails(quotation: QuotationData) {
         appContentRef.value.goToStage(1);
         // 设置应用状态为“显示”模式 (只读)
         appToState('display');
+        await itemsTabQueryAll();
     } else {
         alert('无法获取报价单详情或数据格式不正确！');
     }
@@ -636,6 +638,7 @@ async function handleExecute(currentStage: number, targetStage: number): Promise
             return false; // 返回 false 停留在当前阶段 (VarBox 变为可编辑)
         } else if (onChangeState.value) {
             // 在修改模式下，点击“Save Changes”按钮，执行更新 API 调用
+            await itemsTabQueryAll();
             const body = {
                 quotation: toRaw(quotationDataTree.root?.currentValue) // 获取原始数据以发送到后端
             };
@@ -656,6 +659,7 @@ async function handleExecute(currentStage: number, targetStage: number): Promise
             }
             return false; // 返回 false 停留在当前阶段
         } else if (onCreateState.value) {
+            await itemsTabQueryAll();
             // 在创建模式下，点击“Submit Quotation”按钮，执行创建 API 调用
             const body = {
                 quotation: toRaw(quotationDataTree.root?.currentValue) // 获取原始数据以发送到后端
@@ -756,12 +760,19 @@ const footerConfig = [
  */
 async function handleEnterFromNodeQuotationTree(node: VarNode, value: string, data: any) {
   if (data.nodePath.length > 2 && data.nodePath[0] === 'itemOverview' && data.nodePath[1] === 'items') {
-    await (itemConditionKit as any).validateItemsInTree(
-      quotationDataTree,
-      ['itemOverview','items'],
-      { forceUpdateTree: quotationDataTree }
-    )
+    await itemsTabQueryAll()
   }
+}
+
+/**
+ * @description 封装itemsTabQuery-查询所有（复用 kit）
+ */
+async function itemsTabQueryAll() {
+  return await (itemConditionKit as any).validateItemsInTree(
+    quotationDataTree,
+    ['itemOverview','items'],
+    { forceUpdateTree: quotationDataTree }
+  )
 }
 
 // ItemConditionKit 自动处理标签页切换
