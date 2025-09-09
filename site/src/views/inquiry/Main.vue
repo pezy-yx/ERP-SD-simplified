@@ -277,6 +277,7 @@ async function initializeByGet() {
   }
   const inquiryData: VarNodeValue = data.data.content
   inquiryDataTree.forceSetValue(inquiryData)
+  await itemsTabQueryAll()
   return true
 }
 
