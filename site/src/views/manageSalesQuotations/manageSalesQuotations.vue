@@ -101,9 +101,10 @@
         <div v-if="showInquiryModal" class="modal-overlay">
             <div class="modal-content">
                 <div class="input-group">
-                    <label for="inquiryIdInput">create quotation according inquiry:</label>
-                    <input type="text" id="inquiryIdInput" v-model="inquiryIdInput" placeholder="inquiry id" />
-                    <input type="text" id="customerIdInput" v-model="customerIdInput" placeholder="customer id" />
+                    <label for="inquiryIdInput" style="color:var(--theme-color-dark);font-size: 1.5em;">Create Quotation According Inquiry:</label>
+                    <!-- <input type="text" style="margin-bottom: 20px;" id="inquiryIdInput" v-model="inquiryIdInput" placeholder="inquiry id" />
+                    <input type="text" id="customerIdInput" v-model="customerIdInput" placeholder="customer id" /> -->
+                    <VarBox :tree="createQuotatipnFromInquiryTree" />
                 </div>
                 <div class="modal-actions">
                     <button @click="createQuotationFromInquiry" class="btn-primary">create</button>
@@ -118,7 +119,7 @@
 import { ref, Ref, computed, onMounted } from 'vue';
 import AppContent from '@/components/applicationContent/AppContent.vue';
 import VarBox from '@/components/varbox/VarBox.vue';
-import { bpSearch, materialUnitSearch, quotationIdSearch, soldToPartySearch } from '@/utils/searchMethods';
+import { bpSearch, materialUnitSearch, quotationIdSearch, soldToPartySearch, inquiryIdSearch,customerSearch } from '@/utils/searchMethods';
 import {
     cns,                   // 用于创建 NodeStructure 的辅助函数
     createTreeFromConfig,  // 用于从配置创建 VarTree 实例
@@ -137,12 +138,20 @@ const customerIdInput = ref(''); // 用于存储用户输入的客户 ID
 
 const cancelInquiryCreation = () => {
     showInquiryModal.value = false;
-    inquiryIdInput.value = ''; // 清空输入
+    // inquiryIdInput.value = ''; // 清空输入
     appToState('search');
 };
 
+const createQuotatipnFromInquiryTree = createTreeFromConfig(cns('dict','dict','createTree',{},false,{hideLabel:true},[
+    cns("string",'leaf','inquiryId',{},false,{searchMethods:inquiryIdSearch},[],"Inquiry ID"),
+    cns("string",'leaf','customerId',{},false,{searchMethods:customerSearch},[],"Inquiry ID") 
+],'')
+)
+
 const createQuotationFromInquiry = async () => {
-    if (!inquiryIdInput.value.trim()) {
+    const inquiryIdInput = createQuotatipnFromInquiryTree.root?.findNodeByPath(['inquiryId'])?.getValue();
+
+    if (!inquiryIdInput) {
         alert('请输入 Inquiry ID！');
         return;
     }
@@ -154,7 +163,7 @@ const createQuotationFromInquiry = async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ inquiryId: inquiryIdInput.value, customerId: customerIdInput.value })
+            body: JSON.stringify({ inquiryId: inquiryIdInput, customerId: customerIdInput.value })
         });
 
         const result = await response.json();
@@ -162,7 +171,6 @@ const createQuotationFromInquiry = async () => {
         if (result.success) {
             // alert(`报价单创建成功！新报价单 ID: ${result.data.quotationData.basicInfo.quotation || '未知'}`);
             showInquiryModal.value = false;
-            inquiryIdInput.value = ''; // 清空输入
 
             // 成功后跳转到新的报价单详情页，或者刷新列表
             // 假设后端返回了新报价单的完整数据或ID
@@ -188,7 +196,7 @@ const createQuotationFromInquiry = async () => {
 
 // --- 新增的模态窗口相关状态和方法 ---
 const showInquiryModal = ref(false);
-const inquiryIdInput = ref(''); // 用于存储用户输入的 inquiry ID
+// const inquiryIdInput = ref(''); // 用于存储用户输入的 inquiry ID
 
 // ====================================================================
 // 1. 应用状态定义
@@ -1136,11 +1144,10 @@ td .status-badge {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* 确保在最上层 */
 }
 
 .modal-content {
-    background-color: white;
+    background-color: var(--theme-color-page);
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -1164,7 +1171,7 @@ td .status-badge {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
-    color: #555;
+    color: var(--theme-color-page);
 }
 
 .input-group input[type="text"] {
