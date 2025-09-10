@@ -304,9 +304,25 @@ const performSalesOrderSearch = async () => {
       body: JSON.stringify(queryData),
     });
     const result = await response.json();
-
+    // using re: row.basicInfo.xxx satisfying queryData.xxx: re pattern
     if (result.success && Array.isArray(result.data)) {
-      salesOrdersResult.value = result.data;
+      let allRows = result.data;
+      if (queryData.so_id) {
+        allRows = allRows.filter((row:any) => row.basicInfo.so_id.toString().trim() == queryData.so_id.trim());
+      }
+      if (queryData.status) {
+        const re = new RegExp(queryData.status, 'i');
+        allRows = allRows.filter((row:any) => re.test(row.basicInfo.status));
+      }
+      if (queryData.soldToParty) {
+        allRows = allRows.filter((row:any) => row.basicInfo.soldToParty.toString().trim() == queryData.soldToParty.trim());
+      }
+      if (queryData.customer_referenR) {
+        const re = new RegExp(queryData.customer_referenR, 'i');
+        allRows = allRows.filter((row:any) => re.test(row.basicInfo.customerReference.toString()));
+      }
+      salesOrdersResult.value = allRows;
+      // salesOrdersResult.value = result.data;
     } else {
       console.error('API call failed or returned unexpected data:', result);
       salesOrdersResult.value = [];
