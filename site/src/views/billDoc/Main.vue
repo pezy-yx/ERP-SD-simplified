@@ -194,6 +194,7 @@ async function initializeByCreation() {
 
   if(data.data.content) {
     billingDataTree.forceSetValue(data.data.content)
+    await itemsTabQueryAll()
   }
   if (initializeResult.value) {
     return true
@@ -229,6 +230,7 @@ async function initializeByGet() {
   }
   const billingData: VarNodeValue = data.data.content
   billingDataTree.forceSetValue(billingData)
+  await itemsTabQueryAll()
   return true
 }
 
@@ -237,13 +239,21 @@ async function initializeByGet() {
  */
 async function handleEnterFromNodeBillingTree(node: VarNode, value: string, data: any) {
   if (data.nodePath.length > 2 && data.nodePath[0] === 'itemOverview' && data.nodePath[1] === 'items') {
-    await (itemConditionKit as any).validateItemsInTree(
-      billingDataTree,
-      ['itemOverview','items'],
-      { forceUpdateTree: billingDataTree }
-    )
+    await itemsTabQueryAll()
   }
 }
+
+/**
+ * @description 封装itemsTabQuery-查询所有（复用 kit）
+ */
+async function itemsTabQueryAll() {
+  return await (itemConditionKit as any).validateItemsInTree(
+    billingDataTree,
+    ['itemOverview','items'],
+    { forceUpdateTree: billingDataTree }
+  )
+}
+
 
 /**
  * @description 状态管理的after-next钩子
@@ -297,6 +307,7 @@ async function handleExecute(currentStage: number, targetStage: number) {
     if (onCreateState.value || onChangeState.value) {
       console.log(billingDataTree.getValue())
       // 向后端发送stage 1的所有树，创建/保存开票凭证
+      await itemsTabQueryAll()
       const data = await fetch(`${window.getAPIBaseUrl()}/api/app/billing/edit`, {
         method: 'POST',
         headers: {
