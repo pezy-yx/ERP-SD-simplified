@@ -224,8 +224,12 @@ async function handleExecute() {
       })
 
       const searchResultTree = createTreeFromConfig(
-        cns('dynamiclist', 'list', 'searchResults', [], false, {}, resultNodes,
-          `搜索结果 (${response.total}条) - ${response.message || ''}`)
+        // cns('dynamiclist', 'list', 'searchResults', [], false, {}, resultNodes,
+        //   `搜索结果 (${response.total}条) ${response.message || ''}`)
+        cns('dynamiclist', 'list', 'searchResults', [], false, {
+          ...(currentMethod.value.customConfig??{})
+        }, resultNodes,
+          `搜索结果 ${response.message || ''}`)
       )
 
       resultTree.setRoot(searchResultTree.root)

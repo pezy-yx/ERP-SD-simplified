@@ -51,7 +51,18 @@ const initialInputTree = createTreeFromConfig(
  * @description 单子的头部数据
  */
 const deliveryDetailTree = createTreeFromConfig(
-  cns('dict','dict','deliveryDetail',{},false,{hideLabel:true},[
+  cns('dict','dict','deliveryDetail',{},false,{
+    hideLabel:true,
+    hideList:[
+      'grossWeight'
+      ,'grossWeightUnit'
+      ,'netWeight'
+      ,'netWeightUnit'
+      ,'volume'
+      ,'volumeUnit'
+      ,'shippingPoint'
+    ]
+  },[
     cns('dict','dict','meta',{},true,{hideSelf:true},[
       cns('string','leaf','id','',false,{},[]),
       cns('boolean','leaf','posted',false,false,{},[]),
@@ -74,8 +85,8 @@ const deliveryDetailTree = createTreeFromConfig(
     cns('string','leaf','netWeightUnit','',true,{hideLabel:true,searchMethods:materialUnitSearch},[],"Net Wgt Unit: "), // 3 2
     cns('string','leaf','volume','',true,{},[],"Volume: "), // 2 3
     cns('string','leaf','volumeUnit','',true,{hideLabel:true,searchMethods:materialUnitSearch},[],"Volume Unit: "), // 3 3
-    cns('string','leaf','priority','',true,{},[],"Priority: "), // 2 4
-    cns('string','leaf','shippingPoint','',true,{},[],"Shipping Point: "), // 2 5
+    cns('string','leaf','shippingPoint','',false,{searchMethods:storageLocationSearch},[],"Shipping Point: "), // 2 4
+    cns('string','leaf','priority','',true,{},[],"Priority: "), // 2 5
   ])
 )
 /** @description 交货单详情树的可写路径 */
@@ -758,8 +769,8 @@ async function handleExecute(currentStage: number, targetStage: number) {
 :deep(.deliveryDetail-grossWeight--wrapper) { grid-row: 1; }
 :deep(.deliveryDetail-netWeight--wrapper) { grid-row: 2; }
 :deep(.deliveryDetail-volume--wrapper) { grid-row: 3; }
-:deep(.deliveryDetail-priority--wrapper) { grid-row: 4; }
-:deep(.deliveryDetail-shippingPoint--wrapper) { grid-row: 5; }
+:deep(.deliveryDetail-shippingPoint--wrapper) { grid-row: 4; }
+:deep(.deliveryDetail-priority--wrapper) { grid-row: 5; }
 :deep(.deliveryDetail-grossWeight--wrapper),:deep(.deliveryDetail-netWeight--wrapper),:deep(.deliveryDetail-volume--wrapper),:deep(.deliveryDetail-priority--wrapper),:deep(.deliveryDetail-shippingPoint--wrapper) { grid-column: var(--deliveryDetail-right-col-index); }
 
 :deep(.deliveryDetail-grossWeightUnit--wrapper) { grid-row: 1; }

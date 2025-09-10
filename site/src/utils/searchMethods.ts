@@ -382,6 +382,9 @@ export const deliveryIdSearch: SearchMethod[] = [
       plannedGIDate: 'Planned GI Date',
       deliveryDate: 'Delivery Date',
       pickingStatus: 'Picking Status Name',
+    },
+    customConfig:{
+      hideList: ['shippingPoint']
     }
   }
 ]
