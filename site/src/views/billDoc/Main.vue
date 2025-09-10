@@ -308,12 +308,15 @@ async function handleExecute(currentStage: number, targetStage: number) {
       console.log(billingDataTree.getValue())
       // 向后端发送stage 1的所有树，创建/保存开票凭证
       await itemsTabQueryAll()
+      const treeValue = billingDataTree.getValue()
+      // 去除netValue的千分位分隔符，保证后端能正确解析为数字
+      treeValue.basicInfo.netValue = treeValue.basicInfo.netValue.replace(/,/g, '')
       const data = await fetch(`${window.getAPIBaseUrl()}/api/app/billing/edit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(billingDataTree.getValue())
+        body: JSON.stringify(treeValue)
       }).then(response => {
         console.log('正常返回', response)
         return response.json()
