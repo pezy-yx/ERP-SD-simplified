@@ -144,7 +144,6 @@ const cancelInquiryCreation = () => {
 
 const createQuotatipnFromInquiryTree = createTreeFromConfig(cns('dict','dict','createTree',{},false,{hideLabel:true},[
     cns("string",'leaf','inquiryId',{},false,{searchMethods:inquiryIdSearch},[],"Inquiry ID"),
-    cns("string",'leaf','customerId',{},false,{searchMethods:customerSearch},[],"Inquiry ID") 
 ],'')
 )
 
